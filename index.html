@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Piano Recording App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-record {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-stop {
+            background: linear-gradient(45deg, #54a0ff, #2e86de);
+            color: white;
+        }
+
+        .btn-play {
+            background: linear-gradient(45deg, #5f27cd, #341f97);
+            color: white;
+        }
+
+        .btn-clear {
+            background: linear-gradient(45deg, #ff9ff3, #f368e0);
+            color: white;
+        }
+
+        .recording-status {
+            text-align: center;
+            font-size: 18px;
+            margin: 10px 0;
+            min-height: 25px;
+        }
+
+        .piano {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            position: relative;
+            height: 200px;
+            background: #333;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .key {
+            cursor: pointer;
+            border: 2px solid #222;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            font-weight: bold;
+            transition: all 0.1s ease;
+            user-select: none;
+        }
+
+        .white-key {
+            background: linear-gradient(to bottom, #fff, #f0f0f0);
+            color: #333;
+            width: 60px;
+            height: 180px;
+            margin: 0 1px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .black-key {
+            background: linear-gradient(to bottom, #333, #111);
+            color: white;
+            width: 35px;
+            height: 120px;
+            position: absolute;
+            z-index: 2;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .key:hover {
+            transform: scale(1.02);
+        }
+
+        .key:active, .key.active {
+            transform: scale(0.98);
+        }
+
+        .white-key:active, .white-key.active {
+            background: linear-gradient(to bottom, #e0e0e0, #d0d0d0);
+        }
+
+        .black-key:active, .black-key.active {
+            background: linear-gradient(to bottom, #222, #000);
+        }
+
+        .song-data {
+            margin: 20px 0;
+        }
+
+        .song-data textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            resize: vertical;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .load-save-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-load, .btn-save {
+            background: linear-gradient(45deg, #00d2d3, #54a0ff);
+            color: white;
+        }
+
+        .tempo-control {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .tempo-control input {
+            width: 80px;
+            padding: 8px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .playback-indicator {
+            text-align: center;
+            font-size: 16px;
+            margin: 10px 0;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎹 Piano Practice App</h1>
+        
+        <div class="controls">
+            <button class="btn btn-record" onclick="startRecording()">● Record</button>
+            <button class="btn btn-stop" onclick="stopRecording()">⏹ Stop</button>
+            <button class="btn btn-play" onclick="togglePlayback()">▶ Play Loop</button>
+            <button class="btn btn-clear" onclick="clearRecording()">🗑 Clear</button>
+        </div>
+
+        <div class="controls">
+            <select id="songSelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #00d2d3, #54a0ff);" onchange="loadFromBank()">
+                <option value="">Select a song from bank...</option>
+            </select>
+        </div>
+
+        <div class="recording-status" id="status"></div>
+        <div class="playback-indicator" id="playback-status"></div>
+        <div class="playback-indicator" id="lyrics-display" style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); min-height: 35px;"></div>
+
+        <div class="singer-controls" id="singerControls" style="margin: 20px 0; text-align: center;">
+            <!-- Singer volume controls will be added here dynamically -->
+        </div>
+
+        <div class="tempo-control">
+            <label>Tempo (BPM): </label>
+            <input type="number" id="tempo" value="120" min="60" max="200" onchange="updateTempo()">
+            <label style="margin-left: 20px;">Note Duration (beats): </label>
+            <input type="number" id="stretch" value="1" min="1" max="8" title="How many 1/8 notes this note should last">
+            <label style="margin-left: 20px;">Singer: </label>
+            <select id="currentSinger" style="padding: 5px;">
+                <option value="1">Singer 1</option>
+            </select>
+        </div>
+
+        <div class="piano" id="piano">
+            <!-- Piano keys will be generated here -->
+        </div>
+
+        <div class="song-data">
+            <h3>Song Data (Copy/Paste to Save/Load):</h3>
+            <textarea id="songData" placeholder="Your song data will appear here..."></textarea>
+            <div class="load-save-controls">
+                <button class="btn btn-load" onclick="loadSong()">Load Song</button>
+                <button class="btn btn-save" onclick="saveSong()">Update Data</button>
+                <button class="btn btn-load" onclick="editSong()">Edit Lyrics</button>
+            </div>
+        </div>
+
+        <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; max-width: 80%; max-height: 80%; overflow-y: auto; color: #333;">
+                <h3>Edit Song Notes & Lyrics</h3>
+                <div id="noteEditor"></div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-load" onclick="saveEdits()" style="margin-right: 10px;">Save Changes</button>
+                    <button class="btn btn-clear" onclick="closeEditor()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Audio context and notes
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Note frequencies (E3 to E5)
+        const noteFreqs = {
+            'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65,
+            'A3': 220.00, 'A#3': 233.08, 'B3': 246.94, 'C4': 261.63, 'C#4': 277.18,
+            'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99,
+            'G4': 392.00, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+            'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25
+        };
+
+        // Chord definitions (root, third, fifth)
+        const chordDefinitions = {
+            // Major chords
+            'C': ['C4', 'E4', 'G4'],
+            'C#': ['C#4', 'F4', 'G#4'],
+            'D': ['D4', 'F#4', 'A4'],
+            'D#': ['D#4', 'G4', 'A#4'],
+            'E': ['E4', 'G#4', 'B4'],
+            'F': ['F4', 'A4', 'C5'],
+            'F#': ['F#4', 'A#4', 'C#5'],
+            'G': ['G4', 'B4', 'D5'],
+            'G#': ['G#4', 'C5', 'D#5'],
+            'A': ['A4', 'C#5', 'E5'],
+            'A#': ['A#4', 'D5', 'F5'],
+            'B': ['B4', 'D#5', 'F#5'],
+            
+            // Minor chords
+            'Cm': ['C4', 'D#4', 'G4'],
+            'C#m': ['C#4', 'E4', 'G#4'],
+            'Dm': ['D4', 'F4', 'A4'],
+            'D#m': ['D#4', 'F#4', 'A#4'],
+            'Em': ['E4', 'G4', 'B4'],
+            'Fm': ['F4', 'G#4', 'C5'],
+            'F#m': ['F#4', 'A4', 'C#5'],
+            'Gm': ['G4', 'A#4', 'D5'],
+            'G#m': ['G#4', 'B4', 'D#5'],
+            'Am': ['A4', 'C5', 'E5'],
+            'A#m': ['A#4', 'C#5', 'F5'],
+            'Bm': ['B4', 'D5', 'F#5']
+        };
+
+        // Recording variables
+        let isRecording = false;
+        let recordedNotes = [];
+        let recordingStartTime = 0;
+        let tempo = 120;
+        let eighthNoteLength = (60 / tempo / 2) * 1000; // 1/8 note in ms
+        let currentSong = null;
+        let singers = { "1": { volume: 5 } }; // Default singer
+
+        // Song bank
+        const songBank = [
+            {
+                "notes": [
+                    {
+                        "note": "D#4",
+                        "step": 1,
+                        "lyrics": "born",
+                        "singer": "1"
+                    },
+                    {
+                        "note": "D#4",
+                        "step": 1,
+                        "lyrics": "born",
+                        "singer": "2"
+                    },
+                    {
+                        "note": "C#4",
+                        "step": 2,
+                        "lyrics": "to"
+                    },
+                    {
+                        "note": "D#4",
+                        "step": 3,
+                        "lyrics": "die",
+                        "duration": 2
+                    },
+                    {
+                        "note": "D#4",
+                        "step": 5,
+                        "lyrics": "born"
+                    },
+                    {
+                        "note": "C#4",
+                        "step": 6
+                    },
+                    {
+                        "note": "B3",
+                        "step": 7
+                    },
+                    {
+                        "note": "G#3",
+                        "step": 9
+                    },
+                    {
+                        "note": "B3",
+                        "step": 10
+                    },
+                    {
+                        "note": "C#4",
+                        "step": 11
+                    },
+                    {
+                        "note": "F3",
+                        "step": 12
+                    }
+                ],
+                "tempo": 120,
+                "title": "Until the last light fades",
+                "singers": {
+                    "1": { "volume": 5 },
+                    "2": { "volume": 1 }
+                }
+            }
+        ];
+
+        // Playback variables
+        let isPlaying = false;
+        let playbackInterval = null;
+        let currentStep = 0;
+
+        // Generate piano keys
+        function createPiano() {
+            const piano = document.getElementById('piano');
+            const whiteKeys = ['E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5'];
+            const blackKeys = ['F#3', 'G#3', 'A#3', 'C#4', 'D#4', 'F#4', 'G#4', 'A#4', 'C#5', 'D#5'];
+            
+            // Create white keys
+            whiteKeys.forEach((note, index) => {
+                const key = document.createElement('div');
+                key.className = 'key white-key';
+                key.textContent = note;
+                key.dataset.note = note;
+                key.addEventListener('mousedown', () => playNote(note));
+                key.addEventListener('mouseup', () => stopNote());
+                key.addEventListener('mouseleave', () => stopNote());
+                piano.appendChild(key);
+            });
+
+            // Create black keys
+            const blackKeyPositions = [45, 105, 165, 285, 345, 465, 525, 585, 705, 765];
+            blackKeys.forEach((note, index) => {
+                const key = document.createElement('div');
+                key.className = 'key black-key';
+                key.textContent = note;
+                key.dataset.note = note;
+                key.style.left = `${blackKeyPositions[index]}px`;
+                key.addEventListener('mousedown', () => playNote(note));
+                key.addEventListener('mouseup', () => stopNote());
+                key.addEventListener('mouseleave', () => stopNote());
+                piano.appendChild(key);
+            });
+        }
+
+        // Play a note
+        function playNote(note) {
+            const freq = noteFreqs[note];
+            if (!freq) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            oscillator.type = 'triangle';
+            
+            // Default volume is 0.3, but can be adjusted by singer volume
+            let volume = 0.3;
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+
+            // Visual feedback
+            const keyElement = document.querySelector(`[data-note="${note}"]`);
+            if (keyElement) {
+                keyElement.classList.add('active');
+                setTimeout(() => keyElement.classList.remove('active'), 100);
+            }
+
+            // Record if recording
+            if (isRecording) {
+                const currentTime = Date.now();
+                const relativeTime = currentTime - recordingStartTime;
+                const step = Math.round(relativeTime / eighthNoteLength);
+                const duration = parseInt(document.getElementById('stretch').value) || 1;
+                const currentSinger = document.getElementById('currentSinger') ? document.getElementById('currentSinger').value : "1";
+                recordedNotes.push({ 
+                    note, 
+                    step, 
+                    duration, 
+                    lyrics: '', 
+                    singer: currentSinger 
+                });
+            }
+        }
+
+        // Play note with volume based on singer
+        function playNoteWithVolume(note, singerVolume = 5) {
+            const freq = noteFreqs[note];
+            if (!freq || singerVolume === 0) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            oscillator.type = 'triangle';
+            
+            // Scale volume based on singer volume (1-5 scale)
+            let volume = (singerVolume / 5) * 0.3;
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+
+            // Visual feedback
+            const keyElement = document.querySelector(`[data-note="${note}"]`);
+            if (keyElement) {
+                keyElement.classList.add('active');
+                setTimeout(() => keyElement.classList.remove('active'), 100);
+            }
+        }
+
+        function stopNote() {
+            // Visual feedback handled in playNote
+        }
+
+        // Recording functions
+        function startRecording() {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            isRecording = true;
+            recordedNotes = [];
+            recordingStartTime = Date.now();
+            updateStatus('🔴 Recording...');
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            updateStatus(`✅ Recorded ${recordedNotes.length} notes`);
+            saveSong();
+        }
+
+        function clearRecording() {
+            recordedNotes = [];
+            isRecording = false;
+            isPlaying = false;
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+                playbackInterval = null;
+            }
+            updateStatus('Cleared');
+            updatePlaybackStatus('');
+            document.getElementById('songData').value = '';
+        }
+
+        // Playback functions
+        function togglePlayback() {
+            if (!recordedNotes.length) {
+                updateStatus('No notes recorded!');
+                return;
+            }
+
+            if (isPlaying) {
+                stopPlayback();
+            } else {
+                startPlayback();
+            }
+        }
+
+        function startPlayback() {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            isPlaying = true;
+            currentStep = 0;
+            
+            // Find the maximum step including note durations to know when to loop
+            const maxStep = Math.max(...recordedNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
+            
+            updatePlaybackStatus('▶ Playing...');
+            
+            playbackInterval = setInterval(() => {
+                // Play notes that start at current step
+                const notesToPlay = recordedNotes.filter(n => n.step === currentStep);
+                
+                // Collect lyrics for this step
+                const lyricsAtStep = notesToPlay
+                    .filter(n => n.lyrics && n.lyrics.trim())
+                    .map(n => n.lyrics.trim())
+                    .join(' ');
+                
+                // Display lyrics
+                const lyricsDisplay = document.getElementById('lyrics-display');
+                if (lyricsAtStep) {
+                    lyricsDisplay.textContent = lyricsAtStep;
+                    // Clear after a moment
+                    setTimeout(() => {
+                        if (lyricsDisplay.textContent === lyricsAtStep) {
+                            lyricsDisplay.textContent = '';
+                        }
+                    }, eighthNoteLength * 0.8);
+                }
+                
+                // Play each note with appropriate volume
+                notesToPlay.forEach(n => {
+                    const singerVolume = singers[n.singer] ? singers[n.singer].volume : 5;
+                    playNoteWithVolume(n.note, singerVolume);
+                });
+                
+                currentStep++;
+                if (currentStep >= maxStep) {
+                    currentStep = 0; // Loop back to beginning
+                }
+            }, eighthNoteLength);
+        }
+
+        function stopPlayback() {
+            isPlaying = false;
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+                playbackInterval = null;
+            }
+            updatePlaybackStatus('⏹ Stopped');
+            
+            // Update button text
+            const playButton = document.querySelector('.btn-play');
+            playButton.textContent = '▶ Play Loop';
+        }
+
+        // Tempo control
+        function updateTempo() {
+            tempo = parseInt(document.getElementById('tempo').value);
+            eighthNoteLength = (60 / tempo / 2) * 1000;
+            
+            // Restart playback if currently playing
+            if (isPlaying) {
+                stopPlayback();
+                setTimeout(startPlayback, 100);
+            }
+        }
+
+        // Save/Load functions
+        function saveSong() {
+            const songData = {
+                notes: recordedNotes,
+                tempo: tempo,
+                title: currentSong ? currentSong.title : "Untitled Song",
+                singers: singers
+            };
+            document.getElementById('songData').value = JSON.stringify(songData, null, 2);
+        }
+
+        function loadSong() {
+            try {
+                const songDataText = document.getElementById('songData').value.trim();
+                if (!songDataText) {
+                    updateStatus('No song data to load!');
+                    return;
+                }
+                
+                const songData = JSON.parse(songDataText);
+                recordedNotes = songData.notes || [];
+                tempo = songData.tempo || 120;
+                singers = songData.singers || { "1": { volume: 5 } };
+                currentSong = songData;
+                
+                // Ensure all notes have required properties
+                recordedNotes = recordedNotes.map(note => ({
+                    note: note.note,
+                    step: note.step,
+                    duration: note.duration || note.stretch || 1,
+                    lyrics: note.lyrics || note.description || '',
+                    singer: note.singer || "1"
+                }));
+                
+                document.getElementById('tempo').value = tempo;
+                updateTempo();
+                updateSingerControls();
+                updateSingerSelect();
+                
+                updateStatus(`✅ Loaded song: ${songData.title || 'Untitled'} (${recordedNotes.length} notes)`);
+            } catch (e) {
+                updateStatus('❌ Invalid song data format!');
+            }
+        }
+
+        // Load from song bank
+        function loadFromBank() {
+            const select = document.getElementById('songSelect');
+            const selectedIndex = parseInt(select.value);
+            
+            if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= songBank.length) {
+                return;
+            }
+            
+            const songData = songBank[selectedIndex];
+            document.getElementById('songData').value = JSON.stringify(songData, null, 2);
+            loadSong();
+        }
+
+        // Update singer controls
+        function updateSingerControls() {
+            const container = document.getElementById('singerControls');
+            const singerIds = Object.keys(singers).sort();
+            
+            container.innerHTML = `
+                <h4>Singer Volume Controls (0=off, 1=quiet, 5=normal)</h4>
+                <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                    ${singerIds.map(singerId => `
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <label>Singer ${singerId}:</label>
+                            <input type="range" id="volume_${singerId}" min="0" max="5" value="${singers[singerId].volume}" 
+                                   onchange="updateSingerVolume('${singerId}', this.value)"
+                                   style="width: 100px;">
+                            <span id="volumeLabel_${singerId}">${singers[singerId].volume}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Update singer volume
+        function updateSingerVolume(singerId, volume) {
+            singers[singerId].volume = parseInt(volume);
+            document.getElementById(`volumeLabel_${singerId}`).textContent = volume;
+            saveSong();
+        }
+
+        // Update singer select dropdown
+        function updateSingerSelect() {
+            const select = document.getElementById('currentSinger');
+            const singerIds = Object.keys(singers).sort();
+            
+            select.innerHTML = singerIds.map(id => 
+                `<option value="${id}">Singer ${id}</option>`
+            ).join('');
+        }
+
+        // Edit song function
+        function editSong() {
+            if (!recordedNotes.length) {
+                updateStatus('No notes to edit!');
+                return;
+            }
+
+            const modal = document.getElementById('editModal');
+            const editor = document.getElementById('noteEditor');
+            
+            // Sort notes by step for easier editing
+            const sortedNotes = [...recordedNotes].sort((a, b) => a.step - b.step);
+            
+            editor.innerHTML = sortedNotes.map((note, index) => `
+                <div style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+                    <div style="margin-bottom: 10px;">
+                        <strong>Step ${note.step}:</strong> ${note.note}
+                        <label style="margin-left: 20px;">Duration: 
+                            <input type="number" id="duration_${index}" value="${note.duration || note.stretch || 1}" min="1" max="8" style="width: 60px; margin-left: 5px;">
+                        </label>
+                        <label style="margin-left: 20px;">Singer: 
+                            <select id="singer_${index}" style="margin-left: 5px;">
+                                ${Object.keys(singers).map(id => 
+                                    `<option value="${id}" ${note.singer === id ? 'selected' : ''}>Singer ${id}</option>`
+                                ).join('')}
+                            </select>
+                        </label>
+                    </div>
+                    <div>
+                        <label>Lyrics: </label>
+                        <input type="text" id="lyrics_${index}" value="${note.lyrics || ''}" 
+                               style="width: 300px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;" 
+                               placeholder="Enter lyrics...">
+                    </div>
+                </div>
+            `).join('');
+            
+            modal.style.display = 'block';
+        }
+
+        function saveEdits() {
+            const sortedNotes = [...recordedNotes].sort((a, b) => a.step - b.step);
+            
+            sortedNotes.forEach((note, index) => {
+                const durationInput = document.getElementById(`duration_${index}`);
+                const lyricsInput = document.getElementById(`lyrics_${index}`);
+                const singerInput = document.getElementById(`singer_${index}`);
+                
+                if (durationInput && lyricsInput && singerInput) {
+                    note.duration = parseInt(durationInput.value) || 1;
+                    note.lyrics = lyricsInput.value || '';
+                    note.singer = singerInput.value || "1";
+                    // Remove old stretch property if it exists
+                    delete note.stretch;
+                    delete note.description;
+                }
+            });
+            
+            saveSong();
+            closeEditor();
+            updateStatus('✅ Song updated with lyrics, durations, and singers');
+        }
+
+        function closeEditor() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // Status updates
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        function updatePlaybackStatus(message) {
+            document.getElementById('playback-status').textContent = message;
+            
+            // Update play button text
+            const playButton = document.querySelector('.btn-play');
+            if (isPlaying) {
+                playButton.textContent = '⏸ Stop Loop';
+            } else {
+                playButton.textContent = '▶ Play Loop';
+            }
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            const keyMap = {
+                'z': 'E3', 's': 'F3', 'x': 'F#3', 'd': 'G3', 'c': 'G#3', 'v': 'A3',
+                'g': 'A#3', 'b': 'B3', 'n': 'C4', 'j': 'C#4', 'm': 'D4', 'k': 'D#4',
+                ',': 'E4', '.': 'F4', ';': 'F#4', '/': 'G4', 'q': 'G#4', 'w': 'A4',
+                '3': 'A#4', 'e': 'B4', 'r': 'C5', '5': 'C#5', 't': 'D5', '6': 'D#5', 'y': 'E5'
+            };
+            
+            const note = keyMap[e.key.toLowerCase()];
+            if (note && !e.repeat) {
+                playNote(note);
+            }
+        });
+
+        // Initialize
+        function initializeApp() {
+            createPiano();
+            
+            // Populate song bank dropdown
+            const select = document.getElementById('songSelect');
+            songBank.forEach((song, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = song.title || `Song ${index + 1}`;
+                select.appendChild(option);
+            });
+            
+            updateSingerControls();
+            updateStatus('Ready to record! Click Record and play some notes, or select a song from the bank.');
+        }
+
+        // Initialize
+        initializeApp();
+    </script>
+</body>
+</html>
