@@ -3,14 +3,14 @@ const songData ={
       {
         "chord": "B",
         "step": 1,
-        "duration": 4,
+        "duration": 8,
         "lyrics": "born",
         "singer": "chords"
       },
       {
         "note": "D#4",
         "step": 1,
-        "duration": 4,
+        "duration": 1,
         "lyrics": "born",
         "singer": "1"
       },

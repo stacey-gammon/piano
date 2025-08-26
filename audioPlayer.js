@@ -34,7 +34,7 @@ const chordDefinitions = {
 
 
 // Consolidated playNote function that handles both regular notes and volume-based playback
-function playNote(note, singerVolume = null, duration = 1) {
+function playNote(note, singerVolume = null, duration = .25) {
     const freq = noteFreqs[note];
     if (!freq) return;
 
