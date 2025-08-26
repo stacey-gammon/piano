@@ -103,7 +103,7 @@ async function refreshSongs() {
     updateStatus(`✅ Refreshed songs. Loaded ${songBank.length} songs.`);
 }
 
-// Song management functions
+// Song management functions - simplified for direct editing
 function loadSong() {
     const selectedIndex = document.getElementById('songSelect').value;
     if (selectedIndex === '') {
@@ -117,52 +117,20 @@ function loadSong() {
         return;
     }
     
-    // Load song data
+    // Load song data directly into the textarea for editing
+    const songDataTextarea = document.getElementById('songData');
+    if (songDataTextarea) {
+        songDataTextarea.value = JSON.stringify(songData, null, 2);
+    }
+    
+    // Also load into the playback system
     recordedNotes = songData.notes || [];
     tempo = songData.tempo || 120;
     eighthNoteLength = (60 / tempo / 2) * 1000;
     singers = songData.singers || { "1": { volume: 5 } };
     
     updateSingerControls();
-    updateStatus(`✅ Loaded: ${songData.title}`);
+    updateStatus(`✅ Loaded: ${songData.title} - Edit in textarea and changes will apply on next play`);
 }
 
-function saveSong() {
-    if (recordedNotes.length === 0) {
-        updateStatus('No notes to save.');
-        return;
-    }
-    
-    const songData = {
-        notes: recordedNotes,
-        tempo: tempo,
-        title: `Song ${Date.now()}`,
-        singers: singers
-    };
-    
-    // Create download link
-    const dataStr = JSON.stringify(songData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'song.json';
-    link.click();
-    URL.revokeObjectURL(url);
-    
-    updateStatus('✅ Song downloaded as JSON');
-}
 
-// Load from song bank
-function loadFromBank() {
-    const select = document.getElementById('songSelect');
-    const selectedIndex = parseInt(select.value);
-    
-    if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= songBank.length) {
-        return;
-    }
-    
-    const songData = songBank[selectedIndex];
-    document.getElementById('songData').value = JSON.stringify(songData, null, 2);
-    loadSong();
-}

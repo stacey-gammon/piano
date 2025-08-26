@@ -209,7 +209,7 @@
         </div>
 
         <div class="controls">
-            <select id="songSelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #00d2d3, #54a0ff);" onchange="loadFromBank()">
+            <select id="songSelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #00d2d3, #54a0ff);">
                 <option value="">Select a song from bank...</option>
             </select>
         </div>
@@ -241,22 +241,11 @@
             <h3>Song Data (Copy/Paste to Save/Load):</h3>
             <textarea id="songData" placeholder="Your song data will appear here..."></textarea>
             <div class="load-save-controls">
-                <button class="btn btn-load" onclick="loadSong()">Load Song</button>
-                <button class="btn btn-save" onclick="saveSong()">Update Data</button>
-                <button class="btn btn-load" onclick="editSong()">Edit Lyrics</button>
+                
             </div>
         </div>
 
-        <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; max-width: 80%; max-height: 80%; overflow-y: auto; color: #333;">
-                <h3>Edit Song Notes & Lyrics</h3>
-                <div id="noteEditor"></div>
-                <div style="margin-top: 20px; text-align: center;">
-                    <button class="btn btn-load" onclick="saveEdits()" style="margin-right: 10px;">Save Changes</button>
-                    <button class="btn btn-clear" onclick="closeEditor()">Cancel</button>
-                </div>
-            </div>
-        </div>
+
     </div>
 
     <script src="songManager.js"></script>
@@ -340,7 +329,6 @@
         function stopRecording() {
             isRecording = false;
             updateStatus(`✅ Recorded ${recordedNotes.length} notes`);
-            saveSong();
         }
 
         function clearRecording() {
@@ -358,9 +346,26 @@
 
         // Playback functions
         function togglePlayback() {
+            // Try to load song data from textarea if no recorded notes
             if (!recordedNotes.length) {
-                updateStatus('No notes recorded!');
-                return;
+                const songDataTextarea = document.getElementById('songData');
+                if (songDataTextarea && songDataTextarea.value.trim()) {
+                    try {
+                        const songData = JSON.parse(songDataTextarea.value);
+                        recordedNotes = songData.notes || [];
+                        tempo = songData.tempo || 120;
+                        eighthNoteLength = (60 / tempo / 2) * 1000;
+                        singers = songData.singers || { "1": { volume: 5 } };
+                        updateSingerControls();
+                        updateStatus('✅ Loaded song from textarea');
+                    } catch (e) {
+                        updateStatus('❌ Invalid song data in textarea');
+                        return;
+                    }
+                } else {
+                    updateStatus('No notes recorded!');
+                    return;
+                }
             }
 
             if (isPlaying) {
@@ -472,7 +477,6 @@
         function updateSingerVolume(singerId, volume) {
             singers[singerId].volume = parseInt(volume);
             document.getElementById(`volumeLabel_${singerId}`).textContent = volume;
-            saveSong();
         }
 
         // Update singer select dropdown
@@ -485,72 +489,11 @@
             ).join('');
         }
 
-        // Edit song function
-        function editSong() {
-            if (!recordedNotes.length) {
-                updateStatus('No notes to edit!');
-                return;
-            }
+        // Edit functionality removed - songs are now edited directly in the textarea
 
-            const modal = document.getElementById('editModal');
-            const editor = document.getElementById('noteEditor');
-            
-            // Sort notes by step for easier editing
-            const sortedNotes = [...recordedNotes].sort((a, b) => a.step - b.step);
-            
-            editor.innerHTML = sortedNotes.map((note, index) => `
-                <div style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
-                    <div style="margin-bottom: 10px;">
-                        <strong>Step ${note.step}:</strong> ${note.note}
-                        <label style="margin-left: 20px;">Duration: 
-                            <input type="number" id="duration_${index}" value="${note.duration || note.stretch || 1}" min="1" max="8" style="width: 60px; margin-left: 5px;">
-                        </label>
-                        <label style="margin-left: 20px;">Singer: 
-                            <select id="singer_${index}" style="margin-left: 5px;">
-                                ${Object.keys(singers).map(id => 
-                                    `<option value="${id}" ${note.singer === id ? 'selected' : ''}>Singer ${id}</option>`
-                                ).join('')}
-                            </select>
-                        </label>
-                    </div>
-                    <div>
-                        <label>Lyrics: </label>
-                        <input type="text" id="lyrics_${index}" value="${note.lyrics || ''}" 
-                               style="width: 300px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;" 
-                               placeholder="Enter lyrics...">
-                    </div>
-                </div>
-            `).join('');
-            
-            modal.style.display = 'block';
-        }
 
-        function saveEdits() {
-            const sortedNotes = [...recordedNotes].sort((a, b) => a.step - b.step);
-            
-            sortedNotes.forEach((note, index) => {
-                const durationInput = document.getElementById(`duration_${index}`);
-                const lyricsInput = document.getElementById(`lyrics_${index}`);
-                const singerInput = document.getElementById(`singer_${index}`);
-                
-                if (durationInput && lyricsInput && singerInput) {
-                    note.duration = parseInt(durationInput.value) || 1;
-                    note.lyrics = lyricsInput.value || '';
-                    note.singer = singerInput.value || "1";
-                    // Remove old stretch property if it exists
-                    delete note.stretch;
-                    delete note.description;
-                }
-            });
-            
-            saveSong();
-            closeEditor();
-            updateStatus('✅ Song updated with lyrics, durations, and singers');
-        }
 
-        function closeEditor() {
-            document.getElementById('editModal').style.display = 'none';
-        }
+
 
         // Status updates
         function updateStatus(message) {
@@ -591,6 +534,16 @@
             // Load songs first, then populate the dropdown
             await loadSongs();
             
+            // Add event listener to song select dropdown
+            const songSelect = document.getElementById('songSelect');
+            if (songSelect) {
+                songSelect.addEventListener('change', function() {
+                    if (this.value !== '') {
+                        loadSong();
+                    }
+                });
+            }
+            
             updateSingerControls();
             updateStatus('Ready to record! Click Record and play some notes, or select a song from the bank.');
         }
@@ -599,6 +552,30 @@
         initializeApp().catch(error => {
             console.error('Failed to initialize app:', error);
         });
+
+        const songDataTextarea = document.getElementById('songData');
+        if (songDataTextarea) {
+            songDataTextarea.addEventListener('input', function () {
+                const value = songDataTextarea.value.trim();
+                if (!value) {
+                    recordedNotes = [];
+                    updateStatus('Song data cleared');
+                    return;
+                }
+                try {
+                    const songData = JSON.parse(value);
+                    recordedNotes = songData.notes || [];
+                    tempo = songData.tempo || 120;
+                    eighthNoteLength = (60 / tempo / 2) * 1000;
+                    singers = songData.singers || { "1": { volume: 5 } };
+                    updateSingerControls();
+                    updateSingerSelect();
+                    updateStatus('✅ Song data updated from textarea');
+                } catch (e) {
+                    updateStatus('❌ Invalid JSON in song data');
+                }
+            });
+        }
     </script>
 </body>
 </html>
