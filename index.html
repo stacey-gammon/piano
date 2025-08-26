@@ -259,6 +259,8 @@
         </div>
     </div>
 
+    <script src="songManager.js"></script>
+    <script src="audioPlayer.js"></script>
     <script>
         // Audio context and notes
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -416,89 +418,7 @@
             });
         }
 
-        // Play a note
-        function playNote(note) {
-            const freq = noteFreqs[note];
-            if (!freq) return;
-
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-            oscillator.type = 'triangle';
-            
-            // Default volume is 0.3, but can be adjusted by singer volume
-            let volume = 0.3;
-            
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
-
-            // Visual feedback
-            const keyElement = document.querySelector(`[data-note="${note}"]`);
-            if (keyElement) {
-                keyElement.classList.add('active');
-                setTimeout(() => keyElement.classList.remove('active'), 100);
-            }
-
-            // Record if recording
-            if (isRecording) {
-                const currentTime = Date.now();
-                const relativeTime = currentTime - recordingStartTime;
-                const step = Math.round(relativeTime / eighthNoteLength);
-                const duration = parseInt(document.getElementById('stretch').value) || 1;
-                const currentSinger = document.getElementById('currentSinger') ? document.getElementById('currentSinger').value : "1";
-                recordedNotes.push({ 
-                    note, 
-                    step, 
-                    duration, 
-                    lyrics: '', 
-                    singer: currentSinger 
-                });
-            }
-        }
-
-        // Play note with volume based on singer
-        function playNoteWithVolume(note, singerVolume = 5) {
-            const freq = noteFreqs[note];
-            if (!freq || singerVolume === 0) return;
-
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-            oscillator.type = 'triangle';
-            
-            // Scale volume based on singer volume (1-5 scale)
-            let volume = (singerVolume / 5) * 0.3;
-            
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
-
-            // Visual feedback
-            const keyElement = document.querySelector(`[data-note="${note}"]`);
-            if (keyElement) {
-                keyElement.classList.add('active');
-                setTimeout(() => keyElement.classList.remove('active'), 100);
-            }
-        }
-
-        function stopNote() {
-            // Visual feedback handled in playNote
-        }
+        // Audio functions are now in audioPlayer.js
 
         // Recording functions
         function startRecording() {
@@ -618,64 +538,9 @@
             }
         }
 
-        // Save/Load functions
-        function saveSong() {
-            const songData = {
-                notes: recordedNotes,
-                tempo: tempo,
-                title: currentSong ? currentSong.title : "Untitled Song",
-                singers: singers
-            };
-            document.getElementById('songData').value = JSON.stringify(songData, null, 2);
-        }
+        // Song management functions are now in songManager.js
 
-        function loadSong() {
-            try {
-                const songDataText = document.getElementById('songData').value.trim();
-                if (!songDataText) {
-                    updateStatus('No song data to load!');
-                    return;
-                }
-                
-                const songData = JSON.parse(songDataText);
-                recordedNotes = songData.notes || [];
-                tempo = songData.tempo || 120;
-                singers = songData.singers || { "1": { volume: 5 } };
-                currentSong = songData;
-                
-                // Ensure all notes have required properties
-                recordedNotes = recordedNotes.map(note => ({
-                    note: note.note,
-                    step: note.step,
-                    duration: note.duration || note.stretch || 1,
-                    lyrics: note.lyrics || note.description || '',
-                    singer: note.singer || "1"
-                }));
-                
-                document.getElementById('tempo').value = tempo;
-                updateTempo();
-                updateSingerControls();
-                updateSingerSelect();
-                
-                updateStatus(`✅ Loaded song: ${songData.title || 'Untitled'} (${recordedNotes.length} notes)`);
-            } catch (e) {
-                updateStatus('❌ Invalid song data format!');
-            }
-        }
-
-        // Load from song bank
-        function loadFromBank() {
-            const select = document.getElementById('songSelect');
-            const selectedIndex = parseInt(select.value);
-            
-            if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= songBank.length) {
-                return;
-            }
-            
-            const songData = songBank[selectedIndex];
-            document.getElementById('songData').value = JSON.stringify(songData, null, 2);
-            loadSong();
-        }
+        // Song bank loading is now handled in songManager.js
 
         // Update singer controls
         function updateSingerControls() {
