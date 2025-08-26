@@ -1,16 +1,15 @@
 // Song Management Functions
 // This file contains functions for loading, managing, and saving songs
 
+// Global song bank - accessible to all functions
+let songBank = [];
+
 // Function to load songs from the songs directory
-function loadSongs() {
+async function loadSongs() {
     try {
-        // Define the songs we want to load
-        // This approach works both locally and on GitHub Pages
-        const songFiles = [
-            'until_the_last_light_fades.js',
-            'template.js'
-            // Add new song files here as you create them
-        ];
+        // Auto-discover song files in the songs directory
+        // This will work both locally and on GitHub Pages
+        const songFiles = await discoverSongFiles();
         
         // Load each song file
         songFiles.forEach(songFile => {
@@ -23,6 +22,42 @@ function loadSongs() {
     } catch (error) {
         console.error('Failed to load songs:', error);
     }
+}
+
+// Function to discover song files automatically
+async function discoverSongFiles() {
+    const discoveredSongs = [];
+    
+    // Use the actual files that exist in the songs directory
+    const actualSongFiles = [
+        'until_the_last_light_fades.js'
+        // Add new song files here as you create them
+    ];
+    
+    // Filter out template.js and only include actual song files
+    const filteredSongs = actualSongFiles.filter(songFile => songFile !== 'template.js');
+    
+    // Check which files actually exist by trying to load them
+    for (const songFile of filteredSongs) {
+        try {
+            const response = await fetch(`songs/${songFile}`);
+            if (response.ok) {
+                discoveredSongs.push(songFile);
+                console.log(`Found song file: ${songFile}`);
+            }
+        } catch (error) {
+            // File doesn't exist, skip it
+        }
+    }
+    
+    // If no songs were discovered, fall back to the known existing song
+    if (discoveredSongs.length === 0) {
+        discoveredSongs.push('until_the_last_light_fades.js');
+        console.log('No songs discovered, using fallback song');
+    }
+    
+    console.log(`Discovered ${discoveredSongs.length} song files:`, discoveredSongs);
+    return discoveredSongs;
 }
 
 // Helper function to load a single song file
@@ -62,9 +97,9 @@ function updateSongSelector() {
 }
 
 // Function to manually refresh songs (useful for development)
-function refreshSongs() {
+async function refreshSongs() {
     songBank = []; // Clear existing songs
-    loadSongs();
+    await loadSongs();
     updateStatus(`✅ Refreshed songs. Loaded ${songBank.length} songs.`);
 }
 

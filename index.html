@@ -314,71 +314,7 @@
         let currentSong = null;
         let singers = { "1": { volume: 5 } }; // Default singer
 
-        // Song bank
-        const songBank = [
-            {
-                "notes": [
-                    {
-                        "note": "D#4",
-                        "step": 1,
-                        "lyrics": "born",
-                        "singer": "1"
-                    },
-                    {
-                        "note": "D#4",
-                        "step": 1,
-                        "lyrics": "born",
-                        "singer": "2"
-                    },
-                    {
-                        "note": "C#4",
-                        "step": 2,
-                        "lyrics": "to"
-                    },
-                    {
-                        "note": "D#4",
-                        "step": 3,
-                        "lyrics": "die",
-                        "duration": 2
-                    },
-                    {
-                        "note": "D#4",
-                        "step": 5,
-                        "lyrics": "born"
-                    },
-                    {
-                        "note": "C#4",
-                        "step": 6
-                    },
-                    {
-                        "note": "B3",
-                        "step": 7
-                    },
-                    {
-                        "note": "G#3",
-                        "step": 9
-                    },
-                    {
-                        "note": "B3",
-                        "step": 10
-                    },
-                    {
-                        "note": "C#4",
-                        "step": 11
-                    },
-                    {
-                        "note": "F3",
-                        "step": 12
-                    }
-                ],
-                "tempo": 120,
-                "title": "Until the last light fades",
-                "singers": {
-                    "1": { "volume": 5 },
-                    "2": { "volume": 1 }
-                }
-            }
-        ];
+        // Song bank is now declared in songManager.js
 
         // Playback variables
         let isPlaying = false;
@@ -680,24 +616,20 @@
         });
 
         // Initialize
-        function initializeApp() {
+        async function initializeApp() {
             createPiano();
             
-            // Populate song bank dropdown
-            const select = document.getElementById('songSelect');
-            songBank.forEach((song, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = song.title || `Song ${index + 1}`;
-                select.appendChild(option);
-            });
+            // Load songs first, then populate the dropdown
+            await loadSongs();
             
             updateSingerControls();
             updateStatus('Ready to record! Click Record and play some notes, or select a song from the bank.');
         }
 
         // Initialize
-        initializeApp();
+        initializeApp().catch(error => {
+            console.error('Failed to initialize app:', error);
+        });
     </script>
 </body>
 </html>
