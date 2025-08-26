@@ -1,4 +1,4 @@
-const songData ={
+const lastLightFades = {
     "notes": [
       {
         "chord": "B",
@@ -188,7 +188,7 @@ const songData ={
         "track": "1"
       },
       {
-        "note": "D#4",
+        "note": "C#4",
         "step": 41,
         "duration": 1,
         "lyrics": "mar-",
@@ -202,13 +202,6 @@ const songData ={
         "track": "1"
       },
       {
-        "note": "B3",
-        "step": 46,
-        "duration": 2,
-        "lyrics": "then",
-        "track": "1"
-      },
-      {
         "note": "G#4",
         "step": 48,
         "duration": 4,
@@ -216,7 +209,7 @@ const songData ={
         "track": "1"
       },
       {
-        "note": "C#4",
+        "note": "B3",
         "step": 52,
         "duration": 2,
         "lyrics": "has",
@@ -230,14 +223,14 @@ const songData ={
         "track": "1"
       },
       {
-        "note": "C#4",
+        "note": "D#4",
         "step": 55,
         "duration": 2,
         "lyrics": "ing",
         "track": "1"
       },
       {
-        "note": "B3",
+        "note": "C#4",
         "step": 57,
         "duration": 2,
         "lyrics": "to",
@@ -326,5 +319,5 @@ const songData ={
 
 // Register this song with the main application
 if (typeof registerSong === 'function') {
-    registerSong(songData);
-}
+    registerSong(lastLightFades);
+  }

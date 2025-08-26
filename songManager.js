@@ -7,72 +7,48 @@ let songBank = [];
 // Function to load songs from the songs directory
 async function loadSongs() {
     try {
-        // Auto-discover song files in the songs directory
-        // This will work both locally and on GitHub Pages
-        const songFiles = await discoverSongFiles();
+        console.log('Starting to load songs...');
+        
+        // Load the song files via script tags
+        const songFiles = [
+            'until_the_last_light_fades.js',
+            'until_the_last_light_fades_chorus.js'
+        ];
+        
+        console.log('Song files to load:', songFiles);
         
         // Load each song file
-        songFiles.forEach(songFile => {
-            loadSongFile(songFile);
-        });
+        for (const songFile of songFiles) {
+            console.log(`Loading song file: ${songFile}`);
+            await loadSongFile(songFile);
+        }
         
         // Update the song selector
+        console.log('Updating song selector...');
         updateSongSelector();
+        
+        console.log('Current songBank:', songBank);
         
     } catch (error) {
         console.error('Failed to load songs:', error);
     }
 }
 
-// Function to discover song files automatically
-async function discoverSongFiles() {
-    const discoveredSongs = [];
-    
-    // Use the actual files that exist in the songs directory
-    const actualSongFiles = [
-        'until_the_last_light_fades.js'
-        // Add new song files here as you create them
-    ];
-    
-    // Filter out template.js and only include actual song files
-    const filteredSongs = actualSongFiles.filter(songFile => songFile !== 'template.js');
-    
-    // Check which files actually exist by trying to load them
-    for (const songFile of filteredSongs) {
-        try {
-            const response = await fetch(`songs/${songFile}`);
-            if (response.ok) {
-                discoveredSongs.push(songFile);
-                console.log(`Found song file: ${songFile}`);
-            }
-        } catch (error) {
-            // File doesn't exist, skip it
-        }
-    }
-    
-    // If no songs were discovered, fall back to the known existing song
-    if (discoveredSongs.length === 0) {
-        discoveredSongs.push('until_the_last_light_fades.js');
-        console.log('No songs discovered, using fallback song');
-    }
-    
-    console.log(`Discovered ${discoveredSongs.length} song files:`, discoveredSongs);
-    return discoveredSongs;
-}
-
 // Helper function to load a single song file
 function loadSongFile(songFile) {
-    // Create a script tag to load the song file
-    // This approach works without fetch() and CORS issues
-    const script = document.createElement('script');
-    script.src = `songs/${songFile}`;
-    script.onload = function() {
-        console.log(`Loaded song file: ${songFile}`);
-    };
-    script.onerror = function() {
-        console.warn(`Failed to load song file: ${songFile}`);
-    };
-    document.head.appendChild(script);
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = `songs/${songFile}`;
+        script.onload = () => {
+            console.log(`Successfully loaded: ${songFile}`);
+            resolve();
+        };
+        script.onerror = () => {
+            console.error(`Failed to load: ${songFile}`);
+            reject(new Error(`Failed to load ${songFile}`));
+        };
+        document.head.appendChild(script);
+    });
 }
 
 // Function that song files will call to register themselves
@@ -116,6 +92,25 @@ function loadSong() {
         updateStatus('Song not found.');
         return;
     }
+
+    // Process song data - loop through each entry, and if there is no step field, set it
+    // to the previous step + the duration
+    // of the previous entry with the same track.
+    for (let i = 0; i < songData.notes.length; i++) {
+        if (!songData.notes[i].step) {
+            // Find the previous entry with the same track
+            let previousEntry = null;
+            for (let j = i - 1; j >= 0; j--) {
+                if (songData.notes[j].track === songData.notes[i].track) {
+                    previousEntry = songData.notes[j];
+                    break;
+                }
+            }
+            if (previousEntry) {
+                songData.notes[i].step = previousEntry.step + previousEntry.duration;
+            }
+        }
+    }
     
     // Load song data directly into the textarea for editing
     const songDataTextarea = document.getElementById('songData');
@@ -130,7 +125,7 @@ function loadSong() {
     tracks = songData.tracks || { "1": { volume: 5 } };
     
     updatetrackControls();
-    updateStatus(`✅ Loaded: ${songData.title} - Edit in textarea and changes will apply on next play`);
+    updateStatus(`✅ Loaded: ${songData.title}`);
 }
 
 
