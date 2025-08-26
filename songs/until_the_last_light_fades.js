@@ -133,158 +133,158 @@ const songData ={
       },
       {
         "note": "F#4",
-        "step": 28,
+        "step": 29,
         "duration": 1,
         "lyrics": "heav-",
         "track": "1"
       },
       {
         "note": "G#4",
-        "step": 29,
+        "step": 30,
         "duration": 2,
         "lyrics": "en",
         "track": "1"
       },
       {
-        "note": "F#4",
-        "step": 31,
-        "duration": 2,
+        "note": "G#4",
+        "step": 32,
+        "duration": 1,
         "lyrics": "and",
         "track": "1"
       },
       {
         "note": "F#4",
-        "step": 32,
-        "duration": 3,
+        "step": 33,
+        "duration": 2,
         "lyrics": "earth",
         "track": "1"
       },
       {
-        "note": "C#4",
-        "step": 35,
+        "note": "B3",
+        "step": 36,
         "duration": 1,
         "lyrics": "are",
         "track": "1"
       },
       {
         "note": "C#4",
-        "step": 36,
+        "step": 37,
         "duration": 1,
         "lyrics": "both",
         "track": "1"
       },
       {
         "note": "C#4",
-        "step": 37,
-        "duration": 1,
+        "step": 38,
+        "duration": 2,
         "lyrics": "on",
         "track": "1"
       },
       {
-        "note": "C#4",
-        "step": 38,
+        "note": "B3",
+        "step": 40,
         "duration": 1,
         "lyrics": "the",
         "track": "1"
       },
       {
-        "note": "C#4",
-        "step": 39,
+        "note": "D#4",
+        "step": 41,
         "duration": 1,
         "lyrics": "mar-",
         "track": "1"
       },
       {
-        "note": "C#4",
-        "step": 40,
+        "note": "F#4",
+        "step": 42,
         "duration": 4,
         "lyrics": "ket",
         "track": "1"
       },
       {
-        "note": "C#4",
-        "step": 44,
-        "duration": 1,
+        "note": "B3",
+        "step": 46,
+        "duration": 2,
         "lyrics": "then",
         "track": "1"
       },
       {
-        "note": "C#4",
-        "step": 45,
-        "duration": 2,
+        "note": "G#4",
+        "step": 48,
+        "duration": 4,
         "lyrics": "hell",
         "track": "1"
       },
       {
         "note": "C#4",
-        "step": 46,
-        "duration": 1,
+        "step": 52,
+        "duration": 2,
         "lyrics": "has",
         "track": "1"
       },
       {
-        "note": "C#4",
-        "step": 47,
+        "note": "D#4",
+        "step": 54,
         "duration": 1,
         "lyrics": "noth-",
         "track": "1"
       },
       {
         "note": "C#4",
-        "step": 48,
-        "duration": 1,
+        "step": 55,
+        "duration": 2,
         "lyrics": "ing",
         "track": "1"
       },
       {
-        "note": "C#4",
-        "step": 49,
-        "duration": 1,
+        "note": "B3",
+        "step": 57,
+        "duration": 2,
         "lyrics": "to",
         "track": "1"
       },
       {
-        "note": "C#4",
-        "step": 50,
+        "note": "B3",
+        "step": 59,
         "duration": 4,
         "lyrics": "fear",
         "track": "1"
       },
       {
         "chord": "B",
-        "step": 54,
+        "step": 63,
         "duration": 8,
         "track": "chords"
       },
       {
         "note": "B3",
-        "step": 54,
+        "step": 63,
         "duration": 2,
         "lyrics": "so",
         "track": "1"
       },
       {
         "note": "F#3",
-        "step": 54,
+        "step": 63,
         "duration": 2,
         "track": "2"
       },
       {
         "note": "D#4",
-        "step": 56,
+        "step": 65,
         "duration": 4,
         "lyrics": "where",
         "track": "1"
       },
       {
         "note": "B3",
-        "step": 56,
+        "step": 66,
         "duration": 4,
         "track": "2"
       },
       {
         "note": "F#4",
-        "step": 60,
+        "step": 68,
         "duration": 2,
         "lyrics": "oh",
         "track": "1"
