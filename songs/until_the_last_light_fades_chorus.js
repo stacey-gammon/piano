@@ -105,22 +105,107 @@ const lastLightFadesChorus = {
       {
         "note": "B3",
         "duration": 2,
-        "lyrics": "love",
+        "lyrics": "has",
         "track": "main"
       },
       {
         "note": "F#3",
         "duration": 2,
+        "lyrics": "has",
+        "track": "harmony"
+      },
+      {
+        "note": "C#4",
+        "duration": 2,
+        "lyrics": "the",
+        "track": "main"
+      },
+      {
+        "note": "G#3",
+        "duration": 2,
+        "lyrics": "the",
+        "track": "harmony"
+      },
+      {
+        "note": "D#4",
+        "duration": 2,
+        "lyrics": "sun",
+        "track": "main"
+      },
+      {
+        "note": "B3",
+        "duration": 2,
+        "lyrics": "sun",
+        "track": "harmony"
+      },
+      {
+        "note": "B3",
+        "duration": 2,
+        "lyrics": "re",
+        "track": "main"
+      },
+      {
+        "note": "F#3",
+        "duration": 2,
+        "lyrics": "re",
+        "track": "harmony"
+      },
+      {
+        "note": "G#3",
+        "duration": 2,
+        "lyrics": "tired",
+        "track": "main"
+      },
+      {
+        "note": "A#3",
+        "duration": 2,
+        "lyrics": "tired",
+        "track": "harmony"
+      },
+      {
+        "note": "G#3",
+        "duration": 2,
+        "lyrics": "for",
+        "track": "main"
+      },
+      {
+        "note": "#3",
+        "duration": 2,
+        "lyrics": "for",
+        "track": "harmony"
+      },
+      {
+        "note": "A#3",
+        "duration": 2,
+        "lyrics": "the",
+        "track": "main"
+      },
+      {
+        "note": "F#3",
+        "duration": 2,
+        "lyrics": "the",
+        "track": "harmony"
+      },
+      {
+        "note": "B3",
+        "duration": 2,
+        "lyrics": "day",
+        "track": "main"
+      },
+      {
+        "note": "F#3",
+        "duration": 2,
+        "lyrics": "day",
         "track": "harmony"
       },
     ],
     "tempo": 100,
     "title": "Until the last light fades [Chorus Only]",
     "tracks": {
-      "1": {
+      "main": {
         "volume": 3
       },
-      "2": {
+      "harmony": {
         "volume": 3
       },
       "chords": {
@@ -128,7 +213,7 @@ const lastLightFadesChorus = {
       }
     }
   }
-  
+
 // Register this song with the main application
 if (typeof registerSong === 'function') {
   registerSong(lastLightFadesChorus);

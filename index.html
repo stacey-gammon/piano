@@ -465,15 +465,20 @@
 
         // Update track controls
         function updatetrackControls() {
+            console.log('updatetrackControls called');
+            console.log('Current tracks object:', tracks);
+            
             const container = document.getElementById('trackControls');
             const trackIds = Object.keys(tracks).sort();
             
+            console.log('Track IDs found:', trackIds);
+            
             container.innerHTML = `
-                <h4>track Volume Controls (0=off, 1=quiet, 5=normal)</h4>
+                <h4>Track Volume Controls (0=off, 1=quiet, 5=normal)</h4>
                 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
                     ${trackIds.map(trackId => `
                         <div style="display: flex; align-items: center; gap: 5px;">
-                            <label>track ${trackId}:</label>
+                            <label>${trackId}</label>
                             <input type="range" id="volume_${trackId}" min="0" max="5" value="${tracks[trackId].volume}" 
                                    onchange="updatetrackVolume('${trackId}', this.value)"
                                    style="width: 100px;">
@@ -482,12 +487,23 @@
                     `).join('')}
                 </div>
             `;
+            
+            console.log('Track controls updated');
         }
 
         // Update track volume
         function updatetrackVolume(trackId, volume) {
-            tracks[trackId].volume = parseInt(volume);
-            document.getElementById(`volumeLabel_${trackId}`).textContent = volume;
+            console.log('updatetrackVolume called with:', trackId, volume);
+            console.log('Current tracks object:', tracks);
+            console.log('Track exists:', tracks[trackId]);
+            
+            if (tracks[trackId]) {
+                tracks[trackId].volume = parseInt(volume);
+                document.getElementById(`volumeLabel_${trackId}`).textContent = volume;
+                console.log('Volume updated successfully');
+            } else {
+                console.error(`Track ${trackId} not found in tracks object`);
+            }
         }
 
         // Status updates
