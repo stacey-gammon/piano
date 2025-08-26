@@ -274,37 +274,6 @@
             'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25
         };
 
-        // Chord definitions (root, third, fifth)
-        const chordDefinitions = {
-            // Major chords
-            'C': ['C4', 'E4', 'G4'],
-            'C#': ['C#4', 'F4', 'G#4'],
-            'D': ['D4', 'F#4', 'A4'],
-            'D#': ['D#4', 'G4', 'A#4'],
-            'E': ['E4', 'G#4', 'B4'],
-            'F': ['F4', 'A4', 'C5'],
-            'F#': ['F#4', 'A#4', 'C#5'],
-            'G': ['G4', 'B4', 'D5'],
-            'G#': ['G#4', 'C5', 'D#5'],
-            'A': ['A4', 'C#5', 'E5'],
-            'A#': ['A#4', 'D5', 'F5'],
-            'B': ['B4', 'D#5', 'F#5'],
-            
-            // Minor chords
-            'Cm': ['C4', 'D#4', 'G4'],
-            'C#m': ['C#4', 'E4', 'G#4'],
-            'Dm': ['D4', 'F4', 'A4'],
-            'D#m': ['D#4', 'F#4', 'A#4'],
-            'Em': ['E4', 'G4', 'B4'],
-            'Fm': ['F4', 'G#4', 'C5'],
-            'F#m': ['F#4', 'A4', 'C#5'],
-            'Gm': ['G4', 'A#4', 'D5'],
-            'G#m': ['G#4', 'B4', 'D#5'],
-            'Am': ['A4', 'C5', 'E5'],
-            'A#m': ['A#4', 'C#5', 'F5'],
-            'Bm': ['B4', 'D5', 'F#5']
-        };
-
         // Recording variables
         let isRecording = false;
         let recordedNotes = [];
@@ -436,10 +405,10 @@
                     }, eighthNoteLength * 0.8);
                 }
                 
-                // Play each note with appropriate volume
+                // Play each note or chord with appropriate volume
                 notesToPlay.forEach(n => {
                     const singerVolume = singers[n.singer] ? singers[n.singer].volume : 5;
-                    playNoteWithVolume(n.note, singerVolume);
+                    playNoteOrChord(n, singerVolume);
                 });
                 
                 currentStep++;
