@@ -34,7 +34,7 @@ const chordDefinitions = {
 
 
 // Consolidated playNote function that handles both regular notes and volume-based playback
-function playNote(note, singerVolume = null, duration = .25) {
+function playNote(note, trackVolume = null, duration = .25) {
     const freq = noteFreqs[note];
     if (!freq) return;
 
@@ -47,11 +47,11 @@ function playNote(note, singerVolume = null, duration = .25) {
     oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
     oscillator.type = 'triangle';
     
-    // Handle volume - if singerVolume is provided, use it; otherwise use default
+    // Handle volume - if trackVolume is provided, use it; otherwise use default
     let volume = 0.3; // Default volume
-    if (singerVolume !== null) {
-        if (singerVolume === 0) return; // Don't play if volume is 0
-        volume = (singerVolume / 5) * 0.3; // Scale volume based on singer volume (1-5 scale)
+    if (trackVolume !== null) {
+        if (trackVolume === 0) return; // Don't play if volume is 0
+        volume = (trackVolume / 5) * 0.3; // Scale volume based on track volume (1-5 scale)
     }
     
     const now = audioContext.currentTime;
@@ -77,19 +77,19 @@ function playNote(note, singerVolume = null, duration = .25) {
         const relativeTime = currentTime - recordingStartTime;
         const step = Math.round(relativeTime / eighthNoteLength);
         const duration = parseInt(document.getElementById('stretch')?.value) || 1;
-        const currentSinger = document.getElementById('currentSinger')?.value || "1";
+        const currenttrack = document.getElementById('currenttrack')?.value || "1";
         recordedNotes.push({ 
             note, 
             step, 
             duration, 
             lyrics: '', 
-            singer: currentSinger 
+            track: currenttrack 
         });
     }
 }
 
 // Function to play a chord (multiple notes simultaneously)
-function playChord(chordName, singerVolume = null, duration = 1) {
+function playChord(chordName, trackVolume = null, duration = 1) {
     const chordNotes = chordDefinitions[chordName];
     if (!chordNotes) {
         console.warn(`Unknown chord: ${chordName}`);
@@ -98,7 +98,7 @@ function playChord(chordName, singerVolume = null, duration = 1) {
     
     // Play all notes in the chord simultaneously with the specified duration
     chordNotes.forEach(note => {
-        playNote(note, singerVolume, duration);
+        playNote(note, trackVolume, duration);
     });
     
     // Visual feedback for chord (highlight multiple keys for the duration)
@@ -113,7 +113,7 @@ function playChord(chordName, singerVolume = null, duration = 1) {
 }
 
 // Function to play a note or chord based on the note object
-function playNoteOrChord(noteObject, singerVolume = null) {
+function playNoteOrChord(noteObject, trackVolume = null) {
     // Get duration from the note object, default to 1 if not specified
     const duration = noteObject.duration || 1;
     // duration in steps
@@ -123,17 +123,17 @@ function playNoteOrChord(noteObject, singerVolume = null) {
     const durationSeconds = (steps * eighthNoteLength) / 1000;
 
     if (noteObject.chord) {
-        playChord(noteObject.chord, singerVolume, durationSeconds);
+        playChord(noteObject.chord, trackVolume, durationSeconds);
     } else if (noteObject.note) {
-        playNote(noteObject.note, singerVolume, durationSeconds);
+        playNote(noteObject.note, trackVolume, durationSeconds);
     } else {
         console.warn('Note object must have either "note" or "chord" field:', noteObject);
     }
 }
 
 // Legacy function for backward compatibility
-function playNoteWithVolume(note, singerVolume = 5, duration = .5) {
-    playNote(note, singerVolume, duration); // Default duration of 1
+function playNoteWithVolume(note, trackVolume = 5, duration = .5) {
+    playNote(note, trackVolume, duration); // Default duration of 1
 }
 
 function stopNote() {
@@ -141,7 +141,7 @@ function stopNote() {
 }
 
 // Utility function to add a chord to the recording
-function addChordToRecording(chordName, step, duration = 1, lyrics = '', singer = "1") {
+function addChordToRecording(chordName, step, duration = 1, lyrics = '', track = "1") {
     if (!isRecording) {
         console.warn('Not currently recording');
         return;
@@ -152,14 +152,14 @@ function addChordToRecording(chordName, step, duration = 1, lyrics = '', singer 
         step: step,
         duration: duration,
         lyrics: lyrics,
-        singer: singer
+        track: track
     });
     
     console.log(`Added chord ${chordName} to recording at step ${step}`);
 }
 
 // Utility function to add a note to the recording with duration
-function addNoteToRecording(note, step, duration = 1, lyrics = '', singer = "1") {
+function addNoteToRecording(note, step, duration = 1, lyrics = '', track = "1") {
     if (!isRecording) {
         console.warn('Not currently recording');
         return;
@@ -170,7 +170,7 @@ function addNoteToRecording(note, step, duration = 1, lyrics = '', singer = "1")
         step: step,
         duration: duration,
         lyrics: lyrics,
-        singer: singer
+        track: track
     });
     
     console.log(`Added note ${note} to recording at step ${step} with duration ${duration}`);

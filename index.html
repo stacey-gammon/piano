@@ -225,20 +225,14 @@
         <div class="playback-indicator" id="playback-status"></div>
         <div class="playback-indicator" id="lyrics-display" style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); min-height: 35px;"></div>
 
-        <div class="singer-controls" id="singerControls" style="margin: 20px 0; text-align: center;">
-            <!-- Singer volume controls will be added here dynamically -->
+        <div class="track-controls" id="trackControls" style="margin: 20px 0; text-align: center;">
+            <!-- track volume controls will be added here dynamically -->
         </div>
 
         <div class="tempo-control">
             <label>Tempo (BPM): </label>
             <input type="number" id="tempo" value="120" min="60" max="200" onchange="updateTempo()">
-            <label style="margin-left: 20px;">Note Duration (beats): </label>
-            <input type="number" id="stretch" value="1" min="1" max="8" title="How many 1/8 notes this note should last">
-            <label style="margin-left: 20px;">Singer: </label>
-            <select id="currentSinger" style="padding: 5px;">
-                <option value="1">Singer 1</option>
-            </select>
-        </div>
+                    </div>
 
         <div class="piano" id="piano">
             <!-- Piano keys will be generated here -->
@@ -277,7 +271,7 @@
         let tempo = 120;
         let eighthNoteLength = (60 / tempo / 2) * 1000; // 1/8 note in ms
         let currentSong = null;
-        let singers = { "1": { volume: 5 } }; // Default singer
+        let tracks = { "1": { volume: 5 } }; // Default track
 
         // Song bank is now declared in songManager.js
 
@@ -362,8 +356,8 @@
                         recordedNotes = songData.notes || [];
                         tempo = songData.tempo || 120;
                         eighthNoteLength = (60 / tempo / 2) * 1000;
-                        singers = songData.singers || { "1": { volume: 5 } };
-                        updateSingerControls();
+                        tracks = songData.tracks || { "1": { volume: 5 } };
+                        updatetrackControls();
                         updateStatus('✅ Loaded song from textarea');
                     } catch (e) {
                         updateStatus('❌ Invalid song data in textarea');
@@ -393,6 +387,7 @@
             // Find the natural end of song
             const naturalMaxStep = Math.max(...recordedNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
 
+                
             // Read loop bounds from inputs
             const loopStartInput = document.getElementById('loopStart').value;
             const loopEndInput = document.getElementById('loopEnd').value;
@@ -428,8 +423,8 @@
                 
                 // Play each note or chord with appropriate volume
                 notesToPlay.forEach(n => {
-                    const singerVolume = singers[n.singer] ? singers[n.singer].volume : 5;
-                    playNoteOrChord(n, singerVolume);
+                    const trackVolume = tracks[n.track] ? tracks[n.track].volume : 5;
+                    playNoteOrChord(n, trackVolume);
                 });
                 
                 currentStep++;
@@ -468,48 +463,32 @@
 
         // Song bank loading is now handled in songManager.js
 
-        // Update singer controls
-        function updateSingerControls() {
-            const container = document.getElementById('singerControls');
-            const singerIds = Object.keys(singers).sort();
+        // Update track controls
+        function updatetrackControls() {
+            const container = document.getElementById('trackControls');
+            const trackIds = Object.keys(tracks).sort();
             
             container.innerHTML = `
-                <h4>Singer Volume Controls (0=off, 1=quiet, 5=normal)</h4>
+                <h4>track Volume Controls (0=off, 1=quiet, 5=normal)</h4>
                 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-                    ${singerIds.map(singerId => `
+                    ${trackIds.map(trackId => `
                         <div style="display: flex; align-items: center; gap: 5px;">
-                            <label>Singer ${singerId}:</label>
-                            <input type="range" id="volume_${singerId}" min="0" max="5" value="${singers[singerId].volume}" 
-                                   onchange="updateSingerVolume('${singerId}', this.value)"
+                            <label>track ${trackId}:</label>
+                            <input type="range" id="volume_${trackId}" min="0" max="5" value="${tracks[trackId].volume}" 
+                                   onchange="updatetrackVolume('${trackId}', this.value)"
                                    style="width: 100px;">
-                            <span id="volumeLabel_${singerId}">${singers[singerId].volume}</span>
+                            <span id="volumeLabel_${trackId}">${tracks[trackId].volume}</span>
                         </div>
                     `).join('')}
                 </div>
             `;
         }
 
-        // Update singer volume
-        function updateSingerVolume(singerId, volume) {
-            singers[singerId].volume = parseInt(volume);
-            document.getElementById(`volumeLabel_${singerId}`).textContent = volume;
+        // Update track volume
+        function updatetrackVolume(trackId, volume) {
+            tracks[trackId].volume = parseInt(volume);
+            document.getElementById(`volumeLabel_${trackId}`).textContent = volume;
         }
-
-        // Update singer select dropdown
-        function updateSingerSelect() {
-            const select = document.getElementById('currentSinger');
-            const singerIds = Object.keys(singers).sort();
-            
-            select.innerHTML = singerIds.map(id => 
-                `<option value="${id}">Singer ${id}</option>`
-            ).join('');
-        }
-
-        // Edit functionality removed - songs are now edited directly in the textarea
-
-
-
-
 
         // Status updates
         function updateStatus(message) {
@@ -560,7 +539,7 @@
                 });
             }
             
-            updateSingerControls();
+            updatetrackControls();
             updateStatus('Ready to record! Click Record and play some notes, or select a song from the bank.');
         }
 
@@ -583,9 +562,8 @@
                     recordedNotes = songData.notes || [];
                     tempo = songData.tempo || 120;
                     eighthNoteLength = (60 / tempo / 2) * 1000;
-                    singers = songData.singers || { "1": { volume: 5 } };
-                    updateSingerControls();
-                    updateSingerSelect();
+                    tracks = songData.tracks || { "1": { volume: 5 } };
+                    updatetrackControls();
                     updateStatus('✅ Song data updated from textarea');
                 } catch (e) {
                     updateStatus('❌ Invalid JSON in song data');

@@ -7,13 +7,13 @@ const songData = {
             "note": "C4",
             "step": 1,
             "lyrics": "Example",
-            "singer": "1",
+            "track": "1",
             "duration": 1
         }
     ],
     "tempo": 120,
     "title": "Song Title",
-    "singers": {
+    "tracks": {
         "1": { "volume": 5 }
     }
 };

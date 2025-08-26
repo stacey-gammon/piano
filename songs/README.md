@@ -13,13 +13,13 @@ Each song JSON file should follow this structure:
             "note": "C4",
             "step": 1,
             "lyrics": "Example",
-            "singer": "1",
+            "track": "1",
             "duration": 1
         }
     ],
     "tempo": 120,
     "title": "Song Title",
-    "singers": {
+    "tracks": {
         "1": { "volume": 5 }
     }
 }
@@ -31,11 +31,11 @@ Each song JSON file should follow this structure:
   - **note**: The musical note (e.g., "C4", "D#3", "F#5")
   - **step**: The timing step when the note should play
   - **lyrics**: Optional lyrics for the note
-  - **singer**: Which singer should sing this note (references singers object)
+  - **track**: Which track should sing this note (references tracks object)
   - **duration**: Optional duration in steps (defaults to 1)
 - **tempo**: Beats per minute for the song
 - **title**: Display name for the song
-- **singers**: Object defining available singers and their volume levels
+- **tracks**: Object defining available tracks and their volume levels
 
 ## Adding New Songs
 
@@ -52,5 +52,5 @@ The piano supports these notes:
 
 ## Example Songs
 
-- `until_the_last_light_fades.js` - A complete song with lyrics and multiple singers
+- `until_the_last_light_fades.js` - A complete song with lyrics and multiple tracks
 - `template.js` - Template for creating new songs

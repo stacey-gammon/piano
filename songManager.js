@@ -127,9 +127,9 @@ function loadSong() {
     recordedNotes = songData.notes || [];
     tempo = songData.tempo || 120;
     eighthNoteLength = (60 / tempo / 2) * 1000;
-    singers = songData.singers || { "1": { volume: 5 } };
+    tracks = songData.tracks || { "1": { volume: 5 } };
     
-    updateSingerControls();
+    updatetrackControls();
     updateStatus(`✅ Loaded: ${songData.title} - Edit in textarea and changes will apply on next play`);
 }
 
