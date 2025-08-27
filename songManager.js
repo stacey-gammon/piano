@@ -107,7 +107,8 @@ function loadSong() {
                 }
             }
             if (previousEntry) {
-                songData.notes[i].step = previousEntry.step + previousEntry.duration;
+                pause = previousEntry.pause || 0;
+                songData.notes[i].step = previousEntry.step + previousEntry.duration + pause;
             }
         }
     }
