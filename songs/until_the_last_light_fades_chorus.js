@@ -82,18 +82,30 @@ const lastLightFadesChorus = {
       },
       {
         "note": "E4",
-        "duration": 4,
-        "lyrics": "lights",
+        "duration": 1,
+        "lyrics": "li-",
         "track": "main"
       },
       {
-        "note": "B3",
-        "duration": 4,
-        "lyrics": "lights",
+        "note": "G#3",
+        "duration": 1,
+        "lyrics": "li-",
         "track": "harmony"
       },
       {
-        "note": "B3",
+        "note": "D#4",
+        "duration": 3,
+        "lyrics": "-ghts",
+        "track": "main"
+      },
+      {
+        "note": "F#3",
+        "duration": 3,
+        "lyrics": "-ghts",
+        "track": "harmony"
+      },
+      {
+        "note": "D#4",
         "duration": 2,
         "lyrics": "gone",
         "track": "main"
@@ -105,7 +117,7 @@ const lastLightFadesChorus = {
         "track": "harmony"
       },
       {
-        "note": "B3",
+        "note": "D#4",
         "duration": 4,
         "lyrics": "love",
         "track": "main"
@@ -123,7 +135,7 @@ const lastLightFadesChorus = {
         "track": "main"
       },
       {
-        "note": "F#3",
+        "note": "D#3",
         "duration": 1,
         "lyrics": "has",
         "track": "harmony"
@@ -135,7 +147,7 @@ const lastLightFadesChorus = {
         "track": "main"
       },
       {
-        "note": "G#3",
+        "note": "D#3",
         "duration": 1,
         "lyrics": "the",
         "track": "harmony"
@@ -147,13 +159,15 @@ const lastLightFadesChorus = {
       },
       {
         "note": "D#4",
-        "duration": 4,
+        "duration": 2,
+        "pause": 2,
         "lyrics": "sun",
         "track": "main"
       },
       {
-        "note": "B3",
-        "duration": 4,
+        "note": "G#3",
+        "duration": 2,
+        "pause": 2,
         "lyrics": "sun",
         "track": "harmony"
       },
@@ -171,13 +185,15 @@ const lastLightFadesChorus = {
       },
       {
         "note": "F#3",
-        "duration": 4,
+        "duration": 2,
+        "pause": 2,
         "lyrics": "tired",
         "track": "main"
       },
       {
-        "note": "D#3",
-        "duration": 4,
+        "note": "B2",
+        "duration": 2,
+        "pause": 2,
         "lyrics": "tired",
         "track": "harmony"
       },
@@ -188,7 +204,7 @@ const lastLightFadesChorus = {
         "track": "main"
       },
       {
-        "note": "C#3",
+        "note": "B2",
         "duration": 1,
         "lyrics": "for",
         "track": "harmony"
@@ -200,7 +216,7 @@ const lastLightFadesChorus = {
         "track": "main"
       },
       {
-        "note": "D#3",
+        "note": "B2",
         "duration": 1,
         "lyrics": "the",
         "track": "harmony"
@@ -218,7 +234,7 @@ const lastLightFadesChorus = {
         "track": "main"
       },
       {
-        "note": "G#3",
+        "note": "D#3",
         "duration": 1,
         "lyrics": "da-",
         "track": "harmony"
@@ -231,7 +247,7 @@ const lastLightFadesChorus = {
         "track": "main"
       },
       {
-        "note": "F#3",
+        "note": "C#3",
         "duration": 3,
         "pause": 1,
         "lyrics": "-ay",
@@ -484,7 +500,7 @@ const lastLightFadesChorus = {
         "volume": 3
       },
       "chords": {
-        "volume": 1
+        "volume": 0
       }
     }
   }
