@@ -70,13 +70,13 @@ const lastLightFadesChorus = {
       },
       {
         "note": "D#4",
-        "duration": 2,
+        "duration": 1,
         "lyrics": "the",
         "track": "main"
       },
       {
         "note": "A#3",
-        "duration": 2,
+        "duration": 1,
         "lyrics": "the",
         "track": "harmony"
       },
@@ -94,13 +94,13 @@ const lastLightFadesChorus = {
       },
       {
         "note": "D#4",
-        "duration": 3,
+        "duration": 2,
         "lyrics": "-ghts",
         "track": "main"
       },
       {
         "note": "F#3",
-        "duration": 3,
+        "duration": 2,
         "lyrics": "-ghts",
         "track": "harmony"
       },
