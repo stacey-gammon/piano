@@ -378,13 +378,99 @@ const lastLightFadesChorus = {
       {
         "note": "E4",
         "duration": 4,
+        "pause": 4,
         "lyrics": "mine",
         "track": "main"
       },
       {
         "note": "G#3",
         "duration": 4,
+        "pause": 4,
         "lyrics": "mine",
+        "track": "harmony"
+      },
+      {
+        "note": "F#4",
+        "duration": 1,
+        "lyrics": "please",
+        "track": "main"
+      },
+      {
+        "note": "A#3",
+        "duration": 1,
+        "lyrics": "please",
+        "track": "harmony"
+      },
+      {
+        "note": "G#4",
+        "duration": 4,
+        "lyrics": "stay",
+        "track": "main"
+      },
+      {
+        "note": "B3",
+        "duration": 4,
+        "lyrics": "stay",
+        "track": "harmony"
+      },
+      {
+        "note": "B3",
+        "duration": 1,
+        "lyrics": "til",
+        "track": "main"
+      },
+      {
+        "note": "E3",
+        "duration": 1,
+        "lyrics": "til",
+        "track": "harmony"
+      },
+      {
+        "note": "C#4",
+        "duration": 1,
+        "lyrics": "the",
+        "track": "main"
+      },
+      {
+        "note": "E3",
+        "duration": 1,
+        "lyrics": "the",
+        "track": "harmony"
+      },
+      {
+        "note": "D#4",
+        "duration": 4,
+        "lyrics": "last",
+        "track": "main"
+      },
+      {
+        "note": "F#3",
+        "duration": 4,
+        "lyrics": "last",
+        "track": "harmony"
+      },
+      {
+        "note": "C#4",
+        "duration": 2,
+        "lyrics": "light",
+        "track": "main"
+      },
+      {
+        "note": "F#3",
+        "duration": 2,
+        "lyrics": "light",
+        "track": "harmony"
+      },
+      {
+        "note": "B3",
+        "duration": 4,
+        "lyrics": "fades",
+        "track": "main"
+      },
+      {
+        "note": "D#3",
+        "duration": 4,
+        "lyrics": "fades",
         "track": "harmony"
       },
     ],
