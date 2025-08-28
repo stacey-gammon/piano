@@ -1,6 +1,23 @@
 // Audio Player Functions
 // This file contains consolidated audio playback functions
 
+// Track all active oscillators so we can stop them all
+let activeOscillators = [];
+
+// Function to stop all active oscillators
+function stopAllOscillators() {
+    activeOscillators.forEach(oscillator => {
+        try {
+            console.log('Stopping oscillator');
+            oscillator.stop();
+        } catch (e) {
+            // Oscillator might already be stopped, ignore error
+        }
+    });
+    activeOscillators = [];
+    console.log('Stopped all active oscillators');
+}
+
 // Chord definitions (root, third, fifth)
 const chordDefinitions = {
     // Major chords
@@ -71,7 +88,11 @@ function playNote(note, trackVolume = null, duration = .25) {
     // Sustain until just before note ends
     gainNode.gain.setValueAtTime(volume, now + duration - 0.05);
     
+    // Track this oscillator so we can stop it later if needed
+    activeOscillators.push(oscillator);
+    
     oscillator.start(audioContext.currentTime);
+
     oscillator.stop(audioContext.currentTime + duration);
 
     // Visual feedback

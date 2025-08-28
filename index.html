@@ -452,6 +452,7 @@
 
         function stopPlayback() {
             isPlaying = false;
+            stopAllOscillators();
             if (playbackInterval) {
                 clearInterval(playbackInterval);
                 playbackInterval = null;

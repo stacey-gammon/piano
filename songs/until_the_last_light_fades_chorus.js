@@ -46,13 +46,15 @@ const lastLightFadesChorus = {
       },
       {
         "note": "F#4",
-        "duration": 4,
+        "duration": 2,
+        "pause": 2,
         "lyrics": "where",
         "track": "main"
       },
       {
         "note": "B3",
-        "duration": 4,
+        "duration": 2,
+        "pause": 2,
         "lyrics": "where",
         "track": "harmony"
       },
@@ -118,13 +120,15 @@ const lastLightFadesChorus = {
       },
       {
         "note": "D#4",
-        "duration": 4,
+        "duration": 2,
+        "pause": 2,
         "lyrics": "love",
         "track": "main"
       },
       {
         "note": "F#3",
-        "duration": 4,
+        "duration": 2,
+        "pause": 2,
         "lyrics": "love",
         "track": "harmony"
       },
@@ -154,7 +158,7 @@ const lastLightFadesChorus = {
       },
       {
         "chord": "G#m",
-        "duration": 12,
+        "duration": 10,
         "track": "chords"
       },
       {
@@ -254,7 +258,7 @@ const lastLightFadesChorus = {
         "track": "harmony"
       },
       {
-        "note": "B3",
+        "degree": "1",
         "duration": 1,
         "lyrics": "or",
         "track": "main"
@@ -266,7 +270,7 @@ const lastLightFadesChorus = {
         "track": "harmony"
       },
       {
-        "note": "C#4",
+        "degree": "3",
         "duration": 1,
         "lyrics": "has",
         "track": "main"
@@ -284,37 +288,37 @@ const lastLightFadesChorus = {
         "track": "chords"
       },
       {
-        "note": "E4",
+        "degree": "4",
         "duration": 1,
         "lyrics": "li-",
         "track": "main"
       },
       {
-        "note": "B3",
+        "degree": "6[2]",
         "duration": 1,
         "lyrics": "li-",
         "track": "harmony"
       },
       {
-        "note": "D#4",
+        "degree": "3",
         "duration": 2,
-        "lyrics": "fe",
+        "lyrics": "-ife",
         "track": "main"
       },
       {
-        "note": "B3",
+        "degree": "5[2]",
         "duration": 2,
-        "lyrics": "fe",
+        "lyrics": "-ife",
         "track": "harmony"
       },
       {
-        "note": "D#4",
+        "degree": "3",
         "duration": 2,
         "lyrics": "out",
         "track": "main"
       },
       {
-        "note": "B3",
+        "degree": "5[2]",
         "duration": 2,
         "lyrics": "out",
         "track": "harmony"
@@ -326,19 +330,19 @@ const lastLightFadesChorus = {
         "track": "chords"
       },
       {
-        "note": "B3",
+        "degree": "6[2]",
         "duration": 4,
         "lyrics": "lived",
         "track": "main"
       },
       {
-        "note": "F#3",
+        "degree": "2[2]",
         "duration": 4,
         "lyrics": "lived",
         "track": "harmony"
       },
       {
-        "note": "B3",
+        "degree": "1",
         "duration": 2,
         "lyrics": "these",
         "track": "main"
@@ -356,7 +360,7 @@ const lastLightFadesChorus = {
         "track": "chords"
       },
       {
-        "note": "B3",
+        "degree": "1",
         "duration": 1,
         "lyrics": "ey-",
         "track": "main"
@@ -368,7 +372,7 @@ const lastLightFadesChorus = {
         "track": "harmony"
       },
       {
-        "note": "D#4",
+        "degree": "3",
         "duration": 2,
         "lyrics": "-es",
         "track": "main"
