@@ -12,7 +12,10 @@ async function loadSongs() {
         // Load the song files via script tags
         const songFiles = [
             'until_the_last_light_fades.js',
-            'until_the_last_light_fades_chorus.js'
+            'until_the_last_light_fades_chorus.js',
+            'until_the_last_light_fades_verse2.js',
+            'wayfaring_stranger.js',
+            'mad_world_chorus.js'
         ];
         
         console.log('Song files to load:', songFiles);
@@ -86,8 +89,12 @@ function loadSong() {
         updateStatus('Please select a song first.');
         return;
     }
-    
-    const songData = songBank[selectedIndex];
+    loadSongFromBankAtIndex(selectedIndex);
+}
+
+
+function loadSongFromBankAtIndex(songIndex) {
+    const songData = songBank[songIndex];
     if (!songData) {
         updateStatus('Song not found.');
         return;
@@ -107,8 +114,11 @@ function loadSong() {
                 }
             }
             if (previousEntry) {
+                duration = previousEntry.duration || 1;
                 pause = previousEntry.pause || 0;
-                songData.notes[i].step = previousEntry.step + previousEntry.duration + pause;
+                songData.notes[i].step = previousEntry.step + duration + pause;
+            } else {
+                songData.notes[i].step = 1;
             }
         }
     }
@@ -129,5 +139,3 @@ function loadSong() {
     updatetrackControls();
     updateStatus(`✅ Loaded: ${songData.title}`);
 }
-
-

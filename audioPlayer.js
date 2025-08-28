@@ -50,13 +50,22 @@ const chordDefinitions = {
 };
 
 
-// Note frequencies (B2 to D5)
+// Note frequencies (C2 to D6 - expanded range including all second octaves)
 const noteFreqs = {
-    'B2': 123.47, 'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65,
-    'A3': 220.00, 'A#3': 233.08, 'B3': 246.94, 'C4': 261.63, 'C#4': 277.18,
-    'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99,
-    'G4': 392.00, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
-    'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25
+    // Second octave (C2 to B2)
+    'C2': 65.41, 'C#2': 69.30, 'D2': 73.42, 'D#2': 77.78, 'E2': 82.41, 'F2': 87.31, 'F#2': 92.50, 'G2': 98.00, 'G#2': 103.83, 'A2': 110.00, 'A#2': 116.54, 'B2': 123.47,
+    
+    // Third octave (C3 to B3)
+    'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
+    
+    // Fourth octave (C4 to B4)
+    'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+    
+    // Fifth octave (C5 to B5)
+    'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77,
+    
+    // Sixth octave (C6 to D6)
+    'C6': 1046.50, 'C#6': 1108.73, 'D6': 1174.66
 };
 
 
@@ -120,7 +129,9 @@ function playNote(note, trackVolume = null, duration = .25) {
 }
 
 // Function to play a chord (multiple notes simultaneously)
-function playChord(chordName, trackVolume = null, duration = 1) {
+function playChord(chordName, trackVolume = null, duration = 1, songKey = null) {
+    chordName = mapUnparsedDegreeToNote(chordName, songKey) || chordName;
+
     const chordNotes = chordDefinitions[chordName];
     if (!chordNotes) {
         console.warn(`Unknown chord: ${chordName}`);
@@ -143,11 +154,16 @@ function playChord(chordName, trackVolume = null, duration = 1) {
     });
 }
 
-function mapDegreeToNote(degree, songKey) {
-    if (key == "3[4]") {
-        return songKey + "4";
+function mapUnparsedDegreeToNote(degree, songKey) {
+    if (degree.includes("[")) {
+        const [degree, octave] = degree.split("[");
+        return mapKeyToNote(parseInt(degree), parseInt(octave), songKey);
     }
-    return key;
+    degree_val = parseInt(degree);
+    if (isNaN(degree_val)) {
+        return null;
+    }
+    return mapKeyToNote(degree_val, 3, songKey);
 }
 
 // Map scale degrees to actual notes based on the current key
@@ -158,11 +174,12 @@ function mapKeyToNote(scaleDegree, octave, songKey) {
     const minorScale = [0, 2, 3, 5, 7, 8, 10]; // Root, 2nd, 3rd, 4th, 5th, 6th, 7th
     
     // Get the root frequency for the key
-    const rootNote = songKey + octave; 
+    songKeyDropMinor = songKey.replace("m", "");
+    const rootNote = songKeyDropMinor + octave; 
     const rootFreq = noteFreqs[rootNote];
     
-    if (!rootFreq) {
-        console.error(`Invalid key: ${songKey}. Valid keys are: C, C#, D, D#, E, F, F#, G, G#, A, A#, B`);
+    if (!rootFreq) { 
+        console.error(`Invalid key: ${songKeyDropMinor}, root note: ${rootNote} not found in noteFreqs. Valid keys are: C, C#, D, D#, E, F, F#, G, G#, A, A#, B`);
         return null;
     }
     
@@ -232,7 +249,7 @@ function playNoteOrChord(noteObject, trackVolume = null, songKey = null) {
     const durationSeconds = (noteObject.duration || 1) * eighthNoteLength / 1000;
     
     if (noteObject.chord) {
-        playChord(noteObject.chord, trackVolume, durationSeconds);
+        playChord(noteObject.chord, trackVolume, durationSeconds, songKey);
     } else if (noteObject.note) {
         playNote(noteObject.note, trackVolume, durationSeconds);
     } else {

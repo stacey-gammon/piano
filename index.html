@@ -217,7 +217,7 @@
         
         <div class="controls">
             <select id="songSelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #00d2d3, #54a0ff);">
-                <option value="">Select a song from bank...</option>
+                <option value="3">Select a song from bank...</option>
             </select>
         </div>
 
@@ -554,8 +554,11 @@
                         loadSong();
                     }
                 });
+                songSelect.value = "3";
+                loadSongFromBankAtIndex(3);
             }
             
+
             updatetrackControls();
             updateStatus('Ready to record! Click Record and play some notes, or select a song from the bank.');
         }
