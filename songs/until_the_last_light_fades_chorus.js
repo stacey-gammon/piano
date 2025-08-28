@@ -7,7 +7,7 @@ const lastLightFadesChorus = {
         "track": "chords"
       },
       {
-        "note": "B3",
+        "degree": "1",
         "step": 1,
         "duration": 2,
         "lyrics": "so",
@@ -21,13 +21,13 @@ const lastLightFadesChorus = {
         "track": "harmony"
       },
       {
-        "note": "D#4",
+        "degree": "3",
         "duration": 4,
         "lyrics": "where",
         "track": "main"
       },
       {
-        "note": "B3",
+        "degree": "1",
         "duration": 4,
         "lyrics": "where",
         "track": "harmony"
@@ -491,6 +491,7 @@ const lastLightFadesChorus = {
       },
     ],
     "tempo": 100,
+    "key": "B",
     "title": "Until the last light fades [Chorus Only]",
     "tracks": {
       "main": {

@@ -33,6 +33,16 @@ const chordDefinitions = {
 };
 
 
+// Note frequencies (B2 to D5)
+const noteFreqs = {
+    'B2': 123.47, 'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65,
+    'A3': 220.00, 'A#3': 233.08, 'B3': 246.94, 'C4': 261.63, 'C#4': 277.18,
+    'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99,
+    'G4': 392.00, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+    'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25
+};
+
+
 // Consolidated playNote function that handles both regular notes and volume-based playback
 function playNote(note, trackVolume = null, duration = .25) {
     const freq = noteFreqs[note];
@@ -112,22 +122,100 @@ function playChord(chordName, trackVolume = null, duration = 1) {
     });
 }
 
+function mapDegreeToNote(degree, songKey) {
+    if (key == "3[4]") {
+        return songKey + "4";
+    }
+    return key;
+}
+
+// Map scale degrees to actual notes based on the current key
+function mapKeyToNote(scaleDegree, octave, songKey) {
+    // Define the major scale intervals (frequency ratios from root)
+    // Each number represents how many semitones above the root
+    const majorScale = [0, 2, 4, 5, 7, 9, 11]; // Root, 2nd, 3rd, 4th, 5th, 6th, 7th
+    const minorScale = [0, 2, 3, 5, 7, 8, 10]; // Root, 2nd, 3rd, 4th, 5th, 6th, 7th
+    
+    // Get the root frequency for the key
+    const rootNote = songKey + octave; 
+    const rootFreq = noteFreqs[rootNote];
+    
+    if (!rootFreq) {
+        console.error(`Invalid key: ${songKey}. Valid keys are: C, C#, D, D#, E, F, F#, G, G#, A, A#, B`);
+        return null;
+    }
+    
+    // Validate scale degree (1-7)
+    if (scaleDegree < 1 || scaleDegree > 7) {
+        console.error(`Invalid scale degree: ${scaleDegree}. Must be 1-7.`);
+        return null;
+    }
+    
+    // Calculate the frequency for this scale degree
+    // Each semitone is a factor of 2^(1/12)
+    let semitones = songKey.includes("m") ? minorScale[scaleDegree - 1] : majorScale[scaleDegree - 1];
+
+    const frequency = rootFreq * Math.pow(2, semitones / 12);
+    
+    // Find the closest note in our noteFreqs table
+    let closestNote = null;
+    let smallestDiff = Infinity;
+    
+    for (const [note, freq] of Object.entries(noteFreqs)) {
+        const diff = Math.abs(freq - frequency);
+        if (diff < smallestDiff) {
+            smallestDiff = diff;
+            closestNote = note;
+        }
+    }
+    
+    return closestNote;
+}
+
 // Function to play a note or chord based on the note object
-function playNoteOrChord(noteObject, trackVolume = null) {
-    // Get duration from the note object, default to 1 if not specified
-    const duration = noteObject.duration || 1;
-    // duration in steps
-    const steps = noteObject.duration || 1;
-
-    // convert steps to seconds
-    const durationSeconds = (steps * eighthNoteLength) / 1000;
-
+function playNoteOrChord(noteObject, trackVolume = null, songKey = null) {
+    // Check if this is a scale degree mapping (new feature)
+    if (noteObject.degree !== undefined) {
+        // Parse the key field: can be "1", "1[5]", "3[2]", etc.
+        const keyMatch = noteObject.degree.toString().match(/^(\d+)(?:\[(\d+)\])?$/);
+        
+        if (keyMatch) {
+            const scaleDegree = parseInt(keyMatch[1]);
+            const octave = keyMatch[2] ? parseInt(keyMatch[2]) : 3; // Default to octave 3-4
+            
+            if (!songKey) {
+                console.warn('Song key needs to be defined for scale degree mapping');
+                return;
+            }
+            
+            // Map the scale degree to an actual note
+            const mappedNote = mapKeyToNote(scaleDegree, octave, songKey);
+            
+            if (mappedNote) {
+                // Adjust octave if specified
+                let finalNote = mappedNote;                
+                console.log(`Mapped key ${noteObject.degree} to note ${mappedNote} in key ${songKey} for octave ${octave}`);
+                // Play the mapped note
+                const durationSeconds = (noteObject.duration || 1) * eighthNoteLength / 1000;
+                playNote(mappedNote, trackVolume, durationSeconds);
+            } else {
+                console.error(`Failed to map key ${noteObject.key} to a note`);
+            }
+        } else {
+            console.error(`Invalid key format: ${noteObject.key}. Expected format: "1", "1[5]", "3[2]", etc.`);
+        }
+        return;
+    }
+    
+    // Existing logic for notes and chords
+    const durationSeconds = (noteObject.duration || 1) * eighthNoteLength / 1000;
+    
     if (noteObject.chord) {
         playChord(noteObject.chord, trackVolume, durationSeconds);
     } else if (noteObject.note) {
         playNote(noteObject.note, trackVolume, durationSeconds);
     } else {
-        console.warn('Note object must have either "note" or "chord" field:', noteObject);
+        console.warn('Note object has neither note, chord, nor key field:', noteObject);
     }
 }
 

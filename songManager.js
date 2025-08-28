@@ -122,6 +122,7 @@ function loadSong() {
     // Also load into the playback system
     recordedNotes = songData.notes || [];
     tempo = songData.tempo || 120;
+    songKey = songData.key || "Unknown";
     eighthNoteLength = (60 / tempo / 2) * 1000;
     tracks = songData.tracks || { "1": { volume: 5 } };
     

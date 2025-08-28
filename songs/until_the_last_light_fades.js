@@ -1,4 +1,4 @@
-const lastLightFades = {
+const lastLightFadesV1 = {
     "notes": [
       {
         "chord": "B",
@@ -7,7 +7,7 @@ const lastLightFades = {
         "track": "chords"
       },
       {
-        "note": "D#4",
+        "key": "3",
         "step": 1,
         "duration": 1,
         "lyrics": "born",
@@ -242,68 +242,11 @@ const lastLightFades = {
         "duration": 4,
         "lyrics": "fear",
         "track": "1"
-      },
-      {
-        "chord": "B",
-        "step": 63,
-        "duration": 8,
-        "track": "chords"
-      },
-      {
-        "note": "B3",
-        "step": 63,
-        "duration": 2,
-        "lyrics": "so",
-        "track": "1"
-      },
-      {
-        "note": "F#3",
-        "step": 63,
-        "duration": 2,
-        "track": "2"
-      },
-      {
-        "note": "D#4",
-        "step": 65,
-        "duration": 4,
-        "lyrics": "where",
-        "track": "1"
-      },
-      {
-        "note": "B3",
-        "step": 66,
-        "duration": 4,
-        "track": "2"
-      },
-      {
-        "note": "F#4",
-        "step": 68,
-        "duration": 2,
-        "lyrics": "oh",
-        "track": "1"
-      },
-      {
-        "note": "D#3",
-        "step": 60,
-        "duration": 2,
-        "track": "2"
-      },
-      {
-        "note": "F#4",
-        "step": 62,
-        "duration": 4,
-        "lyrics": "where",
-        "track": "1"
-      },
-      {
-        "note": "B3",
-        "step": 62,
-        "duration": 4,
-        "track": "2"
-      },
+      }
     ],
     "tempo": 120,
-    "title": "Until the last light fades",
+    "key": "B",
+    "title": "Until the last light fades [Verse One]",
     "tracks": {
       "1": {
         "volume": 5
@@ -319,5 +262,5 @@ const lastLightFades = {
 
 // Register this song with the main application
 if (typeof registerSong === 'function') {
-    registerSong(lastLightFades);
+    registerSong(lastLightFadesV1);
   }
