@@ -551,15 +551,27 @@
             console.log('Track IDs found:', trackIds);
             
             container.innerHTML = `
-                <h4>Track Volume Controls (0=off, 1=quiet, 5=normal)</h4>
+                <h4>Track Controls</h4>
                 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
                     ${trackIds.map(trackId => `
-                        <div style="display: flex; align-items: center; gap: 5px;">
-                            <label>${trackId}</label>
-                            <input type="range" id="volume_${trackId}" min="0" max="5" value="${tracks[trackId].volume}" 
-                                   onchange="updatetrackVolume('${trackId}', this.value)"
-                                   style="width: 100px;">
-                            <span id="volumeLabel_${trackId}">${tracks[trackId].volume}</span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; background: rgba(255,255,255,0.1);">
+                            <h5 style="margin: 0; color: white;">${trackId}</h5>
+                            
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <label style="font-size: 12px;">Volume:</label>
+                                <input type="range" id="volume_${trackId}" min="0" max="5" value="${tracks[trackId].volume || 5}" 
+                                       onchange="updatetrackVolume('${trackId}', this.value)"
+                                       style="width: 80px;">
+                                <span id="volumeLabel_${trackId}" style="min-width: 20px; text-align: center;">${tracks[trackId].volume || 5}</span>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <label style="font-size: 12px;">Octave:</label>
+                                <input type="range" id="octave_${trackId}" min="2" max="6" value="${tracks[trackId].default_octave || 4}" 
+                                       onchange="updatetrackOctave('${trackId}', this.value)"
+                                       style="width: 80px;">
+                                <span id="octaveLabel_${trackId}" style="min-width: 20px; text-align: center;">${tracks[trackId].default_octave || 4}</span>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
@@ -578,6 +590,21 @@
                 tracks[trackId].volume = parseInt(volume);
                 document.getElementById(`volumeLabel_${trackId}`).textContent = volume;
                 console.log('Volume updated successfully');
+            } else {
+                console.error(`Track ${trackId} not found in tracks object`);
+            }
+        }
+
+        // Update track octave
+        function updatetrackOctave(trackId, octave) {
+            console.log('updatetrackOctave called with:', trackId, octave);
+            console.log('Current tracks object:', tracks);
+            console.log('Track exists:', tracks[trackId]);
+
+            if (tracks[trackId]) {
+                tracks[trackId].default_octave = parseInt(octave);
+                document.getElementById(`octaveLabel_${trackId}`).textContent = octave;
+                console.log('Octave updated successfully');
             } else {
                 console.error(`Track ${trackId} not found in tracks object`);
             }

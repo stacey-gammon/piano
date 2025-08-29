@@ -136,6 +136,13 @@ function loadSongFromBankAtIndex(songIndex) {
     tracks = songData.tracks || { "1": { volume: 5 } };
     defaultOctave = songData.default_octave || 4;
     
+    // Ensure each track has a default_octave property
+    Object.keys(tracks).forEach(trackId => {
+        if (tracks[trackId].default_octave === undefined) {
+            tracks[trackId].default_octave = defaultOctave;
+        }
+    });
+    
     updatetrackControls();
     
     // Update the key selector to show the current song's key

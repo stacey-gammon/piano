@@ -88,6 +88,18 @@ const madWorldChorus = {
         "lyrics": "sad",
         "track": "main"
       },
+      {
+        "degree": "1[+1]",
+        "duration": 4,
+        "lyrics": "harmony",
+        "track": "harmony"
+      },
+      {
+        "degree": "3[-1]",
+        "duration": 2,
+        "lyrics": "low",
+        "track": "main"
+      }
     ],
     "tempo": 100,
     "key": "Bm",
@@ -95,13 +107,16 @@ const madWorldChorus = {
     "title": "Mad World [Chorus]",
     "tracks": {
       "main": {
-        "volume": 3
+        "volume": 3,
+        "default_octave": 4
       },
       "harmony": {
-        "volume": 3
+        "volume": 3,
+        "default_octave": 5
       },
       "chords": {
-        "volume": 0
+        "volume": 0,
+        "default_octave": 3
       }
     }
   }

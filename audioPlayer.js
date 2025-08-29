@@ -192,7 +192,7 @@ function playChord(chordName, trackVolume = null, duration = 1, songKey = null) 
     });
 }
 
-function mapUnparsedDegreeToNote(degree, songKey) {
+function mapUnparsedDegreeToNote(degree, songKey, trackId = null) {
     let raiseSemitone = 0;
 
     // Check for raised degree
@@ -203,8 +203,35 @@ function mapUnparsedDegreeToNote(degree, songKey) {
 
     // Check for octave specification
     if (degree.includes("[")) {
-        const [deg, octave] = degree.split("[");
-        return mapDegreeToNote(parseInt(deg), parseInt(octave), songKey, raiseSemitone);
+        const [deg, octaveSpec] = degree.split("[");
+        const degree_val = parseInt(deg);
+        
+        if (isNaN(degree_val)) {
+            return null;
+        }
+
+        // Handle relative octave notation: +1, -1, or absolute number
+        let octave;
+        if (octaveSpec.startsWith("+") || octaveSpec.startsWith("-")) {
+            // Relative octave: +1 means +1 from default, -1 means -1 from default
+            const relativeOffset = parseInt(octaveSpec);
+            let baseOctave;
+            
+            if (trackId && tracks[trackId] && tracks[trackId].default_octave !== undefined) {
+                // Use track-specific default octave
+                baseOctave = tracks[trackId].default_octave;
+            } else {
+                // Fall back to song default octave
+                baseOctave = defaultOctave;
+            }
+            
+            octave = baseOctave + relativeOffset;
+        } else {
+            // Absolute octave number
+            octave = parseInt(octaveSpec);
+        }
+        
+        return mapDegreeToNote(degree_val, octave, songKey, raiseSemitone);
     }
 
     const degree_val = parseInt(degree);
@@ -212,7 +239,15 @@ function mapUnparsedDegreeToNote(degree, songKey) {
         return null;
     }
 
-    return mapDegreeToNote(degree_val, defaultOctave, songKey, raiseSemitone);
+    // Use track-specific default octave if available, otherwise fall back to song default
+    let octave;
+    if (trackId && tracks[trackId] && tracks[trackId].default_octave !== undefined) {
+        octave = tracks[trackId].default_octave;
+    } else {
+        octave = defaultOctave;
+    }
+
+    return mapDegreeToNote(degree_val, octave, songKey, raiseSemitone);
 }
 
 // Map scale degrees to actual notes based on the current key
@@ -262,10 +297,10 @@ function playNoteOrChord(noteObject, trackVolume = null, songKey = null) {
     // Check if this is a scale degree mapping (new feature)
     if (noteObject.degree !== undefined) {
         // Map the scale degree to an actual note
-        mappedNote = mapUnparsedDegreeToNote(noteObject.degree, songKey);
+        mappedNote = mapUnparsedDegreeToNote(noteObject.degree, songKey, noteObject.track);
         
         if (mappedNote === null) {
-            console.error(`Failed to map key ${noteObject.key} to a note`);
+            console.error(`Failed to map degree ${noteObject.degree} to a note`);
             return;
         }
     }
@@ -275,7 +310,7 @@ function playNoteOrChord(noteObject, trackVolume = null, songKey = null) {
     } else if (noteObject.note || mappedNote) {
         playNote(noteObject.note || mappedNote, trackVolume, durationSeconds);
     } else {
-        console.warn('Note object has neither note, chord, nor key field:', noteObject);
+        console.warn('Note object has neither note, chord, nor degree field:', noteObject);
     }
 }
 

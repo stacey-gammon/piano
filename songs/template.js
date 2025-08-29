@@ -4,17 +4,33 @@
 const songData = {
     "notes": [
         {
-            "note": "C4",
+            "degree": "1",
             "step": 1,
             "lyrics": "Example",
-            "track": "1",
+            "track": "main",
+            "duration": 1
+        },
+        {
+            "degree": "1[+1]",
+            "step": 2,
+            "lyrics": "Higher",
+            "track": "harmony",
             "duration": 1
         }
     ],
     "tempo": 120,
+    "key": "C",
+    "default_octave": 4,
     "title": "Song Title",
     "tracks": {
-        "1": { "volume": 5 }
+        "main": { 
+            "volume": 5,
+            "default_octave": 4
+        },
+        "harmony": { 
+            "volume": 3,
+            "default_octave": 5
+        }
     }
 };
 
