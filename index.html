@@ -37,6 +37,19 @@
             gap: 15px;
             margin: 20px 0;
             flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .key-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .key-selector label {
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         .btn {
@@ -259,11 +272,22 @@
             <select id="songSelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #00d2d3, #54a0ff);">
                 <option value="3">Select a song from bank...</option>
             </select>
+            <div class="key-selector">
+                <label>Key:</label>
+                <select id="keySelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #ff9ff3, #f368e0);">
+                    <option value="">Select key...</option>
+                </select>
+            </div>
         </div>
 
         <div class="recording-status" id="status"></div>
         <div class="playback-indicator" id="playback-status"></div>
         <div class="playback-indicator" id="lyrics-display" style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); min-height: 35px;"></div>
+        
+        <div style="text-align: center; margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px;">
+            <strong>🎵 Key Transposition:</strong> Change the key selector above to automatically transpose degree-based notes and chords. 
+            Songs using "degree" instead of "note" will automatically play in the new key!
+        </div>
 
         <div class="track-controls" id="trackControls" style="margin: 20px 0; text-align: center;">
             <!-- track volume controls will be added here dynamically -->
@@ -583,7 +607,10 @@
         }
         // Function to highlight keys in the current song's key
         function highlightKeysInKey() {
+            console.log('highlightKeysInKey called with songKey:', songKey);
+            
             if (!songKey || songKey === "Unknown") {
+                console.log('No valid songKey, clearing highlights');
                 // Clear all highlights if no key
                 clearKeyHighlights();
                 return;
@@ -591,6 +618,7 @@
             
             // Get notes in the current key
             const keyNotes = getNotesInKey(songKey);
+            console.log('Key notes returned:', keyNotes);
             
             // Clear previous highlights
             clearKeyHighlights();
@@ -607,6 +635,10 @@
                     degreeIndicator.className = 'degree-indicator';
                     degreeIndicator.textContent = degree;
                     keyElement.appendChild(degreeIndicator);
+                    
+                    console.log(`Highlighted key ${note} with degree ${degree}`);
+                } else {
+                    console.log(`Could not find key element for note: ${note}`);
                 }
             });
             
@@ -623,6 +655,31 @@
                     existingIndicator.remove();
                 }
             });
+        }
+        
+        // Initialize key selector with all available keys
+        function initializeKeySelector() {
+            const keySelect = document.getElementById('keySelect');
+            if (!keySelect) {
+                console.log('Key selector element not found during initialization');
+                return;
+            }
+            
+            const keys = [
+                'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B',
+                'Cm', 'C#m', 'Dm', 'D#m', 'Em', 'Fm', 'F#m', 'Gm', 'G#m', 'Am', 'A#m', 'Bm'
+            ];
+            
+            keySelect.innerHTML = '<option value="">Select key...</option>';
+            keys.forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = key;
+                keySelect.appendChild(option);
+            });
+            
+            console.log(`Initialized key selector with ${keys.length} keys`);
+
         }
 
         // Initialize
@@ -642,6 +699,30 @@
                 });
                 songSelect.value = "3";
                 loadSongFromBankAtIndex(3);
+            }
+            
+            // Initialize key selector
+            console.log('Initializing key selector...');
+            initializeKeySelector();
+            highlightKeysInKey();
+            console.log('Key selector initialized');
+            
+            // Add event listener to key select dropdown
+            const keySelect = document.getElementById('keySelect');
+            if (keySelect) {
+                console.log('Key selector found, adding event listener');
+                keySelect.addEventListener('change', function() {
+                    if (this.value !== '') {
+                        songKey = this.value;
+                        updateStatus(`✅ Changed key to ${songKey} - degree-based notes will automatically transpose!`);
+                        // Re-highlight keys for the new key
+                        if (typeof highlightKeysInKey === 'function') {
+                            highlightKeysInKey();
+                        }
+                    }
+                });
+            } else {
+                console.log('Key selector not found during initialization');
             }
             
 
@@ -667,10 +748,16 @@
                     const songData = JSON.parse(value);
                     recordedNotes = songData.notes || [];
                     tempo = songData.tempo || 120;
+                    songKey = songData.key || "Unknown";
                     eighthNoteLength = (60 / tempo / 2) * 1000;
                     tracks = songData.tracks || { "1": { volume: 5 } };
                     updatetrackControls();
                     updateStatus('✅ Song data updated from textarea');
+                    
+                    // Update key selector to match the new song data
+                    if (typeof updateKeySelector === 'function') {
+                        updateKeySelector(songData.key);
+                    }
                     
                     // Highlight keys in the current song's key
                     highlightKeysInKey();

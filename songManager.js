@@ -140,8 +140,26 @@ function loadSongFromBankAtIndex(songIndex) {
     updatetrackControls();
     updateStatus(`✅ Loaded: ${songData.title}`);
     
-    // Highlight keys in the current song's key
-    if (typeof highlightKeysInKey === 'function') {
-        highlightKeysInKey();
+    // Update the key selector to show the current song's key
+    // Use a small delay to ensure the key selector is initialized
+    setTimeout(() => {
+        updateKeySelector(songData.key);
+    }, 100);
+}
+
+// Function to update the key selector to show the current song's key
+function updateKeySelector(currentKey) {
+    const keySelect = document.getElementById('keySelect');
+    if (keySelect && currentKey && currentKey !== "Unknown") {
+        // Find and select the current key
+        for (let i = 0; i < keySelect.options.length; i++) {
+            if (keySelect.options[i].value === currentKey) {
+                keySelect.selectedIndex = i;
+                console.log(`Set key selector to: ${currentKey}`);
+                break;
+            }
+        }
+    } else {
+        console.log(`Could not set key selector. currentKey: ${currentKey}, keySelect: ${!!keySelect}`);
     }
 }
