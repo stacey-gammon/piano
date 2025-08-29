@@ -281,11 +281,6 @@
         </div>
 
         <div class="playback-indicator" id="lyrics-display" style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); min-height: 35px;"></div>
-        
-        <div style="text-align: center; margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px;">
-            <strong>🎵 Key Transposition:</strong> Change the key selector above to automatically transpose degree-based notes and chords. 
-            Songs using "degree" instead of "note" will automatically play in the new key!
-        </div>
 
         <div class="track-controls" id="trackControls" style="margin: 20px 0; text-align: center;">
             <!-- track volume controls will be added here dynamically -->
@@ -403,12 +398,10 @@
             isRecording = true;
             recordedNotes = [];
             recordingStartTime = Date.now();
-            updateStatus('🔴 Recording...');
         }
 
         function stopRecording() {
             isRecording = false;
-            updateStatus(`✅ Recorded ${recordedNotes.length} notes`);
         }
 
         function clearRecording() {
@@ -419,7 +412,6 @@
                 clearInterval(playbackInterval);
                 playbackInterval = null;
             }
-            updateStatus('Cleared');
             document.getElementById('songData').value = '';
         }
 
@@ -441,11 +433,9 @@
                         // Highlight keys in the current song's key
                         highlightKeysInKey();
                     } catch (e) {
-                        updateStatus('❌ Invalid song data in textarea');
                         return;
                     }
                 } else {
-                    updateStatus('No notes recorded!');
                     return;
                 }
             }
@@ -544,10 +534,10 @@
                 if (lyricsAtStep) {
                     displayLyricsWithContext(currentStep, lyricsAtStep);
                     // Clear after a moment
-                    setTimeout(() => {
-                        const lyricsDisplay = document.getElementById('lyrics-display');
-                        lyricsDisplay.innerHTML = '';
-                    }, eighthNoteLength * 0.8);
+                    // setTimeout(() => {
+                    //     const lyricsDisplay = document.getElementById('lyrics-display');
+                    //     lyricsDisplay.innerHTML = '';
+                    // }, eighthNoteLength * 0.8);
                 }
                 
                 // Play each note or chord with appropriate volume
@@ -659,11 +649,6 @@
             }
         }
 
-        // Status updates
-        function updateStatus(message) {
-            document.getElementById('status').textContent = message;
-        }
-
         // function updatePlaybackStatus(message) {
         //     document.getElementById('playback-status').textContent = message;
             
@@ -727,6 +712,12 @@
             });
         }
         
+
+        // Status updates
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
         // Initialize key selector with all available keys
         function initializeKeySelector() {
             const keySelect = document.getElementById('keySelect');
@@ -784,7 +775,6 @@
                 keySelect.addEventListener('change', function() {
                     if (this.value !== '') {
                         songKey = this.value;
-                        updateStatus(`✅ Changed key to ${songKey} - degree-based notes will automatically transpose!`);
                         // Re-highlight keys for the new key
                         if (typeof highlightKeysInKey === 'function') {
                             highlightKeysInKey();
@@ -810,7 +800,6 @@
                 const value = songDataTextarea.value.trim();
                 if (!value) {
                     recordedNotes = [];
-                    updateStatus('Song data cleared');
                     return;
                 }
                 try {
@@ -821,7 +810,6 @@
                     eighthNoteLength = (60 / tempo / 2) * 1000;
                     tracks = songData.tracks || { "1": { volume: 5 } };
                     updatetrackControls();
-                    updateStatus('✅ Song data updated from textarea');
                     
                     // Update key selector to match the new song data
                     if (typeof updateKeySelector === 'function') {

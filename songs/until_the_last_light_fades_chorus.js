@@ -284,7 +284,7 @@ const lastLightFadesChorus = {
       {
         "chord": "B",
         "duration": 5,
-        "lyrics": "[chord]li-",
+        "lyrics": "li-",
         "track": "chords"
       },
       {
@@ -326,7 +326,7 @@ const lastLightFadesChorus = {
       {
         "chord": "G#m",
         "duration": 4,
-        "lyrics": "[c]lived",
+        "lyrics": "lived",
         "track": "chords"
       },
       {
@@ -356,7 +356,7 @@ const lastLightFadesChorus = {
       {
         "chord": "B",
         "duration": 4,
-        "lyrics": "[chord]ey-",
+        "lyrics": "ey-",
         "track": "chords"
       },
       {
@@ -496,13 +496,16 @@ const lastLightFadesChorus = {
     ],
     "tempo": 100,
     "key": "B",
+    "default_octave": 3,
     "title": "Until the last light fades [Chorus Only]",
     "tracks": {
       "main": {
-        "volume": 3
+        "volume": 3,
+        "default_octave": 3
       },
       "harmony": {
-        "volume": 3
+        "volume": 3,
+        "default_octave": 3
       },
       "chords": {
         "volume": 0
