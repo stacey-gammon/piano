@@ -224,6 +224,76 @@
             background: linear-gradient(to bottom, #2f4f4f, #1a1a1a);
         }
 
+        /* Track-specific key highlighting - dynamic classes for up to 4 tracks */
+        .key-track-1 {
+            box-shadow: 0 0 15px #19e70a, inset 0 0 10px rgba(255, 107, 107, 0.3);
+            border-color: #19e70a !important;
+        }
+
+        .key-track-2 {
+            box-shadow: 0 0 15px #ea1dce, inset 0 0 10px rgba(78, 205, 196, 0.3);
+            border-color: #ea1dce !important;
+        }
+
+        .key-track-3 {
+            box-shadow: 0 0 15px #45b7d1, inset 0 0 10px rgba(69, 183, 209, 0.3);
+            border-color: #45b7d1 !important;
+        }
+
+        .key-track-4 {
+            box-shadow: 0 0 15px #f39c12, inset 0 0 10px rgba(243, 156, 18, 0.3);
+            border-color: #f39c12 !important;
+        }
+
+        .white-key.key-track-1 {
+            background: linear-gradient(to bottom, #ffe6e6, #fff0f0);
+        }
+
+        .black-key.key-track-1 {
+            background: linear-gradient(to bottom, #4a2f2f, #2a1a1a);
+        }
+
+        .white-key.key-track-2 {
+            background: linear-gradient(to bottom, #e6fff9, #f0fffd);
+        }
+
+        .black-key.key-track-2 {
+            background: linear-gradient(to bottom, #2f4a4a, #1a2a2a);
+        }
+
+        .white-key.key-track-3 {
+            background: linear-gradient(to bottom, #e6f4ff, #f0f9ff);
+        }
+
+        .black-key.key-track-3 {
+            background: linear-gradient(to bottom, #2f3f4a, #1a232a);
+        }
+
+        .white-key.key-track-4 {
+            background: linear-gradient(to bottom, #fff8e6, #fffbf0);
+        }
+
+        .black-key.key-track-4 {
+            background: linear-gradient(to bottom, #4a3f2f, #2a231a);
+        }
+
+        /* Track outline colors - dynamic classes for up to 4 tracks */
+        .track-outline-1 {
+            border: 2px solid #19e70a !important;
+        }
+
+        .track-outline-2 {
+            border: 2px solid #ea1dce !important;
+        }
+
+        .track-outline-3 {
+            border: 2px solid #45b7d1 !important;
+        }
+
+        .track-outline-4 {
+            border: 2px solid #f39c12 !important;
+        }
+
         .degree-indicator {
             position: absolute;
             top: 5px;
@@ -540,6 +610,9 @@
                     // }, eighthNoteLength * 0.8);
                 }
                 
+                // Highlight keys based on which track is playing them
+                highlightKeysByTrack();
+                
                 // Play each note or chord with appropriate volume
                 notesToPlay.forEach(n => {
                     const trackVolume = tracks[n.track] ? tracks[n.track].volume : 5;
@@ -560,6 +633,9 @@
                 clearInterval(playbackInterval);
                 playbackInterval = null;
             }
+            
+            // Clear track highlights when stopping
+            clearKeyHighlights();
             
             // Update button text
             const playButton = document.querySelector('.btn-play');
@@ -592,8 +668,13 @@
             container.innerHTML = `
                 <h4>Track Controls</h4>
                 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-                    ${trackIds.map(trackId => `
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; background: rgba(255,255,255,0.1);">
+                    ${trackIds.map((trackId, index) => {
+                        let trackNumber = index + 1;
+                        if (trackId === "chords") {
+                            trackNumber = 0;
+                        }
+                        return `
+                        <div class="track-outline-${trackNumber}" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; background: rgba(255,255,255,0.1);">
                             <h5 style="margin: 0; color: white;">${trackId}</h5>
                             
                             <div style="display: flex; align-items: center; gap: 5px;">
@@ -612,7 +693,8 @@
                                 <span id="octaveLabel_${trackId}" style="min-width: 20px; text-align: center;">${tracks[trackId].default_octave || 4}</span>
                             </div>
                         </div>
-                    `).join('')}
+                    `;
+                    }).join('')}
                 </div>
             `;
             
@@ -705,9 +787,76 @@
             const allKeys = document.querySelectorAll('.key');
             allKeys.forEach(key => {
                 key.classList.remove('key-in-scale');
+                // Remove all track highlighting classes (1-4)
+                for (let i = 1; i <= 4; i++) {
+                    key.classList.remove(`key-track-${i}`);
+                }
                 const existingIndicator = key.querySelector('.degree-indicator');
                 if (existingIndicator) {
                     existingIndicator.remove();
+                }
+            });
+        }
+
+        // Function to highlight keys based on which track is playing them
+        function highlightKeysByTrack() {
+            if (!recordedNotes || !recordedNotes.length) return;
+            
+            // Clear previous track highlights
+            const allKeys = document.querySelectorAll('.key');
+            allKeys.forEach(key => {
+                for (let i = 1; i <= 4; i++) {
+                    key.classList.remove(`key-track-${i}`);
+                }
+            });
+            
+            // Get current step and find notes being played
+            const notesAtCurrentStep = recordedNotes.filter(n => n.step === currentStep);
+            
+            // Create a map of track IDs to track numbers (1-4)
+            const trackIdToNumber = {};
+            const trackIds = Object.keys(tracks).sort();
+            trackIds.forEach((trackId, index) => {
+                if (index < 4) { // Support up to 4 tracks
+                    if (trackId === "chords") {
+                        trackIdToNumber[trackId] = 0;
+                    } else {
+                        trackIdToNumber[trackId] = index + 1;
+                    }
+                }
+            });
+            
+            // Highlight keys for each track
+            notesAtCurrentStep.forEach(note => {
+                const trackNumber = trackIdToNumber[note.track];
+                if (trackNumber) {
+                    let noteToHighlight = null;
+                    
+                    if (note.degree) {
+                        // Map scale degree to actual note
+                        noteToHighlight = mapUnparsedDegreeToNote(note.degree, songKey, note.track);
+                    } else if (note.note) {
+                        noteToHighlight = note.note;
+                    } else if (note.chord) {
+                        // For chords, we'll highlight the root note
+                        if (/\d+/.test(note.chord)) {
+                            const degree = parseInt(note.chord);
+                            noteToHighlight = mapUnparsedDegreeToNote(degree, songKey, note.track);
+                        } else {
+                            // For named chords, use the first note
+                            const chordNotes = chordDefinitions[note.chord];
+                            if (chordNotes && chordNotes.length > 0) {
+                                noteToHighlight = chordNotes[0];
+                            }
+                        }
+                    }
+                    
+                    if (noteToHighlight) {
+                        const keyElement = document.querySelector(`[data-note="${noteToHighlight}"]`);
+                        if (keyElement) {
+                            keyElement.classList.add(`key-track-${trackNumber}`);
+                        }
+                    }
                 }
             });
         }

@@ -15,7 +15,7 @@ const wayfaringStranger = {
         "track": "main"
       },
       {
-        "degree": "3",
+        "degree": "3[+1]",
         "step": 1,
         "duration": 2,
         "lyrics": "I'm",
@@ -28,7 +28,7 @@ const wayfaringStranger = {
         "track": "main"
       },
       {
-        "degree": "3",
+        "degree": "3[+1]",
         "duration": 2,
         "lyrics": "just",
         "track": "harmony"
@@ -63,10 +63,12 @@ const wayfaringStranger = {
     "title": "Wayfaring Stranger [Verse]",
     "tracks": {
       "main": {
-        "volume": 3
+        "volume": 3,
+        "default_octave": 3
       },
       "harmony": {
-        "volume": 3
+        "volume": 3,
+        "default_octave": 3
       },
       "chords": {
         "volume": 0
