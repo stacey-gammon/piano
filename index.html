@@ -325,10 +325,8 @@
         <h1>🎹 Piano Practice App</h1>
         
         <div class="controls">
-            <button class="btn btn-record" onclick="startRecording()">● Record</button>
-            <button class="btn btn-stop" onclick="stopRecording()">⏹ Stop</button>
-            <button class="btn btn-play" onclick="togglePlayback()">▶ Play Loop</button>
-            <button class="btn btn-clear" onclick="clearRecording()">🗑 Clear</button>
+            <button class="btn btn-play" onclick="togglePlayback()">▶ Play</button>
+            <button class="btn btn-clear" onclick="stopRecording()">Stop</button>
         </div>
 
         <div class="tempo-control">
@@ -400,6 +398,7 @@
         let isPlaying = false;
         let playbackInterval = null;
         let currentStep = 0;
+        let wasPlaying = false; // Track if we were playing before
 
         // Generate piano keys
         function createPiano() {
@@ -472,12 +471,15 @@
 
         function stopRecording() {
             isRecording = false;
+            stopPlayback();
+            currentStep = 0;
         }
 
         function clearRecording() {
             recordedNotes = [];
             isRecording = false;
             isPlaying = false;
+            wasPlaying = false; // Reset wasPlaying when clearing
             if (playbackInterval) {
                 clearInterval(playbackInterval);
                 playbackInterval = null;
@@ -515,6 +517,14 @@
             } else {
                 startPlayback();
             }
+        }
+
+
+        function restartRecording() {
+            stopPlayback();
+            currentStep = 0;
+            wasPlaying = false; // Reset wasPlaying when restarting
+            startPlayback();
         }
 
         // Function to get all lyrics with their step numbers
@@ -572,8 +582,9 @@
                 audioContext.resume();
             }
             
+            const playButton = document.querySelector('.btn-play');
+            playButton.textContent = '⏸ Pause';
             isPlaying = true;
-            currentStep = 0;
             
             // Find the natural end of song
             const naturalMaxStep = Math.max(...recordedNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
@@ -586,7 +597,10 @@
             const loopStart = loopStartInput === "" ? 0 : parseInt(loopStartInput);
             const loopEnd = loopEndInput === "" ? naturalMaxStep : parseInt(loopEndInput);
 
-            currentStep = loopStart;
+            // Only reset currentStep if we weren't playing before or if we're at the end
+            if (!wasPlaying || currentStep >= loopEnd) {
+                currentStep = loopStart;
+            }
 
             
             playbackInterval = setInterval(() => {
@@ -603,11 +617,6 @@
                 // Display lyrics with context
                 if (lyricsAtStep) {
                     displayLyricsWithContext(currentStep, lyricsAtStep);
-                    // Clear after a moment
-                    // setTimeout(() => {
-                    //     const lyricsDisplay = document.getElementById('lyrics-display');
-                    //     lyricsDisplay.innerHTML = '';
-                    // }, eighthNoteLength * 0.8);
                 }
                 
                 // Highlight keys based on which track is playing them
@@ -630,6 +639,7 @@
         }
 
         function stopPlayback() {
+            wasPlaying = true; // Mark that we were playing
             isPlaying = false;
             stopAllOscillators();
             if (playbackInterval) {
@@ -637,14 +647,9 @@
                 playbackInterval = null;
             }
             
-            // Clear track highlights when stopping
-            // clearKeyHighlights();
-            
-
-            
             // Update button text
             const playButton = document.querySelector('.btn-play');
-            playButton.textContent = '▶ Play Loop';
+            playButton.textContent = '▶ Play';
         }
 
         // Tempo control
@@ -739,17 +744,6 @@
             }
         }
 
-        // function updatePlaybackStatus(message) {
-        //     document.getElementById('playback-status').textContent = message;
-            
-        //     // Update play button text
-        //     const playButton = document.querySelector('.btn-play');
-        //     if (isPlaying) {
-        //         playButton.textContent = '⏸ Stop Loop';
-        //     } else {
-        //         playButton.textContent = '▶ Play Loop';
-        //     }
-        // }
         // Function to highlight keys in the current song's key
         function highlightKeysInKey() {
             console.log('highlightKeysInKey called with songKey:', songKey);
@@ -1059,6 +1053,7 @@
                     songKey = songData.key || "Unknown";
                     eighthNoteLength = (60 / tempo / 2) * 1000;
                     tracks = songData.tracks || { "1": { volume: 5 } };
+                    wasPlaying = false; // Reset wasPlaying when loading new song data
                     updatetrackControls();
                     
                     // Update key selector to match the new song data

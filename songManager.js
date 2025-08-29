@@ -137,6 +137,11 @@ function loadSongFromBankAtIndex(songIndex) {
     tracks = songData.tracks || { "1": { volume: 5 } };
     defaultOctave = songData.default_octave || 4;
     
+    // Reset playback state when loading a new song
+    if (typeof wasPlaying !== 'undefined') {
+        wasPlaying = false;
+    }
+    
     // Ensure each track has a default_octave property
     Object.keys(tracks).forEach(trackId => {
         if (tracks[trackId].default_octave === undefined) {

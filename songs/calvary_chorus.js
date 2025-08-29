@@ -24,13 +24,14 @@ const calvaryChorus = {
       },
       {
         "degree": "1",
-        "duration": 2,
+        "duration": 3,
         "lyrics": "sa-",
         "track": "main"
       },
       {
         "degree": "5",
-        "lyrics": "sa",
+        "duration": 3,
+        "lyrics": "sa-",
         "track": "H1"
       },
       {
@@ -51,6 +52,7 @@ const calvaryChorus = {
       },
       {
         "degree": "5",
+        "duration": 2,
         "lyrics": "my",
         "track": "H1"
       },
