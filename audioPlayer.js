@@ -231,7 +231,9 @@ function mapUnparsedDegreeToNote(degree, songKey, trackId = null) {
             octave = parseInt(octaveSpec);
         }
         
-        return mapDegreeToNote(degree_val, octave, songKey, raiseSemitone);
+        note = mapDegreeToNote(degree_val, octave, songKey, raiseSemitone);
+        console.log('Mapped degree', degree, 'to note:', note);
+        return note;
     }
 
     const degree_val = parseInt(degree);

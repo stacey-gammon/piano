@@ -7,7 +7,7 @@ const lastLightFadesV2 = {
       "track": "chords"
     },
     {
-      "key": "3",
+      "degree": "3",
       "step": 1,
       "duration": 1,
       "lyrics": "father",
@@ -67,7 +67,7 @@ const lastLightFadesV2 = {
       "track": "1"
     },
     {
-      "note": "F#3",
+      "degree": "5",
       "duration": 2,
       "lyrics": "line",
       "track": "1"

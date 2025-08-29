@@ -11,6 +11,7 @@ async function loadSongs() {
         
         // Load the song files via script tags
         const songFiles = [
+            'calvary_chorus.js',
             'until_the_last_light_fades.js',
             'until_the_last_light_fades_chorus.js',
             'until_the_last_light_fades_verse2.js',

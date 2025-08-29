@@ -76,7 +76,7 @@ const lastLightFadesV1 = {
         "track": "1"
       },
       {
-        "note": "F#3",
+        "degree": "5",
         "step": 12,
         "duration": 2,
         "lyrics": "live",
