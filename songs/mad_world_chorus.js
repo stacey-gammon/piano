@@ -52,49 +52,46 @@ const madWorldChorus = {
       },
       {
         "degree": "4",
-        "duration": 1,
+        "duration": 4,
         "lyrics": "-ny",
         "track": "main"
       },
       {
-        "degree": "5",
-        "duration": 5,
+        "degree": "4",
+        "duration": 2,
         "lyrics": "I",
         "track": "main"
       },
       {
-        "degree": "5",
-        "duration": 5,
+        "degree": "#6",
         "lyrics": "find",
         "track": "main"
       },
       {
-        "degree": "5",
-        "duration": 5,
+        "degree": "#6",
         "lyrics": "it",
         "track": "main"
       },
       {
-        "degree": "5",
-        "duration": 5,
+        "degree": "4",
         "lyrics": "kind",
         "track": "main"
       },
       {
-        "degree": "5",
-        "duration": 5,
+        "degree": "4",
         "lyrics": "of",
         "track": "main"
       },
       {
-        "degree": "5",
-        "duration": 5,
+        "degree": "1",
+        "duration": 4,
         "lyrics": "sad",
         "track": "main"
       },
     ],
     "tempo": 100,
     "key": "Bm",
+    "default_octave": 3,
     "title": "Mad World [Chorus]",
     "tracks": {
       "main": {

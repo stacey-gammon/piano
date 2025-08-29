@@ -135,6 +135,7 @@ function loadSongFromBankAtIndex(songIndex) {
     songKey = songData.key || "Unknown";
     eighthNoteLength = (60 / tempo / 2) * 1000;
     tracks = songData.tracks || { "1": { volume: 5 } };
+    defaultOctave = songData.default_octave || 4;
     
     updatetrackControls();
     updateStatus(`✅ Loaded: ${songData.title}`);

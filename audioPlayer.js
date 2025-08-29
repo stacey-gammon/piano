@@ -98,8 +98,12 @@ const noteFreqs = {
 
 // Consolidated playNote function that handles both regular notes and volume-based playback
 function playNote(note, trackVolume = null, duration = .25) {
+    console.log('Playing note:', note);
     const freq = noteFreqs[note];
-    if (!freq) return;
+    if (!freq) {
+        console.error('Invalid note:', note);
+        return;
+    }
 
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -161,6 +165,8 @@ function playChord(chordName, trackVolume = null, duration = 1, songKey = null) 
     if (/\d+/.test(chordName)) {
         degree = parseInt(chordName);
         chordNotes = getChordNotes(songKey, degree);
+        // Add the octave to the chord notes
+        chordNotes = chordNotes.map(note => note + defaultOctave);
     } else {
         chordNotes = chordDefinitions[chordName];
     }
@@ -187,50 +193,57 @@ function playChord(chordName, trackVolume = null, duration = 1, songKey = null) 
 }
 
 function mapUnparsedDegreeToNote(degree, songKey) {
-    if (degree.includes("[")) {
-        const [degree, octave] = degree.split("[");
-        return mapDegreeToNote(parseInt(degree), parseInt(octave), songKey);
+    let raiseSemitone = 0;
+
+    // Check for raised degree
+    if (degree.startsWith("#")) {
+        raiseSemitone = 1; // raise by one semitone
+        degree = degree.slice(1); // remove "#" before parsing
     }
-    degree_val = parseInt(degree);
+
+    // Check for octave specification
+    if (degree.includes("[")) {
+        const [deg, octave] = degree.split("[");
+        return mapDegreeToNote(parseInt(deg), parseInt(octave), songKey, raiseSemitone);
+    }
+
+    const degree_val = parseInt(degree);
     if (isNaN(degree_val)) {
         return null;
     }
-    return mapDegreeToNote(degree_val, 4, songKey);
+
+    return mapDegreeToNote(degree_val, defaultOctave, songKey, raiseSemitone);
 }
 
 // Map scale degrees to actual notes based on the current key
-function mapDegreeToNote(scaleDegree, octave, songKey) {
-    // Define the major scale intervals (frequency ratios from root)
-    // Each number represents how many semitones above the root
-    const majorScale = [0, 2, 4, 5, 7, 9, 11]; // Root, 2nd, 3rd, 4th, 5th, 6th, 7th
-    const minorScale = [0, 2, 3, 5, 7, 8, 10]; // Root, 2nd, 3rd, 4th, 5th, 6th, 7th
+function mapDegreeToNote(scaleDegree, octave, songKey, raiseSemitone = 0) {
+    const majorScale = [0, 2, 4, 5, 7, 9, 11]; 
+    const minorScale = [0, 2, 3, 5, 7, 8, 10]; 
     
-    // Get the root frequency for the key
-    songKeyDropMinor = songKey.replace("m", "");
+    const songKeyDropMinor = songKey.replace("m", "");
     const rootNote = songKeyDropMinor + octave; 
     const rootFreq = noteFreqs[rootNote];
-    
+
     if (!rootFreq) { 
-        console.error(`Invalid key: ${songKeyDropMinor}, root note: ${rootNote} not found in noteFreqs. Valid keys are: C, C#, D, D#, E, F, F#, G, G#, A, A#, B`);
+        console.error(`Invalid key: ${songKeyDropMinor}, root note: ${rootNote}`);
         return null;
     }
-    
-    // Validate scale degree (1-7)
+
     if (scaleDegree < 1 || scaleDegree > 7) {
         console.error(`Invalid scale degree: ${scaleDegree}. Must be 1-7.`);
         return null;
     }
-    
-    // Calculate the frequency for this scale degree
-    // Each semitone is a factor of 2^(1/12)
+
     let semitones = songKey.includes("m") ? minorScale[scaleDegree - 1] : majorScale[scaleDegree - 1];
 
+    // Apply the raised semitone
+    semitones += raiseSemitone;
+
     const frequency = rootFreq * Math.pow(2, semitones / 12);
-    
-    // Find the closest note in our noteFreqs table
+
+    // Find closest note
     let closestNote = null;
     let smallestDiff = Infinity;
-    
     for (const [note, freq] of Object.entries(noteFreqs)) {
         const diff = Math.abs(freq - frequency);
         if (diff < smallestDiff) {
@@ -238,7 +251,7 @@ function mapDegreeToNote(scaleDegree, octave, songKey) {
             closestNote = note;
         }
     }
-    
+
     return closestNote;
 }
 
@@ -253,8 +266,8 @@ function playNoteOrChord(noteObject, trackVolume = null, songKey = null) {
         
         if (mappedNote === null) {
             console.error(`Failed to map key ${noteObject.key} to a note`);
+            return;
         }
-        return;
     }
     
     if (noteObject.chord) {
