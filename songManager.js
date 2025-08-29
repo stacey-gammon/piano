@@ -69,7 +69,7 @@ function updateSongSelector() {
         songBank.forEach((song, index) => {
             const option = document.createElement('option');
             option.value = index;
-            option.textContent = song.title;
+            option.textContent = "[" + song.key + "] " + song.title;
             songSelect.appendChild(option);
         });
     }
@@ -138,4 +138,9 @@ function loadSongFromBankAtIndex(songIndex) {
     
     updatetrackControls();
     updateStatus(`✅ Loaded: ${songData.title}`);
+    
+    // Highlight keys in the current song's key
+    if (typeof highlightKeysInKey === 'function') {
+        highlightKeysInKey();
+    }
 }

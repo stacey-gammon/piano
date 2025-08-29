@@ -46,12 +46,12 @@ const madWorldChorus = {
         "track": "chords"
       },
       {
-        "degree": "6",
+        "degree": "#6",
         "lyrics": "fun-",
         "track": "main"
       },
       {
-        "degree": "5",
+        "degree": "4",
         "duration": 1,
         "lyrics": "-ny",
         "track": "main"

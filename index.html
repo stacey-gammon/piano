@@ -106,6 +106,7 @@
             font-weight: bold;
             transition: all 0.1s ease;
             user-select: none;
+            position: relative;
         }
 
         .white-key {
@@ -195,6 +196,45 @@
             margin: 10px 0;
             min-height: 20px;
         }
+
+        /* Key highlighting styles */
+        .key-in-scale {
+            box-shadow: 0 0 15px #ffd700, inset 0 0 10px rgba(255, 215, 0, 0.3);
+            border-color: #ffd700 !important;
+        }
+
+        .white-key.key-in-scale {
+            background: linear-gradient(to bottom, #fff8dc, #f0f8ff);
+        }
+
+        .black-key.key-in-scale {
+            background: linear-gradient(to bottom, #2f4f4f, #1a1a1a);
+        }
+
+        .degree-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ffd700;
+            color: #333;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .black-key .degree-indicator {
+            top: 3px;
+            right: 3px;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+        }
     </style>
 </head>
 <body>
@@ -251,6 +291,7 @@
 
     <script src="songManager.js"></script>
     <script src="audioPlayer.js"></script>
+    <script src="musicTheory.js"></script>
     <script>
         // Audio context and notes
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -375,6 +416,9 @@
                         tracks = songData.tracks || { "1": { volume: 5 } };
                         updatetrackControls();
                         updateStatus('✅ Loaded song from textarea');
+                        
+                        // Highlight keys in the current song's key
+                        highlightKeysInKey();
                     } catch (e) {
                         updateStatus('❌ Invalid song data in textarea');
                         return;
@@ -476,9 +520,6 @@
             }
         }
 
-        // Song management functions are now in songManager.js
-
-        // Song bank loading is now handled in songManager.js
 
         // Update track controls
         function updatetrackControls() {
@@ -539,6 +580,50 @@
                 playButton.textContent = '▶ Play Loop';
             }
         }
+        // Function to highlight keys in the current song's key
+        function highlightKeysInKey() {
+            if (!songKey || songKey === "Unknown") {
+                // Clear all highlights if no key
+                clearKeyHighlights();
+                return;
+            }
+            
+            // Get notes in the current key
+            const keyNotes = getNotesInKey(songKey);
+            
+            // Clear previous highlights
+            clearKeyHighlights();
+            
+            // Highlight keys and add degree indicators
+            keyNotes.forEach(({ note, degree }) => {
+                const keyElement = document.querySelector(`[data-note="${note}"]`);
+                if (keyElement) {
+                    // Add highlight class
+                    keyElement.classList.add('key-in-scale');
+                    
+                    // Add degree indicator
+                    const degreeIndicator = document.createElement('div');
+                    degreeIndicator.className = 'degree-indicator';
+                    degreeIndicator.textContent = degree;
+                    keyElement.appendChild(degreeIndicator);
+                }
+            });
+            
+            console.log(`Highlighted ${keyNotes.length} keys for key: ${songKey}`);
+        }
+        
+        // Function to clear key highlights
+        function clearKeyHighlights() {
+            const allKeys = document.querySelectorAll('.key');
+            allKeys.forEach(key => {
+                key.classList.remove('key-in-scale');
+                const existingIndicator = key.querySelector('.degree-indicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+            });
+        }
+
         // Initialize
         async function initializeApp() {
             createPiano();
@@ -585,6 +670,9 @@
                     tracks = songData.tracks || { "1": { volume: 5 } };
                     updatetrackControls();
                     updateStatus('✅ Song data updated from textarea');
+                    
+                    // Highlight keys in the current song's key
+                    highlightKeysInKey();
                 } catch (e) {
                     updateStatus('❌ Invalid JSON in song data');
                 }
