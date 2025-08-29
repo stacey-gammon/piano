@@ -79,7 +79,6 @@ function updateSongSelector() {
 async function refreshSongs() {
     songBank = []; // Clear existing songs
     await loadSongs();
-    updateStatus(`✅ Refreshed songs. Loaded ${songBank.length} songs.`);
 }
 
 // Song management functions - simplified for direct editing
@@ -138,7 +137,6 @@ function loadSongFromBankAtIndex(songIndex) {
     defaultOctave = songData.default_octave || 4;
     
     updatetrackControls();
-    updateStatus(`✅ Loaded: ${songData.title}`);
     
     // Update the key selector to show the current song's key
     // Use a small delay to ensure the key selector is initialized

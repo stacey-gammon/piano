@@ -280,8 +280,6 @@
             </div>
         </div>
 
-        <div class="recording-status" id="status"></div>
-        <div class="playback-indicator" id="playback-status"></div>
         <div class="playback-indicator" id="lyrics-display" style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); min-height: 35px;"></div>
         
         <div style="text-align: center; margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px;">
@@ -422,7 +420,6 @@
                 playbackInterval = null;
             }
             updateStatus('Cleared');
-            updatePlaybackStatus('');
             document.getElementById('songData').value = '';
         }
 
@@ -440,7 +437,6 @@
                         eighthNoteLength = (60 / tempo / 2) * 1000;
                         tracks = songData.tracks || { "1": { volume: 5 } };
                         updatetrackControls();
-                        updateStatus('✅ Loaded song from textarea');
                         
                         // Highlight keys in the current song's key
                         highlightKeysInKey();
@@ -482,7 +478,6 @@
 
             currentStep = loopStart;
 
-            updatePlaybackStatus('▶ Playing...');
             
             playbackInterval = setInterval(() => {
                 // Play notes that start at current step
@@ -526,7 +521,6 @@
                 clearInterval(playbackInterval);
                 playbackInterval = null;
             }
-            updatePlaybackStatus('⏹ Stopped');
             
             // Update button text
             const playButton = document.querySelector('.btn-play');
@@ -594,17 +588,17 @@
             document.getElementById('status').textContent = message;
         }
 
-        function updatePlaybackStatus(message) {
-            document.getElementById('playback-status').textContent = message;
+        // function updatePlaybackStatus(message) {
+        //     document.getElementById('playback-status').textContent = message;
             
-            // Update play button text
-            const playButton = document.querySelector('.btn-play');
-            if (isPlaying) {
-                playButton.textContent = '⏸ Stop Loop';
-            } else {
-                playButton.textContent = '▶ Play Loop';
-            }
-        }
+        //     // Update play button text
+        //     const playButton = document.querySelector('.btn-play');
+        //     if (isPlaying) {
+        //         playButton.textContent = '⏸ Stop Loop';
+        //     } else {
+        //         playButton.textContent = '▶ Play Loop';
+        //     }
+        // }
         // Function to highlight keys in the current song's key
         function highlightKeysInKey() {
             console.log('highlightKeysInKey called with songKey:', songKey);
@@ -727,7 +721,6 @@
             
 
             updatetrackControls();
-            updateStatus('Ready to record! Click Record and play some notes, or select a song from the bank.');
         }
 
         // Initialize
