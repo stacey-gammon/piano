@@ -69,7 +69,7 @@ function updateSongSelector() {
         songBank.forEach((song, index) => {
             const option = document.createElement('option');
             option.value = index;
-            option.textContent = "[" + song.key + "] " + song.title;
+            option.textContent = song.title;
             songSelect.appendChild(option);
         });
     }
