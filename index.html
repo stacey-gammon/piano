@@ -457,6 +457,56 @@
             }
         }
 
+        // Function to get all lyrics with their step numbers
+        function getAllLyricsWithSteps() {
+            const lyricsMap = new Map();
+            recordedNotes.forEach(note => {
+                if (note.lyrics && note.lyrics.trim()) {
+                    const step = note.step;
+                    if (!lyricsMap.has(step)) {
+                        lyricsMap.set(step, []);
+                    }
+                    lyricsMap.get(step).push(note.lyrics.trim());
+                }
+            });
+            return lyricsMap;
+        }
+
+        // Function to display lyrics with context (previous 4, current, next 4)
+        function displayLyricsWithContext(currentStep, currentLyrics) {
+            const lyricsMap = getAllLyricsWithSteps();
+            const allSteps = Array.from(lyricsMap.keys()).sort((a, b) => a - b);
+            const currentStepIndex = allSteps.indexOf(currentStep);
+            
+            let displayText = '';
+            
+            // Add previous 4 lyrics
+            for (let i = Math.max(0, currentStepIndex - 4); i < currentStepIndex; i++) {
+                const step = allSteps[i];
+                const lyrics = lyricsMap.get(step).filter((lyric, index, arr) => arr.indexOf(lyric) === index).join(' ');
+                if (lyrics) {
+                    displayText += `<span style="color: #aaa; font-size: 18px;">${lyrics}</span> `;
+                }
+            }
+            
+            // Add current lyrics (highlighted)
+            if (currentLyrics) {
+                displayText += `<span style="color: #fff; font-size: 24px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">${currentLyrics}</span> `;
+            }
+            
+            // Add next 4 lyrics
+            for (let i = currentStepIndex + 1; i <= Math.min(allSteps.length - 1, currentStepIndex + 4); i++) {
+                const step = allSteps[i];
+                const lyrics = lyricsMap.get(step).filter((lyric, index, arr) => arr.indexOf(lyric) === index).join(' ');
+                if (lyrics) {
+                    displayText += `<span style="color: #aaa; font-size: 18px;">${lyrics}</span> `;
+                }
+            }
+            
+            const lyricsDisplay = document.getElementById('lyrics-display');
+            lyricsDisplay.innerHTML = displayText;
+        }
+
         function startPlayback() {
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
@@ -487,17 +537,16 @@
                 const lyricsAtStep = notesToPlay
                     .filter(n => n.lyrics && n.lyrics.trim())
                     .map(n => n.lyrics.trim())
+                    .filter((lyric, index, arr) => arr.indexOf(lyric) === index)
                     .join(' ');
                 
-                // Display lyrics
-                const lyricsDisplay = document.getElementById('lyrics-display');
+                // Display lyrics with context
                 if (lyricsAtStep) {
-                    lyricsDisplay.textContent = lyricsAtStep;
+                    displayLyricsWithContext(currentStep, lyricsAtStep);
                     // Clear after a moment
                     setTimeout(() => {
-                        if (lyricsDisplay.textContent === lyricsAtStep) {
-                            lyricsDisplay.textContent = '';
-                        }
+                        const lyricsDisplay = document.getElementById('lyrics-display');
+                        lyricsDisplay.innerHTML = '';
                     }, eighthNoteLength * 0.8);
                 }
                 
