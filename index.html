@@ -613,6 +613,9 @@
                 // Highlight keys based on which track is playing them
                 highlightKeysByTrack();
                 
+                // Update track degrees display
+                updateTrackDegreesDisplay();
+                
                 // Play each note or chord with appropriate volume
                 notesToPlay.forEach(n => {
                     const trackVolume = tracks[n.track] ? tracks[n.track].volume : 5;
@@ -636,6 +639,8 @@
             
             // Clear track highlights when stopping
             // clearKeyHighlights();
+            
+
             
             // Update button text
             const playButton = document.querySelector('.btn-play');
@@ -675,6 +680,9 @@
                         }
                         return `
                         <div class="track-outline-${trackNumber}" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; background: rgba(255,255,255,0.1);">
+                            <div class="track-note-degrees-display" id="track-note-degrees-display-${trackId}">
+                            </div>
+                            
                             <h5 style="margin: 0; color: white;">${trackId}</h5>
                             
                             <div style="display: flex; align-items: center; gap: 5px;">
@@ -857,6 +865,99 @@
                             keyElement.classList.add(`key-track-${trackNumber}`);
                         }
                     }
+                }
+            });
+        }
+
+        // Function to update track degrees display
+        function updateTrackDegreesDisplay() {
+            if (!recordedNotes || !recordedNotes.length) return;
+            
+            // Update each track's display
+            Object.keys(tracks).forEach(trackId => {
+                const displayElement = document.getElementById(`track-note-degrees-display-${trackId}`);
+                if (displayElement) {
+                    // Find previous, current, and next notes for this track    
+                    const currentNotes = recordedNotes.filter(n => n.track === trackId && n.step === currentStep);
+                    if (currentNotes.length === 0) {
+                        return;
+                    }
+                    const currentNote = currentNotes[0];
+
+                    // Walk backwards until we find a note that doesn't match the current note
+                    let previousNotes = [];
+                    for (let i = currentStep - 1; i >= 0; i--) {
+                        const note = recordedNotes.find(n => n.track === trackId && n.step === i);
+                        if (!note) {
+                            continue;
+                        }
+                        currentValue = currentNote.degree || currentNote.note;
+                        previousValue = note.degree || note.note;
+                        if (previousValue !== currentValue) {
+                            previousNotes.push(note);
+                            break;
+                        }
+                    }
+
+                    // Walk forwards until we find a note that doesn't match the current note
+                    let nextNotes = [];
+                    for (let i = currentStep + 1; i < recordedNotes.length; i++) {
+                        const note = recordedNotes.find(n => n.track === trackId && n.step === i);
+                        if (!note) {
+                            continue;
+                        }
+                        currentValue = currentNote.degree || currentNote.note;
+                        nextValue = note.degree || note.note;
+                        if (nextValue !== currentValue) {
+                            nextNotes.push(note);
+                            break;
+                        }
+                    }
+                    
+                    let displayText = '';
+                    
+                    // Previous notes (dimmed)
+                    if (previousNotes.length > 0) {
+                        const prevTexts = previousNotes.map(note => {
+                            if (note.degree) return note.degree.toString();
+                            if (note.chord) return note.chord;
+                            if (note.note) return note.note;
+                            return '';
+                        }).filter(text => text);
+                        if (prevTexts.length > 0) {
+                            displayText += `<span style="color: #666; font-size: 12px;">${prevTexts.join(' ')}</span> `;
+                        }
+                    }
+                    
+                    // Current notes (highlighted)
+                    if (currentNotes.length > 0) {
+                        const currentTexts = currentNotes.map(note => {
+                            if (note.degree) return note.degree.toString();
+                            if (note.chord) return note.chord;
+                            if (note.note) return note.note;
+                            return '';
+                        }).filter(text => text);
+                        if (currentTexts.length > 0) {
+                            displayText += `<span style="color: #fff; font-size: 14px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px;">${currentTexts.join(' ')}</span> `;
+                        }
+                    }
+                    
+                    // Next notes (dimmed)
+                    if (nextNotes.length > 0) {
+                        const nextTexts = nextNotes.map(note => {
+                            if (note.degree) return note.degree.toString();
+                            if (note.chord) return note.chord;
+                            if (note.note) return note.note;
+                            return '';
+                        }).filter(text => text);
+                        if (nextTexts.length > 0) {
+                            displayText += `<span style="color: #666; font-size: 12px;">${nextTexts.join(' ')}</span>`;
+                        }
+                    }
+                    
+                    displayElement.innerHTML = displayText;
+                    displayElement.style.minHeight = '20px';
+                    displayElement.style.textAlign = 'center';
                 }
             });
         }
