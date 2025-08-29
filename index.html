@@ -89,6 +89,16 @@
             background: linear-gradient(45deg, #ff9ff3, #f368e0);
             color: white;
         }
+        
+        .btn-rewind {
+            background: linear-gradient(45deg, #feca57, #ff9ff3);
+            color: white;
+        }
+        
+        .btn-ff {
+            background: linear-gradient(45deg, #48dbf8, #0abde3);
+            color: white;
+        }
 
         .recording-status {
             text-align: center;
@@ -327,6 +337,8 @@
         <div class="controls">
             <button class="btn btn-play" onclick="togglePlayback()">▶ Play</button>
             <button class="btn btn-clear" onclick="stopRecording()">Stop</button>
+            <button class="btn btn-rewind" onclick="rewind()">⏪ Rewind</button>
+            <button class="btn btn-ff" onclick="fastForward()">⏩ Fast Forward</button>
         </div>
 
         <div class="tempo-control">
@@ -349,6 +361,7 @@
         </div>
 
         <div class="playback-indicator" id="lyrics-display" style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); min-height: 35px;"></div>
+        <div class="step-counter" id="step-counter" style="text-align: center; font-size: 16px; color: #ccc; margin: 10px 0;">Step: 0</div>
 
         <div class="track-controls" id="trackControls" style="margin: 20px 0; text-align: center;">
             <!-- track volume controls will be added here dynamically -->
@@ -607,23 +620,8 @@
                 // Play notes that start at current step
                 const notesToPlay = recordedNotes.filter(n => n.step === currentStep);
                 
-                // Collect lyrics for this step
-                const lyricsAtStep = notesToPlay
-                    .filter(n => n.lyrics && n.lyrics.trim())
-                    .map(n => n.lyrics.trim())
-                    .filter((lyric, index, arr) => arr.indexOf(lyric) === index)
-                    .join(' ');
-                
-                // Display lyrics with context
-                if (lyricsAtStep) {
-                    displayLyricsWithContext(currentStep, lyricsAtStep);
-                }
-                
-                // Highlight keys based on which track is playing them
-                highlightKeysByTrack();
-                
-                // Update track degrees display
-                updateTrackDegreesDisplay();
+                // Update display for current step
+                updateDisplayAtCurrentStep();
                 
                 // Play each note or chord with appropriate volume
                 notesToPlay.forEach(n => {
@@ -650,6 +648,65 @@
             // Update button text
             const playButton = document.querySelector('.btn-play');
             playButton.textContent = '▶ Play';
+        }
+        
+        // Navigation functions
+        function rewind() {
+            if (!recordedNotes.length) return;
+            
+            // Get loop bounds
+            const loopStartInput = document.getElementById('loopStart').value;
+            const loopStart = loopStartInput === "" ? 0 : parseInt(loopStartInput);
+            
+            // Move back by 8 steps (or to loop start if we'd go past it)
+            currentStep = Math.max(loopStart, currentStep - 1);
+            
+            // Update display without starting playback
+            updateDisplayAtCurrentStep();
+        }
+        
+        function fastForward() {
+            if (!recordedNotes.length) return;
+            
+            // Get loop bounds
+            const loopEndInput = document.getElementById('loopEnd').value;
+            const naturalMaxStep = Math.max(...recordedNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
+            const loopEnd = loopEndInput === "" ? naturalMaxStep : parseInt(loopEndInput);
+            
+            // Move forward by 8 steps (or to loop end if we'd go past it)
+            currentStep = Math.min(loopEnd - 1, currentStep + 1);
+            
+            // Update display without starting playback
+            updateDisplayAtCurrentStep();
+        }
+        
+        function updateDisplayAtCurrentStep() {
+            // Get notes at current step
+            const notesAtStep = recordedNotes.filter(n => n.step === currentStep);
+            
+            // Collect lyrics for this step
+            const lyricsAtStep = notesAtStep
+                .filter(n => n.lyrics && n.lyrics.trim())
+                .map(n => n.lyrics.trim())
+                .filter((lyric, index, arr) => arr.indexOf(lyric) === index)
+                .join(' ');
+            
+            // Display lyrics with context
+            if (lyricsAtStep) {
+                displayLyricsWithContext(currentStep, lyricsAtStep);
+            }
+            // Update step counter
+            const stepCounter = document.getElementById('step-counter');
+            if (stepCounter) {
+                const naturalMaxStep = Math.max(...recordedNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
+                stepCounter.textContent = `Step: ${currentStep} / ${naturalMaxStep}`;
+            }
+            
+            // Highlight keys based on which track is playing them
+            highlightKeysByTrack();
+            
+            // Update track degrees display
+            updateTrackDegreesDisplay();
         }
 
         // Tempo control
@@ -1068,6 +1125,29 @@
                 }
             });
         }
+        
+        // Add keyboard shortcuts for navigation
+        document.addEventListener('keydown', function(event) {
+            // Only handle shortcuts if not typing in an input field
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            switch(event.key) {
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    rewind();
+                    break;
+                case 'ArrowRight':
+                    event.preventDefault();
+                    fastForward();
+                    break;
+                case ' ':
+                    event.preventDefault();
+                    togglePlayback();
+                    break;
+            }
+        });
     </script>
 </body>
 </html>
