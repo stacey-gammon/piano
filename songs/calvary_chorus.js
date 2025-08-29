@@ -58,13 +58,44 @@ const calvaryChorus = {
       },
       {
         "degree": "3",
-        "duration": 1,
+        "duration": 3,
         "lyrics": "strength",
         "track": "main"
       },
       {
         "degree": "3[+1]",
+        "duration": 3,
         "lyrics": "strength",
+        "track": "H1"
+      },
+      {
+        "degree": "3",
+        "lyrics": "for",
+        "track": "main"
+      },
+      {
+        "degree": "5",
+        "lyrics": "for",
+        "track": "H1"
+      },
+      {
+        "degree": "4",
+        "lyrics": "run-",
+        "track": "main"
+      },
+      {
+        "degree": "6",
+        "lyrics": "run-",
+        "track": "H1"
+      },
+      {
+        "degree": "4",
+        "lyrics": "-in",
+        "track": "main"
+      },
+      {
+        "degree": "6",
+        "lyrics": "-in",
         "track": "H1"
       },
     ],
