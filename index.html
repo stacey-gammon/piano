@@ -565,7 +565,8 @@
                 const songDataTextarea = document.getElementById('songData');
                 if (songDataTextarea && songDataTextarea.value.trim()) {
                     try {
-                        const songData = JSON.parse(songDataTextarea.value);
+                        let songData = JSON.parse(songDataTextarea.value);
+                        songData = getProcessedSongData(songData);
                         currentNotes = songData.notes || [];
                         songKey = songData.key || "Unknown";
                         tempo = songData.tempo || 120;
@@ -886,13 +887,11 @@
                     degreeIndicator.textContent = degree;
                     keyElement.appendChild(degreeIndicator);
                     
-                    console.log(`Highlighted key ${note} with degree ${degree}`);
                 } else {
                     console.log(`Could not find key element for note: ${note}`);
                 }
             });
             
-            console.log(`Highlighted ${keyNotes.length} keys for key: ${songKey}`);
         }
         
         // Function to clear key highlights
@@ -1127,7 +1126,7 @@
 
         // Status updates
         function updateStatus(message) {
-            document.getElementById('status').textContent = message;
+            // document.getElementById('status').textContent = message;
         }
 
         // Initialize key selector with all available keys
@@ -1207,7 +1206,8 @@
                     return;
                 }
                 try {
-                    const songData = JSON.parse(value);
+                    let songData = JSON.parse(value);
+                    songData = getProcessedSongData(songData);
                     currentNotes = songData.notes || [];
                     tempo = songData.tempo || 120;
                     songKey = songData.key || "Unknown";

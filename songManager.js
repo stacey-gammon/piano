@@ -99,35 +99,41 @@ function loadSong() {
     updatetrackControls();
 }
 
-
-function loadSongFromBankAtIndex(songIndex) {
-    const songData = songBank[songIndex];
-    if (!songData) {
-        updateStatus('Song not found.');
-        return;
-    }
+function getProcessedSongData(songData) {
+    // Make a copy of the song data
+    const processedSongData = JSON.parse(JSON.stringify(songData));
 
     // Process song data - loop through each entry, and if there is no step field, set it
     // to the previous step + the duration
     // of the previous entry with the same track.
-    for (let i = 0; i < songData.notes.length; i++) {
-        if (!songData.notes[i].step) {
+    for (let i = 0; i < processedSongData.notes.length; i++) {
+        if (!processedSongData.notes[i].step) {
             // Find the previous entry with the same track
             let previousEntry = null;
             for (let j = i - 1; j >= 0; j--) {
-                if (songData.notes[j].track === songData.notes[i].track) {
-                    previousEntry = songData.notes[j];
+                if (processedSongData.notes[j].track === processedSongData.notes[i].track) {
+                    previousEntry = processedSongData.notes[j];
                     break;
                 }
             }
             if (previousEntry) {
                 duration = previousEntry.duration || 1;
                 pause = previousEntry.pause || 0;
-                songData.notes[i].step = previousEntry.step + duration + pause;
+                processedSongData.notes[i].step = previousEntry.step + duration + pause;
             } else {
-                songData.notes[i].step = 1;
+                processedSongData.notes[i].step = 1;
             }
         }
+    }
+    return processedSongData;
+}
+
+
+function loadSongFromBankAtIndex(songIndex) {
+    let songData = songBank[songIndex];
+    if (!songData) {
+        updateStatus('Song not found.');
+        return;
     }
     
     // Load song data directly into the textarea for editing
@@ -136,6 +142,7 @@ function loadSongFromBankAtIndex(songIndex) {
         songDataTextarea.value = JSON.stringify(songData, null, 2);
     }
     
+    songData = getProcessedSongData(songData);
     // Also load into the playback system
     currentNotes = songData.notes || [];
     tempo = songData.tempo || 120;
