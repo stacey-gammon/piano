@@ -42,7 +42,7 @@ const madWorldChorus = {
       },
       {
         "chord": "4",
-        "lyrics": "funny",
+        "lyrics": "fun-",
         "track": "chords"
       },
       {
@@ -103,7 +103,7 @@ const madWorldChorus = {
         "default_octave": 3
       },
       "chords": {
-        "volume": 0,
+        "volume": 3,
         "default_octave": 3
       }
     }

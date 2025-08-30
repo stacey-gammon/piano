@@ -12,61 +12,115 @@ const wayfaringStranger = {
         "step": 1,
         "duration": 2,
         "lyrics": "I'm",
-        "track": "main"
+        "track": "1"
       },
       {
         "degree": "3[+1]",
         "step": 1,
         "duration": 2,
         "lyrics": "I'm",
-        "track": "harmony"
+        "track": "2"
+      },
+      {
+        "degree": "1",
+        "duration": 3,
+        "lyrics": "just",
+        "track": "1"
+      },
+      {
+        "degree": "3[+1]",
+        "duration": 3,
+        "lyrics": "just",
+        "track": "2"
+      },
+      {
+        "degree": "5",
+        "duration": 1,
+        "lyrics": "a",
+        "track": "1"
+      },
+      {
+        "degree": "1[4]",
+        "duration": 1,
+        "lyrics": "a",
+        "track": "2"
+      },
+      {
+        "degree": "5",
+        "duration": 5,
+        "lyrics": "poor",
+        "track": "1"
+      },
+      {
+        "degree": "1[4]",
+        "duration": 5,
+        "lyrics": "poor",
+        "track": "2"
+      },
+      {
+        "degree": "5",
+        "duration": 2,
+        "lyrics": "way",
+        "track": "1"
       },
       {
         "degree": "1",
         "duration": 2,
-        "lyrics": "just",
-        "track": "main"
-      },
-      {
-        "degree": "3[+1]",
-        "duration": 2,
-        "lyrics": "just",
-        "track": "harmony"
+        "lyrics": "way",
+        "track": "2"
       },
       {
         "degree": "5",
+        "duration": 3,
+        "lyrics": "fare",
+        "track": "1"
+      },
+      {
+        "degree": "1",
+        "duration": 3,
+        "lyrics": "fare",
+        "track": "2"
+      },
+      {
+        "degree": "3",
         "duration": 1,
-        "lyrics": "a",
-        "track": "main"
+        "lyrics": "in",
+        "track": "1"
       },
       {
-        "degree": "1[4]",
+        "degree": "1",
         "duration": 1,
-        "lyrics": "a",
-        "track": "harmony"
+        "lyrics": "in",
+        "track": "2"
       },
       {
-        "degree": "5",
-        "duration": 5,
-        "lyrics": "poor",
-        "track": "main"
+        "degree": "1",
+        "duration": 1,
+        "lyrics": "strang",
+        "track": "1"
       },
       {
-        "degree": "1[4]",
-        "duration": 5,
-        "lyrics": "poor",
-        "track": "harmony"
+        "degree": "1",
+        "duration": 1,
+        "lyrics": "strang",
+        "track": "2"
+      },
+      {
+        "degree": "1",
+        "duration": 1,
+        "lyrics": "er",
+        "track": "1"
       },
     ],
     "tempo": 100,
     "key": "Dm",
     "title": "Wayfaring Stranger [Verse]",
     "tracks": {
-      "main": {
+      "1": {
         "volume": 3,
         "default_octave": 3
       },
-      "harmony": {
+      "2": {
         "volume": 3,
         "default_octave": 3
       },

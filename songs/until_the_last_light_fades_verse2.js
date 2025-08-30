@@ -10,63 +10,72 @@ const lastLightFadesV2 = {
       "degree": "3",
       "step": 1,
       "duration": 1,
-      "lyrics": "father",
+      "lyrics": "fath",
       "track": "1"
     },
     {
-      "note": "B3",
+      "degree": "2",
       "duration": 1,
-      "track": "2"
+      "lyrics": "er",
+      "track": "1"
     },
     {
-      "note": "C#4",
-      "duration": 1,
+      "degree": "3",
+      "duration": 2,
       "lyrics": "oh",
       "track": "1"
     },
     {
-      "note": "D#4",
+      "degree": "3",
       "duration": 2,
       "lyrics": "my",
       "track": "1"
     },
     {
-      "note": "D#4",
+      "degree": "3",
       "duration": 1,
-      "lyrics": "father",
+      "lyrics": "fath",
       "track": "1"
     },
     {
-      "note": "C#4",
+      "degree": "2",
       "duration": 1,
-      "lyrics": "i'll",
-      "track": "1"
-    },
-    {
-      "note": "B3",
-      "duration": 1,
-      "lyrics": "be",
-      "track": "1"
-    },
-    {
-      "note": "G#3",
-      "duration": 1,
-      "lyrics": "stan",
-      "track": "1"
-    },
-    {
-      "note": "G#3",
-      "lyrics": "din",
-      "track": "1"
-    },
-    {
-      "note": "B3",
-      "lyrics": "in",
+      "lyrics": "er",
       "track": "1"
     },
     {
       "degree": "1",
       "duration": 2,
+      "lyrics": "i'll",
+      "track": "1"
+    },
+    {
+      "degree": "1",
+      "duration": 2,
+      "lyrics": "be",
+      "track": "1"
+    },
+    {
+      "degree": "6[-1]",
+      "duration": 2,
+      "lyrics": "stan",
+      "track": "1"
+    },
+    {
+      "degree": "1]",
+      "duration": 2,
+      "lyrics": "din",
+      "track": "1"
+    },
+    {
+      "degree": "2",
+      "duration": 2,
+      "lyrics": "in",
+      "track": "1"
+    },
+    {
+      "degree": "1",
+      "duration": 3,
       "lyrics": "line",
       "track": "1"
     },
@@ -77,7 +86,7 @@ const lastLightFadesV2 = {
     },
     {
       "degree": "3",
-      "duration": 2,
+      "duration": 3,
       "lyrics": "face",
       "track": "1"
     },
@@ -89,13 +98,13 @@ const lastLightFadesV2 = {
     },
     {
       "degree": "1",
-      "duration": 2,
+      "duration": 3,
       "lyrics": "faults",
       "track": "1"
     },
     {
       "degree": "2",
-      "duration": 1,
+      "duration": 2,
       "lyrics": "are",
       "track": "1"
     },
@@ -164,56 +173,63 @@ const lastLightFadesV2 = {
       "track": "1"
     },
     {
-      "degree": "2",
-      "duration": 4,
+      "degree": "1",
+      "duration": 2,
       "lyrics": "dy",
       "track": "1"
     },
     {
-      "degree": "5",
-      "duration": 4,
+      "degree": "3",
+      "duration": 2,
       "lyrics": "-in",
       "track": "1"
     },
     {
-      "note": "B3",
+      "degree": "3",
       "duration": 2,
       "lyrics": "its",
       "track": "1"
     },
     {
-      "note": "D#4",
+      "degree": "2",
       "duration": 1,
       "lyrics": "the",
       "track": "1"
     },
     {
-      "note": "D#4",
+      "degree": "3",
       "duration": 2,
+      "pause": 2,
       "lyrics": "girl",
       "track": "1"
     },
     {
-      "note": "C#4",
-      "duration": 2,
+      "degree": "1",
+      "duration": 1,
       "lyrics": "im",
       "track": "1"
     },
     {
-      "note": "B3",
-      "duration": 4,
-      "lyrics": "leavin",
+      "degree": "3",
+      "duration": 2,
+      "lyrics": "leav-",
       "track": "1"
     },
     {
-      "note": "B3",
-      "duration": 4,
-      "lyrics": "be",
+      "degree": "3",
+      "duration": 3,
+      "lyrics": "-in",
       "track": "1"
     },
     {
-      "note": "B3",
-      "duration": 4,
+      "degree": "2",
+      "duration": 2,
+      "lyrics": "be-",
+      "track": "1"
+    },
+    {
+      "degree": "1",
+      "duration": 3,
       "lyrics": "hind",
       "track": "1"
     }

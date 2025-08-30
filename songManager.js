@@ -16,7 +16,8 @@ async function loadSongs() {
             'until_the_last_light_fades_chorus.js',
             'until_the_last_light_fades_verse2.js',
             'wayfaring_stranger.js',
-            'mad_world_chorus.js'
+            'mad_world_chorus.js',
+            'country_roads_well_pennies.js'
         ];
         
         console.log('Song files to load:', songFiles);
