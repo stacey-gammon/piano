@@ -100,6 +100,22 @@
             color: white;
         }
 
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .left-side-container,
+            .right-side-container {
+                flex: none;
+            }
+            
+            .song-data textarea {
+                height: 300px; /* Shorter on mobile */
+            }
+        }
+
         .recording-status {
             text-align: center;
             font-size: 18px;
@@ -107,16 +123,44 @@
             min-height: 25px;
         }
 
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .left-side-container {
+            flex: 4; /* 80% of the space (4/5) */
+        }
+
+        .right-side-container {
+            flex: 1; /* 20% of the space (1/5) */
+        }
+
         .piano {
             display: flex;
             justify-content: center;
-            margin: 30px 0;
             position: relative;
             height: 200px;
             background: #333;
             border-radius: 10px;
             padding: 10px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%; /* Full width at bottom */
+            margin: 20px 0;
         }
 
         .key {
@@ -168,21 +212,30 @@
         }
 
         .song-data {
-            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* Take full height of right container */
+        }
+
+        .song-data h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #fff;
         }
 
         .song-data textarea {
             width: 100%;
-            height: 120px;
-            padding: 15px;
+            height: 500px; /* Even taller for the narrow column */
+            padding: 10px;
             border: none;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.9);
             color: #333;
             font-family: 'Courier New', monospace;
-            font-size: 12px;
+            font-size: 10px;
             resize: vertical;
             box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 1; /* Take up remaining space in the column */
         }
 
         .load-save-controls {
@@ -333,54 +386,60 @@
 <body>
     <div class="container">
         <h1>🎹 Piano Practice App</h1>
-        
-        <div class="controls">
-            <button class="btn btn-play" onclick="togglePlayback()">▶ Play</button>
-            <button class="btn btn-clear" onclick="stopRecording()">Stop</button>
-            <button class="btn btn-rewind" onclick="rewind()">⏪ Rewind</button>
-            <button class="btn btn-ff" onclick="fastForward()">⏩ Fast Forward</button>
-        </div>
 
-        <div class="tempo-control">
-            <label>Loop Start (step): </label>
-            <input type="number" id="loopStart" min="0" placeholder="Start">
-            <label style="margin-left: 20px;">Loop End (step): </label>
-            <input type="number" id="loopEnd" min="0" placeholder="End">
-        </div>
-        
-        <div class="controls">
-            <select id="songSelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #00d2d3, #54a0ff);">
-            </select>
-            <div class="key-selector">
-                <label>Key:</label>
-                <select id="keySelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #ff9ff3, #f368e0);">
-                    <option value="">Select key...</option>
+        <div class="main-content">
+            <div class="left-side-container">
+            
+            <div class="controls">
+                <button class="btn btn-play" onclick="togglePlayback()">▶ Play</button>
+                <button class="btn btn-clear" onclick="stopRecording()">Stop</button>
+                <button class="btn btn-rewind" onclick="rewind()">⏪ Rewind</button>
+                <button class="btn btn-ff" onclick="fastForward()">⏩ Fast Forward</button>
+            </div>
+
+            <div class="tempo-control">
+                <label>Loop Start (step): </label>
+                <input type="number" id="loopStart" min="0" placeholder="Start">
+                <label style="margin-left: 20px;">Loop End (step): </label>
+                <input type="number" id="loopEnd" min="0" placeholder="End">
+            </div>
+            
+            <div class="controls">
+                <select id="songSelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #00d2d3, #54a0ff);">
                 </select>
+                <div class="key-selector">
+                    <label>Key:</label>
+                    <select id="keySelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #ff9ff3, #f368e0);">
+                        <option value="">Select key...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="playback-indicator" id="lyrics-display" style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); min-height: 35px;"></div>
+            <div class="step-counter" id="step-counter" style="text-align: center; font-size: 16px; color: #ccc; margin: 10px 0;">Step: 0</div>
+
+            <div class="track-controls" id="trackControls" style="margin: 20px 0; text-align: center;">
+                <!-- track volume controls will be added here dynamically -->
+            </div>
+
+            <div class="tempo-control">
+                <label>Tempo (BPM): </label>
+                <input type="number" id="tempo" value="120" min="60" max="200" onchange="updateTempo()">
+            </div>
+
+
+            </div>
+            <div class="right-side-container">
+            <div class="song-data">
+                <textarea id="songData" placeholder="Your song data will appear here..."></textarea>
+                <div class="load-save-controls">
+                    
+                </div>
+            </div>
             </div>
         </div>
-
-        <div class="playback-indicator" id="lyrics-display" style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); min-height: 35px;"></div>
-        <div class="step-counter" id="step-counter" style="text-align: center; font-size: 16px; color: #ccc; margin: 10px 0;">Step: 0</div>
-
-        <div class="track-controls" id="trackControls" style="margin: 20px 0; text-align: center;">
-            <!-- track volume controls will be added here dynamically -->
-        </div>
-
-        <div class="tempo-control">
-            <label>Tempo (BPM): </label>
-            <input type="number" id="tempo" value="120" min="60" max="200" onchange="updateTempo()">
-                    </div>
-
         <div class="piano" id="piano">
             <!-- Piano keys will be generated here -->
-        </div>
-
-        <div class="song-data">
-            <h3>Song Data (Copy/Paste to Save/Load):</h3>
-            <textarea id="songData" placeholder="Your song data will appear here..."></textarea>
-            <div class="load-save-controls">
-                
-            </div>
         </div>
 
 
