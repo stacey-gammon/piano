@@ -149,7 +149,7 @@ function playNote(note, trackVolume = null, duration = .25) {
         const step = Math.round(relativeTime / eighthNoteLength);
         const duration = parseInt(document.getElementById('stretch')?.value) || 1;
         const currenttrack = document.getElementById('currenttrack')?.value || "1";
-        recordedNotes.push({ 
+        currentNotes.push({ 
             note, 
             step, 
             duration, 
@@ -332,7 +332,7 @@ function addChordToRecording(chordName, step, duration = 1, lyrics = '', track =
         return;
     }
     
-    recordedNotes.push({
+    currentNotes.push({
         chord: chordName,
         step: step,
         duration: duration,
@@ -350,7 +350,7 @@ function addNoteToRecording(note, step, duration = 1, lyrics = '', track = "1") 
         return;
     }
     
-    recordedNotes.push({
+    currentNotes.push({
         note: note,
         step: step,
         duration: duration,

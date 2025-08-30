@@ -350,7 +350,6 @@
         
         <div class="controls">
             <select id="songSelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #00d2d3, #54a0ff);">
-                <option value="3">Select a song from bank...</option>
             </select>
             <div class="key-selector">
                 <label>Key:</label>
@@ -396,7 +395,7 @@
         
         // Recording variables
         let isRecording = false;
-        let recordedNotes = [];
+        let currentNotes = [];
         let recordingStartTime = 0;
         let tempo = 120;
         let defaultOctave = 4;
@@ -410,7 +409,7 @@
         // Playback variables
         let isPlaying = false;
         let playbackInterval = null;
-        let currentStep = 0;
+        let currentStep = 1;
         let wasPlaying = false; // Track if we were playing before
 
         // Generate piano keys
@@ -478,7 +477,7 @@
             }
             
             isRecording = true;
-            recordedNotes = [];
+            currentNotes = [];
             recordingStartTime = Date.now();
         }
 
@@ -489,7 +488,7 @@
         }
 
         function clearRecording() {
-            recordedNotes = [];
+            currentNotes = [];
             isRecording = false;
             isPlaying = false;
             wasPlaying = false; // Reset wasPlaying when clearing
@@ -503,12 +502,12 @@
         // Playback functions
         function togglePlayback() {
             // Try to load song data from textarea if no recorded notes
-            if (!recordedNotes.length) {
+            if (!currentNotes.length) {
                 const songDataTextarea = document.getElementById('songData');
                 if (songDataTextarea && songDataTextarea.value.trim()) {
                     try {
                         const songData = JSON.parse(songDataTextarea.value);
-                        recordedNotes = songData.notes || [];
+                        currentNotes = songData.notes || [];
                         songKey = songData.key || "Unknown";
                         tempo = songData.tempo || 120;
                         eighthNoteLength = (60 / tempo / 2) * 1000;
@@ -543,7 +542,7 @@
         // Function to get all lyrics with their step numbers
         function getAllLyricsWithSteps() {
             const lyricsMap = new Map();
-            recordedNotes.forEach(note => {
+            currentNotes.forEach(note => {
                 if (note.lyrics && note.lyrics.trim()) {
                     const step = note.step;
                     if (!lyricsMap.has(step)) {
@@ -600,7 +599,7 @@
             isPlaying = true;
             
             // Find the natural end of song
-            const naturalMaxStep = Math.max(...recordedNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
+            const naturalMaxStep = Math.max(...currentNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
 
                 
             // Read loop bounds from inputs
@@ -618,7 +617,7 @@
             
             playbackInterval = setInterval(() => {
                 // Play notes that start at current step
-                const notesToPlay = recordedNotes.filter(n => n.step === currentStep);
+                const notesToPlay = currentNotes.filter(n => n.step === currentStep);
                 
                 // Update display for current step
                 updateDisplayAtCurrentStep();
@@ -652,7 +651,7 @@
         
         // Navigation functions
         function rewind() {
-            if (!recordedNotes.length) return;
+            if (!currentNotes.length) return;
             
             // Get loop bounds
             const loopStartInput = document.getElementById('loopStart').value;
@@ -666,11 +665,11 @@
         }
         
         function fastForward() {
-            if (!recordedNotes.length) return;
+            if (!currentNotes.length) return;
             
             // Get loop bounds
             const loopEndInput = document.getElementById('loopEnd').value;
-            const naturalMaxStep = Math.max(...recordedNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
+            const naturalMaxStep = Math.max(...currentNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
             const loopEnd = loopEndInput === "" ? naturalMaxStep : parseInt(loopEndInput);
             
             // Move forward by 8 steps (or to loop end if we'd go past it)
@@ -682,7 +681,7 @@
         
         function updateDisplayAtCurrentStep() {
             // Get notes at current step
-            const notesAtStep = recordedNotes.filter(n => n.step === currentStep);
+            const notesAtStep = currentNotes.filter(n => n.step === currentStep);
             
             // Collect lyrics for this step
             const lyricsAtStep = notesAtStep
@@ -698,7 +697,7 @@
             // Update step counter
             const stepCounter = document.getElementById('step-counter');
             if (stepCounter) {
-                const naturalMaxStep = Math.max(...recordedNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
+                const naturalMaxStep = Math.max(...currentNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
                 stepCounter.textContent = `Step: ${currentStep} / ${naturalMaxStep}`;
             }
             
@@ -859,7 +858,7 @@
 
         // Function to highlight keys based on which track is playing them
         function highlightKeysByTrack() {
-            if (!recordedNotes || !recordedNotes.length) return;
+            if (!currentNotes || !currentNotes.length) return;
             
             // Clear previous track highlights
             const allKeys = document.querySelectorAll('.key');
@@ -870,7 +869,7 @@
             });
             
             // Get current step and find notes being played
-            const notesAtCurrentStep = recordedNotes.filter(n => n.step === currentStep);
+            const notesAtCurrentStep = currentNotes.filter(n => n.step === currentStep);
             
             // Create a map of track IDs to track numbers (1-4)
             const trackIdToNumber = {};
@@ -923,45 +922,48 @@
 
         // Function to update track degrees display
         function updateTrackDegreesDisplay() {
-            if (!recordedNotes || !recordedNotes.length) return;
+            if (!currentNotes || !currentNotes.length) return;
             
             // Update each track's display
             Object.keys(tracks).forEach(trackId => {
                 const displayElement = document.getElementById(`track-note-degrees-display-${trackId}`);
                 if (displayElement) {
                     // Find previous, current, and next notes for this track    
-                    const currentNotes = recordedNotes.filter(n => n.track === trackId && n.step === currentStep);
-                    if (currentNotes.length === 0) {
+                    const notesAtCurrentStep = currentNotes.filter(n => n.track === trackId && n.step === currentStep);
+                    if (notesAtCurrentStep.length === 0) {
                         return;
                     }
-                    const currentNote = currentNotes[0];
+                    const currentNote = notesAtCurrentStep[0];
 
                     // Walk backwards until we find a note that doesn't match the current note
                     let previousNotes = [];
+                    const PREVIOUS_NOTES_LIMIT = 4;
                     for (let i = currentStep - 1; i >= 0; i--) {
-                        const note = recordedNotes.find(n => n.track === trackId && n.step === i);
+                        const note = currentNotes.find(n => n.track === trackId && n.step === i);
                         if (!note) {
                             continue;
                         }
                         currentValue = currentNote.degree || currentNote.note;
                         previousValue = note.degree || note.note;
-                        if (previousValue !== currentValue) {
-                            previousNotes.push(note);
+                        previousNotes.push(note);
+
+                        if (previousNotes.length >= PREVIOUS_NOTES_LIMIT) {
                             break;
                         }
                     }
 
+                    const NEXT_NOTES_LIMIT = 4;
                     // Walk forwards until we find a note that doesn't match the current note
                     let nextNotes = [];
-                    for (let i = currentStep + 1; i < recordedNotes.length; i++) {
-                        const note = recordedNotes.find(n => n.track === trackId && n.step === i);
+                    for (let i = currentStep + 1; i < currentNotes.length; i++) {
+                        const note = currentNotes.find(n => n.track === trackId && n.step === i);
                         if (!note) {
                             continue;
                         }
                         currentValue = currentNote.degree || currentNote.note;
                         nextValue = note.degree || note.note;
-                        if (nextValue !== currentValue) {
-                            nextNotes.push(note);
+                        nextNotes.push(note);
+                        if (nextNotes.length >= NEXT_NOTES_LIMIT) {
                             break;
                         }
                     }
@@ -982,8 +984,8 @@
                     }
                     
                     // Current notes (highlighted)
-                    if (currentNotes.length > 0) {
-                        const currentTexts = currentNotes.map(note => {
+                    if (notesAtCurrentStep.length > 0) {
+                        const currentTexts = notesAtCurrentStep.map(note => {
                             if (note.degree) return note.degree.toString();
                             if (note.chord) return note.chord;
                             if (note.note) return note.note;
@@ -1060,20 +1062,18 @@
                         loadSong();
                     }
                 });
-                songSelect.value = "3";
-                loadSongFromBankAtIndex(3);
+                songSelect.value = "0";
+                loadSong();
             }
             
             // Initialize key selector
-            console.log('Initializing key selector...');
             initializeKeySelector();
             highlightKeysInKey();
-            console.log('Key selector initialized');
+            updateDisplayAtCurrentStep();
             
             // Add event listener to key select dropdown
             const keySelect = document.getElementById('keySelect');
             if (keySelect) {
-                console.log('Key selector found, adding event listener');
                 keySelect.addEventListener('change', function() {
                     if (this.value !== '') {
                         songKey = this.value;
@@ -1101,12 +1101,12 @@
             songDataTextarea.addEventListener('input', function () {
                 const value = songDataTextarea.value.trim();
                 if (!value) {
-                    recordedNotes = [];
+                    currentNotes = [];
                     return;
                 }
                 try {
                     const songData = JSON.parse(value);
-                    recordedNotes = songData.notes || [];
+                    currentNotes = songData.notes || [];
                     tempo = songData.tempo || 120;
                     songKey = songData.key || "Unknown";
                     eighthNoteLength = (60 / tempo / 2) * 1000;

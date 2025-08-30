@@ -131,7 +131,7 @@ function loadSongFromBankAtIndex(songIndex) {
     }
     
     // Also load into the playback system
-    recordedNotes = songData.notes || [];
+    currentNotes = songData.notes || [];
     tempo = songData.tempo || 120;
     songKey = songData.key || "Unknown";
     eighthNoteLength = (60 / tempo / 2) * 1000;
