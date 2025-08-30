@@ -736,9 +736,6 @@
                 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
                     ${trackIds.map((trackId, index) => {
                         let trackNumber = index + 1;
-                        if (trackId === "chords") {
-                            trackNumber = 0;
-                        }
                         return `
                         <div class="track-outline-${trackNumber}" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; background: rgba(255,255,255,0.1);">
                             <div class="track-note-degrees-display" id="track-note-degrees-display-${trackId}">
@@ -766,8 +763,7 @@
                     }).join('')}
                 </div>
             `;
-            
-            console.log('Track controls updated');
+            updateTrackDegreesDisplay();
         }
 
         // Update track volume
@@ -876,16 +872,16 @@
             const trackIds = Object.keys(tracks).sort();
             trackIds.forEach((trackId, index) => {
                 if (index < 4) { // Support up to 4 tracks
-                    if (trackId === "chords") {
-                        trackIdToNumber[trackId] = 0;
-                    } else {
-                        trackIdToNumber[trackId] = index + 1;
-                    }
+                    trackIdToNumber[trackId] = index + 1;
                 }
             });
             
+            highlightKeysInKey();
             // Highlight keys for each track
             notesAtCurrentStep.forEach(note => {
+                if (note.chord) {
+                    return;
+                }
                 const trackNumber = trackIdToNumber[note.track];
                 if (trackNumber) {
                     let noteToHighlight = null;
@@ -909,7 +905,6 @@
                         }
                     }
                     
-                    highlightKeysInKey();
                     if (noteToHighlight) {
                         const keyElement = document.querySelector(`[data-note="${noteToHighlight}"]`);
                         if (keyElement) {
@@ -918,6 +913,46 @@
                     }
                 }
             });
+        }
+
+        // Helper function to convert chord degree to actual chord name
+        function convertChordDegreeToName(degree, songKey) {
+            if (!songKey || songKey === "Unknown") {
+                return degree.toString(); // fallback to degree number
+            }
+            
+            // Get the scale and chord notes for this degree
+            const scale = getMinorScale(songKey);
+            const chordPatterns = {
+                1: [0, 2, 4],
+                2: [1, 3, 5], 
+                3: [2, 4, 6],
+                4: [3, 5, 0],
+                5: [4, 6, 1],
+                6: [5, 0, 2],
+                7: [6, 1, 3]
+            };
+
+            const indices = chordPatterns[degree];
+            if (!indices) {
+                return degree.toString(); // fallback for invalid degrees
+            }
+            
+            const notes = indices.map(i => scale[i]);
+            const root = notes[0];
+
+            // Calculate intervals to determine chord quality
+            const intervals = [
+                (12 + (noteToSemitone(notes[1]) - noteToSemitone(root))) % 12,
+                (12 + (noteToSemitone(notes[2]) - noteToSemitone(root))) % 12
+            ];
+
+            let quality = "";
+            if (intervals[0] === 3 && intervals[1] === 7) quality = "m";      // minor triad
+            else if (intervals[0] === 4 && intervals[1] === 7) quality = "";  // major triad
+            else if (intervals[0] === 3 && intervals[1] === 6) quality = "dim"; // diminished
+
+            return root + quality;
         }
 
         // Function to update track degrees display
@@ -930,10 +965,7 @@
                 if (displayElement) {
                     // Find previous, current, and next notes for this track    
                     const notesAtCurrentStep = currentNotes.filter(n => n.track === trackId && n.step === currentStep);
-                    if (notesAtCurrentStep.length === 0) {
-                        return;
-                    }
-                    const currentNote = notesAtCurrentStep[0];
+                    const currentNote = notesAtCurrentStep.length === 0 ? null : notesAtCurrentStep[0];
 
                     // Walk backwards until we find a note that doesn't match the current note
                     let previousNotes = [];
@@ -943,8 +975,6 @@
                         if (!note) {
                             continue;
                         }
-                        currentValue = currentNote.degree || currentNote.note;
-                        previousValue = note.degree || note.note;
                         previousNotes.push(note);
 
                         if (previousNotes.length >= PREVIOUS_NOTES_LIMIT) {
@@ -960,8 +990,6 @@
                         if (!note) {
                             continue;
                         }
-                        currentValue = currentNote.degree || currentNote.note;
-                        nextValue = note.degree || note.note;
                         nextNotes.push(note);
                         if (nextNotes.length >= NEXT_NOTES_LIMIT) {
                             break;
@@ -974,7 +1002,13 @@
                     if (previousNotes.length > 0) {
                         const prevTexts = previousNotes.map(note => {
                             if (note.degree) return note.degree.toString();
-                            if (note.chord) return note.chord;
+                            if (note.chord) {
+                                // If it's a numeric chord degree, convert to actual chord name
+                                if (/^\d+$/.test(note.chord)) {
+                                    return convertChordDegreeToName(parseInt(note.chord), songKey);
+                                }
+                                return note.chord;
+                            }
                             if (note.note) return note.note;
                             return '';
                         }).filter(text => text);
@@ -987,7 +1021,13 @@
                     if (notesAtCurrentStep.length > 0) {
                         const currentTexts = notesAtCurrentStep.map(note => {
                             if (note.degree) return note.degree.toString();
-                            if (note.chord) return note.chord;
+                            if (note.chord) {
+                                // If it's a numeric chord degree, convert to actual chord name
+                                if (/^\d+$/.test(note.chord)) {
+                                    return convertChordDegreeToName(parseInt(note.chord), songKey);
+                                }
+                                return note.chord;
+                            }
                             if (note.note) return note.note;
                             return '';
                         }).filter(text => text);
@@ -1000,7 +1040,13 @@
                     if (nextNotes.length > 0) {
                         const nextTexts = nextNotes.map(note => {
                             if (note.degree) return note.degree.toString();
-                            if (note.chord) return note.chord;
+                            if (note.chord) {
+                                // If it's a numeric chord degree, convert to actual chord name
+                                if (/^\d+$/.test(note.chord)) {
+                                    return convertChordDegreeToName(parseInt(note.chord), songKey);
+                                }
+                                return note.chord;
+                            }
                             if (note.note) return note.note;
                             return '';
                         }).filter(text => text);

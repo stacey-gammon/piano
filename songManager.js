@@ -91,6 +91,12 @@ function loadSong() {
         return;
     }
     loadSongFromBankAtIndex(selectedIndex);
+
+    // Initialize key selector
+    initializeKeySelector();
+    highlightKeysInKey();
+    updateDisplayAtCurrentStep();
+    updatetrackControls();
 }
 
 
