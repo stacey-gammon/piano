@@ -915,14 +915,17 @@
             });
         }
 
+
         // Helper function to convert chord degree to actual chord name
         function convertChordDegreeToName(degree, songKey) {
             if (!songKey || songKey === "Unknown") {
                 return degree.toString(); // fallback to degree number
             }
             
-            // Get the scale and chord notes for this degree
-            const scale = getMinorScale(songKey);
+            // Determine if it's major or minor key
+            const isMinorKey = songKey.toLowerCase().includes('m');
+            const scale = isMinorKey ? getMinorScale(songKey) : getMajorScale(songKey);
+            
             const chordPatterns = {
                 1: [0, 2, 4],
                 2: [1, 3, 5], 
@@ -1005,7 +1008,7 @@
                             if (note.chord) {
                                 // If it's a numeric chord degree, convert to actual chord name
                                 if (/^\d+$/.test(note.chord)) {
-                                    return convertChordDegreeToName(parseInt(note.chord), songKey);
+                                    return convertChordDegreeToName(note.chord, songKey);
                                 }
                                 return note.chord;
                             }
@@ -1112,11 +1115,7 @@
                 loadSong();
             }
             
-            // Initialize key selector
-            initializeKeySelector();
-            highlightKeysInKey();
-            updateDisplayAtCurrentStep();
-            
+
             // Add event listener to key select dropdown
             const keySelect = document.getElementById('keySelect');
             if (keySelect) {
@@ -1133,8 +1132,6 @@
                 console.log('Key selector not found during initialization');
             }
             
-
-            updatetrackControls();
         }
 
         // Initialize

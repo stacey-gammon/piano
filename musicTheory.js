@@ -12,7 +12,9 @@ function noteToSemitone(note) {
 }
 
 function getChordNotes(key, degree) {
-    const scale = getMinorScale(key); // natural minor
+    // Determine if it's major or minor key
+    const isMinorKey = key.toLowerCase().includes('m');
+    const scale = isMinorKey ? getMinorScale(key) : getMajorScale(key);
     const chordPatterns = {
         1: [0, 2, 4],
         2: [1, 3, 5],
@@ -41,12 +43,29 @@ function getChordNotes(key, degree) {
     return notes
 }
 
+function getMajorScale(key) {
+    const root = key.replace("m", ""); // Remove 'm' if present
+    
+    // intervals for major scale: W-W-H-W-W-W-H
+    const semitones = [2, 2, 1, 2, 2, 2];  // Only 6 intervals to get 7 notes total
+    const chromatic = scales.major; // full chromatic scale
+    const startIdx = chromatic.indexOf(root);
+    const scale = [root];
+    let idx = startIdx;
+    
+    for (let i = 0; i < semitones.length; i++) {
+        idx = (idx + semitones[i]) % 12;
+        scale.push(chromatic[idx]);
+    }
+    return scale; // 1-7 scale degrees
+}
+
 function getMinorScale(key) {
     // Strip off "m" if user passes something like "Bm"
     const root = key.replace("m", "");
 
     // intervals for natural minor: W-H-W-W-H-W-W
-    const semitones = [2, 1, 2, 2, 1, 2, 2];
+    const semitones = [2, 1, 2, 2, 1, 2];  // Only 6 intervals to get 7 notes total
     const chromatic = scales.minor; // full chromatic scale
     const startIdx = chromatic.indexOf(root);
     const scale = [root];
