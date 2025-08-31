@@ -11,15 +11,17 @@ async function loadSongs() {
         
         // Load the song files via script tags
         const songFiles = [
+            'country_roads_well_pennies_chorus.js',
+            'country_roads_well_pennies_verse1.js',
             'calvary_chorus.js',
             'until_the_last_light_fades.js',
             'until_the_last_light_fades_chorus.js',
             'until_the_last_light_fades_verse2.js',
             'wayfaring_stranger.js',
             'mad_world_chorus.js',
-            'country_roads_well_pennies.js'
-        ];
-        
+            'country_roads_well_pennies_verse1.js'
+            ];
+            
         console.log('Song files to load:', songFiles);
         
         // Load each song file

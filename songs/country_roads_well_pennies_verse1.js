@@ -1,4 +1,4 @@
-const countryRoadsWellPennies = {
+const countryRoadsWellPenniesV1 = {
   "notes": [
     {
       "chord": "1",
@@ -94,11 +94,62 @@ const countryRoadsWellPennies = {
       "degree": "2",
       "lyrics": "tains",
       "track": "1"
+    },
+    {
+      "chord": "4",
+      "lyrics": "shen",
+      "step": 25,
+      "duration": 3,
+      "track": "chord"
+    },
+    {
+      "degree": "6[-1]",
+      "lyrics": "shen",
+      "step": 25,
+      "track": "1"
+    },
+    {
+      "degree": "6[-1]",
+      "lyrics": "en",
+      "track": "1"
+    },
+    {
+      "degree": "6[-1]",
+      "lyrics": "doh",
+      "track": "1"
+    },
+    {
+      "degree": "5[-1]",
+      "lyrics": "a",
+      "track": "1"
+    },
+    {
+      "chord": "1",
+      "lyrics": "ri",
+      "step": 29,
+      "duration": 3,
+      "track": "chord"
+    },
+    {
+      "degree": "6[-1]",
+      "lyrics": "ri",
+      "track": "1"
+    },
+    {
+      "degree": "1",
+      "lyrics": "i",
+      "track": "1"
+    },
+    {
+      "degree": "1",
+      "lyrics": "ver",
+      "track": "1",
+      "duration": 3
     }
   ],
   "tempo": 80,
   "key": "C",
-  "title": "Country Roads, Well Pennies",
+  "title": "Country Roads, Well Pennies, Verse 1",
   "tracks": {
     "1": {
       "volume": 3,
@@ -116,5 +167,5 @@ const countryRoadsWellPennies = {
 
 // Register this song with the main application
 if (typeof registerSong === 'function') {
-  registerSong(countryRoadsWellPennies);
+  registerSong(countryRoadsWellPenniesV1);
 }
