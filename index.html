@@ -391,10 +391,10 @@
             <div class="left-side-container">
             
             <div class="controls">
-                <button class="btn btn-play" onclick="togglePlayback()">▶ Play</button>
-                <button class="btn btn-clear" onclick="stopRecording()">Stop</button>
-                <button class="btn btn-rewind" onclick="rewind()">⏪ Rewind</button>
-                <button class="btn btn-ff" onclick="fastForward()">⏩ Fast Forward</button>
+                <button class="btn btn-play" onclick="togglePlayback()">▶️ </button>
+                <button class="btn btn-rewind" onclick="rewindToBeginning()">⏪⏪ </button>
+                <button class="btn btn-rewind" onclick="rewind()">⏪ </button>
+                <button class="btn btn-ff" onclick="fastForward()">⏩ </button>
             </div>
 
             <div class="tempo-control">
@@ -540,10 +540,27 @@
             recordingStartTime = Date.now();
         }
 
-        function stopRecording() {
-            isRecording = false;
-            stopPlayback();
-            currentStep = 0;
+        function rewindToBeginning() {
+            currentStep = 1;
+            updateDisplayAtCurrentStep();
+        }
+
+        function toggleStopPlayback() {
+
+            const stopButton = document.querySelector('.btn-play');
+
+            if (isPlaying) {
+                isRecording = false;
+                pausePlayback();
+                currentStep = 1;    
+                updateDisplayAtCurrentStep();
+                stopButton.textContent = 'Stop';
+            } else {
+                stopButton.textContent = 'Play from beginning';
+                currentStep = 1;
+                updateDisplayAtCurrentStep();
+                startPlayback();
+            }
         }
 
         function clearRecording() {
@@ -585,18 +602,10 @@
             }
 
             if (isPlaying) {
-                stopPlayback();
+                pausePlayback();
             } else {
                 startPlayback();
             }
-        }
-
-
-        function restartRecording() {
-            stopPlayback();
-            currentStep = 0;
-            wasPlaying = false; // Reset wasPlaying when restarting
-            startPlayback();
         }
 
         // Function to get all lyrics with their step numbers
@@ -655,7 +664,7 @@
             }
             
             const playButton = document.querySelector('.btn-play');
-            playButton.textContent = '⏸ Pause';
+            playButton.textContent = '⏸️';
             isPlaying = true;
             
             // Find the natural end of song
@@ -695,7 +704,7 @@
             }, eighthNoteLength);
         }
 
-        function stopPlayback() {
+        function pausePlayback() {
             wasPlaying = true; // Mark that we were playing
             isPlaying = false;
             stopAllOscillators();
@@ -706,7 +715,7 @@
             
             // Update button text
             const playButton = document.querySelector('.btn-play');
-            playButton.textContent = '▶ Play';
+            playButton.textContent = '▶️';
         }
         
         // Navigation functions
@@ -751,9 +760,8 @@
                 .join(' ');
             
             // Display lyrics with context
-            if (lyricsAtStep) {
-                displayLyricsWithContext(currentStep, lyricsAtStep);
-            }
+            displayLyricsWithContext(currentStep, lyricsAtStep);
+
             // Update step counter
             const stepCounter = document.getElementById('step-counter');
             if (stepCounter) {
@@ -775,8 +783,8 @@
             
             // Restart playback if currently playing
             if (isPlaying) {
-                stopPlayback();
-                setTimeout(startPlayback, 100);
+                pausePlayback();
+                setTimeout(startPlayback, 300);
             }
         }
 
