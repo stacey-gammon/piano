@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chord Transpose Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-6">
+
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">Chord Transpose Tool</h1>
+      <p class="text-gray-600">Paste your lyrics with chords and transpose to any key</p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-6">
+      <!-- Input Section -->
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Original</h2>
+        <textarea id="inputText"
+          placeholder="Paste your lyrics with chords here..."
+          class="w-full h-96 p-4 border-2 border-gray-200 rounded-lg font-mono text-sm resize-none focus:border-blue-400 focus:outline-none"></textarea>
+        <div class="mt-4 text-sm text-gray-500">
+          Tip: Place chords above lyrics on separate lines for best results
+        </div>
+      </div>
+
+      <!-- Output Section -->
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-gray-800">Transposed</h2>
+          <button id="copyBtn"
+            class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            disabled>
+            Copy
+          </button>
+        </div>
+        
+        <textarea id="outputText" readonly
+          placeholder="Transposed chords will appear here..."
+          class="w-full h-96 p-4 border-2 border-gray-200 rounded-lg font-mono text-sm resize-none bg-gray-50"></textarea>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-center gap-6">
+        <button id="downBtn"
+          class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold">
+          ↓ Down
+        </button>
+
+        <div class="text-center">
+          <div id="stepsDisplay" class="text-2xl font-bold text-gray-800 mb-1">
+            Original Key
+          </div>
+          <div class="text-sm text-gray-500">Current transposition</div>
+        </div>
+
+        <button id="upBtn"
+          class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold">
+          ↑ Up
+        </button>
+
+        <button id="resetBtn"
+          class="px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors" disabled>
+          ↻ Reset
+        </button>
+      </div>
+
+      <div class="mt-4 text-center text-sm text-gray-600">
+        Use the Up/Down buttons to transpose by semitones, or click Reset to return to original key
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="mt-6 bg-blue-50 rounded-xl p-6">
+      <h3 class="text-lg font-semibold text-blue-800 mb-3">How to use:</h3>
+      <div class="text-blue-700 space-y-2">
+        <p>1. Paste your song with chords positioned above the lyrics</p>
+        <p>2. Use the Up/Down buttons to transpose to your desired key</p>
+        <p>3. Copy the transposed result to use elsewhere</p>
+        <p>4. Supports major, minor, and extended chords (C, Cm, C7, Csus4, etc.)</p>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const enharmonicMap = { 'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#' };
+
+  const inputText = document.getElementById('inputText');
+  const outputText = document.getElementById('outputText');
+  const stepsDisplay = document.getElementById('stepsDisplay');
+  const copyBtn = document.getElementById('copyBtn');
+  const upBtn = document.getElementById('upBtn');
+  const downBtn = document.getElementById('downBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let transposeSteps = 0;
+
+  function transposeChord(chord, steps) {
+    if (!chord.trim()) return chord;
+    const match = chord.match(/^([A-G][#b]?)(.*)/);
+    if (!match) return chord;
+
+    let rootNote = match[1];
+    const chordSuffix = match[2];
+    if (enharmonicMap[rootNote]) rootNote = enharmonicMap[rootNote];
+
+    const currentIndex = chromaticScale.indexOf(rootNote);
+    if (currentIndex === -1) return chord;
+
+    let newIndex = (currentIndex + steps) % 12;
+    if (newIndex < 0) newIndex += 12;
+
+    return chromaticScale[newIndex] + chordSuffix;
+  }
+
+  function transposeText(text, steps) {
+    if (steps === 0) return text;
+    const lines = text.split('\n');
+    return lines.map(line => {
+      const chordPattern = /\b[A-G][#b]?[^\s]*\b/g;
+      return line.replace(chordPattern, match => {
+        if (/^[A-G][#b]?(m|maj|min|dim|aug|\d|sus|add|\/)*$/i.test(match.trim())) {
+          return transposeChord(match, steps);
+        }
+        return match;
+      });
+    }).join('\n');
+  }
+
+  function updateOutput() {
+    const text = inputText.value;
+    const transposed = transposeText(text, transposeSteps);
+    outputText.value = transposed;
+    copyBtn.disabled = !transposed;
+    resetBtn.disabled = transposeSteps === 0;
+    stepsDisplay.textContent =
+      transposeSteps === 0
+        ? 'Original Key'
+        : `${transposeSteps > 0 ? '+' : ''}${transposeSteps} ${Math.abs(transposeSteps) === 1 ? 'semitone' : 'semitones'}`;
+  }
+
+  inputText.addEventListener('input', updateOutput);
+
+  upBtn.addEventListener('click', () => { transposeSteps++; updateOutput(); });
+  downBtn.addEventListener('click', () => { transposeSteps--; updateOutput(); });
+  resetBtn.addEventListener('click', () => { transposeSteps = 0; updateOutput(); });
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(outputText.value);
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+    } catch (err) {
+      console.error('Copy failed:', err);
+    }
+  });
+</script>
+</body>
+</html>
