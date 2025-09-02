@@ -132,7 +132,7 @@
     return lines.map(line => {
       const chordPattern = /\b[A-G][#b]?[^\s]*\b/g;
       return line.replace(chordPattern, match => {
-        if (/^[A-G][#b]?(m|maj|min|dim|aug|\d|sus|add|\/)*$/i.test(match.trim())) {
+        if (/^[A-G][#b]?(?:m|maj|min|dim|aug|\d|sus|add|\d+)?(?:\/[A-G][#b]?)?$/i.test(match.trim())) {
           return transposeChord(match, steps);
         }
         return match;
