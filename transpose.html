@@ -98,24 +98,33 @@
   const resetBtn = document.getElementById('resetBtn');
 
   let transposeSteps = 0;
-
+  
   function transposeChord(chord, steps) {
     if (!chord.trim()) return chord;
+  
+    // Handle slash chords (like F#/A#)
+    if (chord.includes('/')) {
+      const [main, bass] = chord.split('/');
+      return transposeChord(main, steps) + '/' + transposeChord(bass, steps);
+    }
+  
     const match = chord.match(/^([A-G][#b]?)(.*)/);
     if (!match) return chord;
-
+  
     let rootNote = match[1];
     const chordSuffix = match[2];
+  
     if (enharmonicMap[rootNote]) rootNote = enharmonicMap[rootNote];
-
+  
     const currentIndex = chromaticScale.indexOf(rootNote);
     if (currentIndex === -1) return chord;
-
+  
     let newIndex = (currentIndex + steps) % 12;
     if (newIndex < 0) newIndex += 12;
-
+  
     return chromaticScale[newIndex] + chordSuffix;
   }
+
 
   function transposeText(text, steps) {
     if (steps === 0) return text;
