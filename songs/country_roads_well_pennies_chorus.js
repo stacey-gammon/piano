@@ -1,22 +1,16 @@
 const countryRoadsWellPenniesChorus = {
   "notes": [
     {
-      "chord": "1",
-      "duration": 4,
-      "lyrics": "",
-      "track": "chords"
-    },
-    {
       "degree": "1",
       "duration": 2,
-      "step": 3,
+      "step": 2,
       "lyrics": "Coun",
       "track": "1"
     },
     {
       "degree": "5",
       "duration": 2,
-      "step": 3,
+      "step": 2,
       "lyrics": "Coun",
       "track": "2"
     },
@@ -29,6 +23,13 @@ const countryRoadsWellPenniesChorus = {
       "degree": "7",
       "lyrics": "try",
       "track": "2"
+    },
+    {
+      "chord": "1",
+      "duration": 8,
+      "step": 5,
+      "lyrics": "",
+      "track": "chords"
     },
     {
       "degree": "3",
@@ -100,6 +101,27 @@ const countryRoadsWellPenniesChorus = {
       "duration": 3,
       "lyrics": "home",
       "track": "2"
+    },
+    {
+      "chord": "6",
+      "lyrics": "to",
+      "track": "chords"
+    },
+    {
+      "degree": "3",
+      "duration": 1,
+      "lyrics": "to",
+      "track": "1"
+    },
+    {
+      "degree": "2",
+      "lyrics": "the",
+      "track": "1"
+    },
+    {
+      "degree": "2",
+      "lyrics": "place",
+      "track": "1"
     }
   ],
   "tempo": 80,

@@ -625,6 +625,11 @@
 
         // Function to display lyrics with context (previous 4, current, next 4)
         function displayLyricsWithContext(currentStep, currentLyrics) {
+            // If it's step 1 or 0, show the next lyrics, otherwise leave the previous lyric
+            // display the same. 
+            if (!currentLyrics && currentStep > 1) {
+                return;
+            }
             const lyricsMap = getAllLyricsWithSteps();
             const allSteps = Array.from(lyricsMap.keys()).sort((a, b) => a - b);
             const currentStepIndex = allSteps.indexOf(currentStep);
@@ -692,9 +697,10 @@
                 updateDisplayAtCurrentStep();
                 
                 // Play each note or chord with appropriate volume
+                const currentTime = audioContext.currentTime;
                 notesToPlay.forEach(n => {
                     const trackVolume = tracks[n.track] ? tracks[n.track].volume : 5;
-                    playNoteOrChord(n, trackVolume, songKey);
+                    playNoteOrChord(n, trackVolume, songKey, currentTime);
                 });
                 
                 currentStep++;
@@ -866,7 +872,6 @@
 
         // Function to highlight keys in the current song's key
         function highlightKeysInKey() {
-            console.log('highlightKeysInKey called with songKey:', songKey);
             
             if (!songKey || songKey === "Unknown") {
                 console.log('No valid songKey, clearing highlights');
@@ -877,7 +882,6 @@
             
             // Get notes in the current key
             const keyNotes = getNotesInKey(songKey);
-            console.log('Key notes returned:', keyNotes);
             
             // Clear previous highlights
             clearKeyHighlights();
@@ -895,8 +899,6 @@
                     degreeIndicator.textContent = degree;
                     keyElement.appendChild(degreeIndicator);
                     
-                } else {
-                    console.log(`Could not find key element for note: ${note}`);
                 }
             });
             
@@ -1020,7 +1022,7 @@
             if (intervals[0] === 3 && intervals[1] === 7) quality = "m";      // minor triad
             else if (intervals[0] === 4 && intervals[1] === 7) quality = "";  // major triad
             else if (intervals[0] === 3 && intervals[1] === 6) quality = "dim"; // diminished
-
+    
             return root + quality;
         }
 
@@ -1036,6 +1038,9 @@
                     const notesAtCurrentStep = currentNotes.filter(n => n.track === trackId && n.step === currentStep);
                     const currentNote = notesAtCurrentStep.length === 0 ? null : notesAtCurrentStep[0];
 
+                    if (!currentNote && currentStep > 1) {
+                        return;
+                    }
                     // Walk backwards until we find a note that doesn't match the current note
                     let previousNotes = [];
                     const PREVIOUS_NOTES_LIMIT = 4;

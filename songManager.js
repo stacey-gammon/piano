@@ -19,8 +19,9 @@ async function loadSongs() {
             'until_the_last_light_fades_verse2.js',
             'wayfaring_stranger.js',
             'mad_world_chorus.js',
-            'country_roads_well_pennies_verse1.js'
-            ];
+            'country_roads_well_pennies_verse1.js',
+            'sound_of_silence.js',
+        ];
             
         console.log('Song files to load:', songFiles);
         
@@ -79,12 +80,6 @@ function updateSongSelector() {
     }
 }
 
-// Function to manually refresh songs (useful for development)
-async function refreshSongs() {
-    songBank = []; // Clear existing songs
-    await loadSongs();
-}
-
 // Song management functions - simplified for direct editing
 function loadSong() {
     const selectedIndex = document.getElementById('songSelect').value;
@@ -119,8 +114,8 @@ function getProcessedSongData(songData) {
                 }
             }
             if (previousEntry) {
-                duration = previousEntry.duration || 1;
-                pause = previousEntry.pause || 0;
+                const duration = previousEntry.duration || 1;
+                const pause = previousEntry.pause || 0;
                 processedSongData.notes[i].step = previousEntry.step + duration + pause;
             } else {
                 processedSongData.notes[i].step = 1;

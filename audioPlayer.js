@@ -8,14 +8,12 @@ let activeOscillators = [];
 function stopAllOscillators() {
     activeOscillators.forEach(oscillator => {
         try {
-            console.log('Stopping oscillator');
             oscillator.stop();
         } catch (e) {
             // Oscillator might already be stopped, ignore error
         }
     });
     activeOscillators = [];
-    console.log('Stopped all active oscillators');
 }
 
 // Chord definitions (root, third, fifth)
@@ -96,9 +94,14 @@ const noteFreqs = {
 };
 
 
+function perceivedLoudnessScale(freq) {
+    // crude correction: quieter for lows, boost highs
+    // Middle C (C4, ~261 Hz) is our baseline = 1.0
+    return Math.min(1.5, Math.max(0.6, Math.log2(freq / 261) * 0.2 + 1));
+}
+
 // Consolidated playNote function that handles both regular notes and volume-based playback
-function playNote(note, trackVolume = null, duration = .25) {
-    console.log('Playing note:', note);
+function playNote(note, trackVolume = null, duration = .25, startTime = null) {
     const freq = noteFreqs[note];
     if (!freq) {
         console.error('Invalid note:', note);
@@ -111,29 +114,33 @@ function playNote(note, trackVolume = null, duration = .25) {
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
     
-    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+    // Use provided startTime or current time
+    const playTime = startTime || audioContext.currentTime;
+    
+    oscillator.frequency.setValueAtTime(freq, playTime);
     oscillator.type = 'triangle';
     
-    // Handle volume - if trackVolume is provided, use it; otherwise use default
-    let volume = 0.3; // Default volume
+    let volume = 0.3;
     if (trackVolume !== null) {
-        if (trackVolume === 0) return; // Don't play if volume is 0
-        volume = (trackVolume / 5) * 0.3; // Scale volume based on track volume (1-5 scale)
+        if (trackVolume === 0) return;
+        volume = (trackVolume / 5) * 0.3;
+        // Apply frequency scaling so low notes aren’t overpowering
+        volume *= perceivedLoudnessScale(freq);
+        console.log('Setting volume to', volume, 'for note', note, 'at time', playTime, 'trackVolume', trackVolume);
     }
     
-    const now = audioContext.currentTime;
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(volume, now + 0.01);
+    gainNode.gain.setValueAtTime(0, playTime);
+    gainNode.gain.linearRampToValueAtTime(volume, playTime + 0.01);
 
     // Sustain until just before note ends
-    gainNode.gain.setValueAtTime(volume, now + duration - 0.05);
+    gainNode.gain.setValueAtTime(volume, playTime + duration - 0.05);
     
     // Track this oscillator so we can stop it later if needed
     activeOscillators.push(oscillator);
     
-    oscillator.start(audioContext.currentTime);
+    oscillator.start(playTime);
 
-    oscillator.stop(audioContext.currentTime + duration);
+    oscillator.stop(playTime + duration);
 
     // Visual feedback
     const keyElement = document.querySelector(`[data-note="${note}"]`);
@@ -160,10 +167,11 @@ function playNote(note, trackVolume = null, duration = .25) {
 }
 
 // Function to play a chord (multiple notes simultaneously)
-function playChord(chordName, trackVolume = null, duration = 1, songKey = null) {
+function playChord(chordName, trackVolume = null, duration = 1, songKey = null, startTime = null) {
     // check to see if there are any digits in the chord name
+    let chordNotes;
     if (/\d+/.test(chordName)) {
-        degree = parseInt(chordName);
+        const degree = parseInt(chordName);
         chordNotes = getChordNotes(songKey, degree);
         // Add the octave to the chord notes
         chordNotes = chordNotes.map(note => note + defaultOctave);
@@ -178,7 +186,7 @@ function playChord(chordName, trackVolume = null, duration = 1, songKey = null) 
     
     // Play all notes in the chord simultaneously with the specified duration
     chordNotes.forEach(note => {
-        playNote(note, trackVolume, duration);
+        playNote(note, trackVolume, duration, startTime);
     });
     
     // Visual feedback for chord (highlight multiple keys for the duration)
@@ -293,7 +301,7 @@ function mapDegreeToNote(scaleDegree, octave, songKey, raiseSemitone = 0) {
 }
 
 // Function to play a note or chord based on the note object
-function playNoteOrChord(noteObject, trackVolume = null, songKey = null) {
+function playNoteOrChord(noteObject, trackVolume = null, songKey = null, startTime = null) {
     const durationSeconds = (noteObject.duration || 1) * eighthNoteLength / 1000;
     let mappedNote = null;
     // Check if this is a scale degree mapping (new feature)
@@ -308,9 +316,9 @@ function playNoteOrChord(noteObject, trackVolume = null, songKey = null) {
     }
     
     if (noteObject.chord) {
-        playChord(noteObject.chord, trackVolume, durationSeconds, songKey);
+        playChord(noteObject.chord, trackVolume, durationSeconds, songKey, startTime);
     } else if (noteObject.note || mappedNote) {
-        playNote(noteObject.note || mappedNote, trackVolume, durationSeconds);
+        playNote(noteObject.note || mappedNote, trackVolume, durationSeconds, startTime);
     } else {
         console.warn('Note object has neither note, chord, nor degree field:', noteObject);
     }
@@ -374,3 +382,4 @@ function getNotesInKey(songKey) {
     }
     return notes;
 }
+
