@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Piano App</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .key-selector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .key-selector label {
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .key-selector select {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff9ff3, #f368e0);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .key-selector select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .piano {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            height: 250px;
+            background: #333;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin: 20px 0;
+        }
+
+        .key {
+            cursor: pointer;
+            border: 2px solid #222;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 5px;
+            font-weight: bold;
+            transition: all 0.1s ease;
+            user-select: none;
+            position: relative;
+        }
+
+        .white-key {
+            background: linear-gradient(to bottom, #fff, #f0f0f0);
+            color: #333;
+            width: 60px;
+            height: 220px;
+            margin: 0 1px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .black-key {
+            background: linear-gradient(to bottom, #333, #111);
+            color: white;
+            width: 35px;
+            height: 140px;
+            position: absolute;
+            z-index: 2;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .key:hover {
+            transform: scale(1.02);
+        }
+
+        .key:active, .key.active {
+            transform: scale(0.98);
+        }
+
+        .white-key:active, .white-key.active {
+            background: linear-gradient(to bottom, #e0e0e0, #d0d0d0);
+        }
+
+        .black-key:active, .black-key.active {
+            background: linear-gradient(to bottom, #222, #000);
+        }
+
+        .note-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .degree-indicator {
+            background: #ffd700;
+            color: #333;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            margin-top: 5px;
+        }
+
+        .black-key .degree-indicator {
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+        }
+
+        .instructions {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+        }
+
+        .chord-display {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 30px;
+            color: #ffd700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 768px) {
+            .piano {
+                height: 200px;
+                padding: 10px;
+            }
+            
+            .white-key {
+                width: 45px;
+                height: 180px;
+            }
+            
+            .black-key {
+                width: 28px;
+                height: 110px;
+            }
+            
+            .note-name {
+                font-size: 12px;
+            }
+            
+            .degree-indicator {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎹 Simple Piano App</h1>
+        
+        <div class="key-selector">
+            <label for="keySelect">Select Key:</label>
+            <select id="keySelect">
+                <option value="">Choose a key...</option>
+                <option value="C">C Major</option>
+                <option value="C#">C# Major</option>
+                <option value="D">D Major</option>
+                <option value="D#">D# Major</option>
+                <option value="E">E Major</option>
+                <option value="F">F Major</option>
+                <option value="F#">F# Major</option>
+                <option value="G">G Major</option>
+                <option value="G#">G# Major</option>
+                <option value="A">A Major</option>
+                <option value="A#">A# Major</option>
+                <option value="B">B Major</option>
+                <option value="Cm">C Minor</option>
+                <option value="C#m">C# Minor</option>
+                <option value="Dm">D Minor</option>
+                <option value="D#m">D# Minor</option>
+                <option value="Em">E Minor</option>
+                <option value="Fm">F Minor</option>
+                <option value="F#m">F# Minor</option>
+                <option value="Gm">G Minor</option>
+                <option value="G#m">G# Minor</option>
+                <option value="Am">A Minor</option>
+                <option value="A#m">A# Minor</option>
+                <option value="Bm">B Minor</option>
+            </select>
+        </div>
+
+        <div class="chord-display" id="chordDisplay">
+            Select a key to start playing chords!
+        </div>
+
+        <div class="piano" id="piano">
+            <!-- Piano keys will be generated here -->
+        </div>
+
+        <div class="instructions">
+            <p>🎵 <strong>How to use:</strong></p>
+            <p>1. Select a key (like C Major or D Minor) from the dropdown above</p>
+            <p>2. Click any key on the piano to play the corresponding chord</p>
+            <p>3. Each key shows the note name and its degree in the selected key</p>
+            <p>4. The chord being played will be displayed above the piano</p>
+        </div>
+    </div>
+
+    <script src="../musicTheory.js"></script>
+    <script>
+        // Audio context
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Current selected key
+        let currentKey = '';
+        
+        // Note frequencies (C3 to C5 range for piano)
+        const noteFreqs = {
+            'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
+            'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+            'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
+        };
+
+        // Generate piano keys
+        function createPiano() {
+            const piano = document.getElementById('piano');
+            piano.innerHTML = '';
+            
+            const whiteKeys = ['C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
+            const blackKeys = ['C#3', 'D#3', 'F#3', 'G#3', 'A#3', 'C#4', 'D#4', 'F#4', 'G#4', 'A#4', 'C#5', 'D#5'];
+            
+            // Create white keys
+            whiteKeys.forEach((note, index) => {
+                const key = document.createElement('div');
+                key.className = 'key white-key';
+                key.dataset.note = note;
+                
+                const noteName = document.createElement('div');
+                noteName.className = 'note-name';
+                noteName.textContent = note;
+                key.appendChild(noteName);
+                
+                const degreeIndicator = document.createElement('div');
+                degreeIndicator.className = 'degree-indicator';
+                degreeIndicator.textContent = '?';
+                key.appendChild(degreeIndicator);
+                
+                key.addEventListener('mousedown', () => playChord(note));
+                key.addEventListener('mouseup', () => stopNote());
+                key.addEventListener('mouseleave', () => stopNote());
+                
+                piano.appendChild(key);
+            });
+
+            // Create black keys with relative positioning
+            const blackKeyPositions = [
+                { note: 'C#3', relativeTo: 'C3', offset: 0.75 },
+                { note: 'D#3', relativeTo: 'D3', offset: 0.75 },
+                { note: 'F#3', relativeTo: 'F3', offset: 0.75 },
+                { note: 'G#3', relativeTo: 'G3', offset: 0.75 },
+                { note: 'A#3', relativeTo: 'A3', offset: 0.75 },
+                { note: 'C#4', relativeTo: 'C4', offset: 0.75 },
+                { note: 'D#4', relativeTo: 'D4', offset: 0.75 },
+                { note: 'F#4', relativeTo: 'F4', offset: 0.75 },
+                { note: 'G#4', relativeTo: 'G4', offset: 0.75 },
+                { note: 'A#4', relativeTo: 'A4', offset: 0.75 },
+                { note: 'C#5', relativeTo: 'C5', offset: 0.75 },
+                { note: 'D#5', relativeTo: 'D5', offset: 0.75 }
+            ];
+            
+            blackKeyPositions.forEach(({ note, relativeTo, offset }) => {
+                const key = document.createElement('div');
+                key.className = 'key black-key';
+                key.dataset.note = note;
+                
+                const noteName = document.createElement('div');
+                noteName.className = 'note-name';
+                noteName.textContent = note;
+                key.appendChild(noteName);
+                
+                const degreeIndicator = document.createElement('div');
+                degreeIndicator.className = 'degree-indicator';
+                degreeIndicator.textContent = '?';
+                key.appendChild(degreeIndicator);
+                
+                // Position relative to the white key to the left
+                const whiteKeyElement = piano.querySelector(`[data-note="${relativeTo}"]`);
+                if (whiteKeyElement) {
+                    const whiteKeyRect = whiteKeyElement.getBoundingClientRect();
+                    const pianoRect = piano.getBoundingClientRect();
+                    const relativeLeft = whiteKeyRect.left - pianoRect.left + (whiteKeyRect.width * offset);
+                    key.style.left = `${relativeLeft}px`;
+                }
+                
+                key.addEventListener('mousedown', () => playChord(note));
+                key.addEventListener('mouseup', () => stopNote());
+                key.addEventListener('mouseleave', () => stopNote());
+                
+                piano.appendChild(key);
+            });
+        }
+
+        // Play a single note
+        function playNote(note, duration = 0.5) {
+            const freq = noteFreqs[note];
+            if (!freq) {
+                console.error('Invalid note:', note);
+                return;
+            }
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            oscillator.type = 'triangle';
+            
+            const volume = 0.3;
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime + duration - 0.05);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+
+            // Visual feedback
+            const keyElement = document.querySelector(`[data-note="${note}"]`);
+            if (keyElement) {
+                keyElement.classList.add('active');
+                setTimeout(() => keyElement.classList.remove('active'), duration * 1000);
+            }
+        }
+
+        // Play a chord based on the clicked key
+        function playChord(rootNote) {
+            if (!currentKey) {
+                document.getElementById('chordDisplay').textContent = 'Please select a key first!';
+                return;
+            }
+
+            // Get the degree of the clicked note in the current key
+            const degree = getDegreeInKey(rootNote, currentKey);
+            if (!degree) {
+                document.getElementById('chordDisplay').textContent = `Note ${rootNote} not found in ${currentKey}`;
+                return;
+            }
+
+            // Get chord notes for this degree
+            const chordNotes = getChordNotes(currentKey, degree);
+            if (!chordNotes) {
+                document.getElementById('chordDisplay').textContent = `Invalid chord for degree ${degree}`;
+                return;
+            }
+
+            // Add octave to chord notes (use octave 4)
+            const chordNotesWithOctave = chordNotes.map(note => note + '4');
+            
+            // Play all notes in the chord
+            chordNotesWithOctave.forEach(note => {
+                playNote(note, 1.0);
+            });
+
+            // Display chord information
+            const chordName = getChordName(currentKey, degree);
+            document.getElementById('chordDisplay').textContent = 
+                `${rootNote} (${degree}) → ${chordName} chord: ${chordNotesWithOctave.join(', ')}`;
+        }
+
+        // Get the degree of a note in a given key
+        function getDegreeInKey(note, key) {
+            const noteName = note.replace(/\d+/, ''); // Remove octave number
+            const isMinorKey = key.toLowerCase().includes('m');
+            const scale = isMinorKey ? getMinorScale(key) : getMajorScale(key);
+            
+            const degree = scale.indexOf(noteName) + 1;
+            return degree > 0 ? degree : null;
+        }
+
+        // Get chord name for a degree in a key
+        function getChordName(key, degree) {
+            const isMinorKey = key.toLowerCase().includes('m');
+            const scale = isMinorKey ? getMinorScale(key) : getMajorScale(key);
+            const rootNote = scale[degree - 1];
+            
+            // Determine chord quality based on key and degree
+            let quality = '';
+            if (isMinorKey) {
+                // Minor key chord qualities
+                const qualities = ['m', 'dim', '', 'm', 'm', '', ''];
+                quality = qualities[degree - 1] || '';
+            } else {
+                // Major key chord qualities
+                const qualities = ['', 'm', 'm', '', '', 'm', 'dim'];
+                quality = qualities[degree - 1] || '';
+            }
+            
+            return rootNote + quality;
+        }
+
+        // Update degree indicators when key changes
+        function updateDegreeIndicators() {
+            if (!currentKey) {
+                // Show question marks
+                document.querySelectorAll('.degree-indicator').forEach(indicator => {
+                    indicator.textContent = '?';
+                });
+                return;
+            }
+
+            const isMinorKey = currentKey.toLowerCase().includes('m');
+            const scale = isMinorKey ? getMinorScale(currentKey) : getMajorScale(currentKey);
+            
+            document.querySelectorAll('.key').forEach(key => {
+                const note = key.dataset.note;
+                const noteName = note.replace(/\d+/, ''); // Remove octave
+                const degree = scale.indexOf(noteName) + 1;
+                
+                const indicator = key.querySelector('.degree-indicator');
+                if (indicator) {
+                    indicator.textContent = degree > 0 ? degree : '?';
+                }
+            });
+        }
+
+        // Stop note (for mouse events)
+        function stopNote() {
+            // Visual feedback is handled in playNote
+        }
+
+        // Initialize the app
+        function initializeApp() {
+            createPiano();
+            
+            // Add event listener to key selector
+            const keySelect = document.getElementById('keySelect');
+            keySelect.addEventListener('change', function() {
+                currentKey = this.value;
+                updateDegreeIndicators();
+                
+                if (currentKey) {
+                    document.getElementById('chordDisplay').textContent = 
+                        `Selected key: ${currentKey}. Click any key to play its chord!`;
+                } else {
+                    document.getElementById('chordDisplay').textContent = 
+                        'Select a key to start playing chords!';
+                }
+            });
+        }
+
+        // Start the app
+        initializeApp();
+    </script>
+</body>
+</html>

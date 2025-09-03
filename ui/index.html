@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Piano Recording App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .key-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .key-selector label {
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-record {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-stop {
+            background: linear-gradient(45deg, #54a0ff, #2e86de);
+            color: white;
+        }
+
+        .btn-play {
+            background: linear-gradient(45deg, #5f27cd, #341f97);
+            color: white;
+        }
+
+        .btn-clear {
+            background: linear-gradient(45deg, #ff9ff3, #f368e0);
+            color: white;
+        }
+        
+        .btn-rewind {
+            background: linear-gradient(45deg, #feca57, #ff9ff3);
+            color: white;
+        }
+        
+        .btn-ff {
+            background: linear-gradient(45deg, #48dbf8, #0abde3);
+            color: white;
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .left-side-container,
+            .right-side-container {
+                flex: none;
+            }
+            
+            .song-data textarea {
+                height: 300px; /* Shorter on mobile */
+            }
+        }
+
+        .recording-status {
+            text-align: center;
+            font-size: 18px;
+            margin: 10px 0;
+            min-height: 25px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .left-side-container {
+            flex: 4; /* 80% of the space (4/5) */
+        }
+
+        .right-side-container {
+            flex: 1; /* 20% of the space (1/5) */
+        }
+
+        .piano {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            height: 200px;
+            background: #333;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%; /* Full width at bottom */
+            margin: 20px 0;
+        }
+
+        .key {
+            cursor: pointer;
+            border: 2px solid #222;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            font-weight: bold;
+            transition: all 0.1s ease;
+            user-select: none;
+            position: relative;
+        }
+
+        .white-key {
+            background: linear-gradient(to bottom, #fff, #f0f0f0);
+            color: #333;
+            width: 60px;
+            height: 180px;
+            margin: 0 1px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .black-key {
+            background: linear-gradient(to bottom, #333, #111);
+            color: white;
+            width: 35px;
+            height: 120px;
+            position: absolute;
+            z-index: 2;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .key:hover {
+            transform: scale(1.02);
+        }
+
+        .key:active, .key.active {
+            transform: scale(0.98);
+        }
+
+        .white-key:active, .white-key.active {
+            background: linear-gradient(to bottom, #e0e0e0, #d0d0d0);
+        }
+
+        .black-key:active, .black-key.active {
+            background: linear-gradient(to bottom, #222, #000);
+        }
+
+        .song-data {
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* Take full height of right container */
+        }
+
+        .song-data h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .song-data textarea {
+            width: 100%;
+            height: 500px; /* Even taller for the narrow column */
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            resize: vertical;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 1; /* Take up remaining space in the column */
+        }
+
+        .load-save-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-load, .btn-save {
+            background: linear-gradient(45deg, #00d2d3, #54a0ff);
+            color: white;
+        }
+
+        .tempo-control {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .tempo-control input {
+            width: 80px;
+            padding: 8px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .playback-indicator {
+            text-align: center;
+            font-size: 16px;
+            margin: 10px 0;
+            min-height: 20px;
+        }
+
+        /* Key highlighting styles */
+        .key-in-scale {
+            box-shadow: 0 0 15px #ffd700, inset 0 0 10px rgba(255, 215, 0, 0.3);
+            border-color: #ffd700 !important;
+        }
+
+        .white-key.key-in-scale {
+            background: linear-gradient(to bottom, #fff8dc, #f0f8ff);
+        }
+
+        .black-key.key-in-scale {
+            background: linear-gradient(to bottom, #2f4f4f, #1a1a1a);
+        }
+
+        /* Track-specific key highlighting - dynamic classes for up to 4 tracks */
+        .key-track-1 {
+            box-shadow: 0 0 15px #19e70a, inset 0 0 10px rgba(255, 107, 107, 0.3);
+            border-color: #19e70a !important;
+        }
+
+        .key-track-2 {
+            box-shadow: 0 0 15px #ea1dce, inset 0 0 10px rgba(78, 205, 196, 0.3);
+            border-color: #ea1dce !important;
+        }
+
+        .key-track-3 {
+            box-shadow: 0 0 15px #45b7d1, inset 0 0 10px rgba(69, 183, 209, 0.3);
+            border-color: #45b7d1 !important;
+        }
+
+        .key-track-4 {
+            box-shadow: 0 0 15px #f39c12, inset 0 0 10px rgba(243, 156, 18, 0.3);
+            border-color: #f39c12 !important;
+        }
+
+        .white-key.key-track-1 {
+            background: linear-gradient(to bottom, #ffe6e6, #fff0f0);
+        }
+
+        .black-key.key-track-1 {
+            background: linear-gradient(to bottom, #4a2f2f, #2a1a1a);
+        }
+
+        .white-key.key-track-2 {
+            background: linear-gradient(to bottom, #e6fff9, #f0fffd);
+        }
+
+        .black-key.key-track-2 {
+            background: linear-gradient(to bottom, #2f4a4a, #1a2a2a);
+        }
+
+        .white-key.key-track-3 {
+            background: linear-gradient(to bottom, #e6f4ff, #f0f9ff);
+        }
+
+        .black-key.key-track-3 {
+            background: linear-gradient(to bottom, #2f3f4a, #1a232a);
+        }
+
+        .white-key.key-track-4 {
+            background: linear-gradient(to bottom, #fff8e6, #fffbf0);
+        }
+
+        .black-key.key-track-4 {
+            background: linear-gradient(to bottom, #4a3f2f, #2a231a);
+        }
+
+        /* Track outline colors - dynamic classes for up to 4 tracks */
+        .track-outline-1 {
+            border: 2px solid #19e70a !important;
+        }
+
+        .track-outline-2 {
+            border: 2px solid #ea1dce !important;
+        }
+
+        .track-outline-3 {
+            border: 2px solid #45b7d1 !important;
+        }
+
+        .track-outline-4 {
+            border: 2px solid #f39c12 !important;
+        }
+
+        .degree-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ffd700;
+            color: #333;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .black-key .degree-indicator {
+            top: 3px;
+            right: 3px;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎹 Piano Practice App</h1>
+
+        <div class="main-content">
+            <div class="left-side-container">
+            
+            <div class="controls">
+                <button class="btn btn-play" onclick="togglePlayback()">▶️ </button>
+                <button class="btn btn-rewind" onclick="rewindToBeginning()">⏪⏪ </button>
+                <button class="btn btn-rewind" onclick="rewind()">⏪ </button>
+                <button class="btn btn-ff" onclick="fastForward()">⏩ </button>
+            </div>
+
+            <div class="tempo-control">
+                <label>Loop Start (step): </label>
+                <input type="number" id="loopStart" min="0" placeholder="Start">
+                <label style="margin-left: 20px;">Loop End (step): </label>
+                <input type="number" id="loopEnd" min="0" placeholder="End">
+            </div>
+            
+            <div class="controls">
+                <select id="songSelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #00d2d3, #54a0ff);">
+                </select>
+                <div class="key-selector">
+                    <label>Key:</label>
+                    <select id="keySelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #ff9ff3, #f368e0);">
+                        <option value="">Select key...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="playback-indicator" id="lyrics-display" style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); min-height: 35px;"></div>
+            <div class="step-counter" id="step-counter" style="text-align: center; font-size: 16px; color: #ccc; margin: 10px 0;">Step: 0</div>
+
+            <div class="track-controls" id="trackControls" style="margin: 20px 0; text-align: center;">
+                <!-- track volume controls will be added here dynamically -->
+            </div>
+
+            <div class="tempo-control">
+                <label>Tempo (BPM): </label>
+                <input type="number" id="tempo" value="120" min="60" max="200" onchange="updateTempo()">
+            </div>
+
+
+            </div>
+            <div class="right-side-container">
+            <div class="song-data">
+                <textarea id="songData" placeholder="Your song data will appear here..."></textarea>
+                <div class="load-save-controls">
+                    
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="piano" id="piano">
+            <!-- Piano keys will be generated here -->
+        </div>
+
+
+    </div>
+
+    <script src="songManager.js"></script>
+    <script src="audioPlayer.js"></script>
+    <script src="musicTheory.js"></script>
+    <script src="songs/sound_of_silence.js"></script>
+    <script>
+        // Audio context and notes
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Recording variables
+        let isRecording = false;
+        let currentNotes = [];
+        let recordingStartTime = 0;
+        let tempo = 120;
+        let defaultOctave = 4;
+        let eighthNoteLength = (60 / tempo / 2) * 1000; // 1/8 note in ms
+        let currentSong = null;
+        let tracks = { "1": { volume: 5 } }; // Default track
+        let songKey = "Unknown";
+
+        // Song bank is now declared in songManager.js
+
+        // Playback variables
+        let isPlaying = false;
+        let playbackInterval = null;
+        let currentStep = 1;
+        let wasPlaying = false; // Track if we were playing before
+
+        // Generate piano keys
+        function createPiano() {
+            const piano = document.getElementById('piano');
+            const whiteKeys = ['B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5'];
+            const blackKeys = ['C#3', 'D#3', 'F#3', 'G#3', 'A#3', 'C#4', 'D#4', 'F#4', 'G#4', 'A#4', 'C#5', 'D#5'];
+            
+            // Create white keys
+            whiteKeys.forEach((note, index) => {
+                const key = document.createElement('div');
+                key.className = 'key white-key';
+                key.textContent = note;
+                key.dataset.note = note;
+                key.addEventListener('mousedown', () => playNote(note));
+                key.addEventListener('mouseup', () => stopNote());
+                key.addEventListener('mouseleave', () => stopNote());
+                piano.appendChild(key);
+            });
+
+            // Create black keys with relative positioning
+            const blackKeyPositions = [
+                { note: 'C#3', relativeTo: 'C3', offset: 0.75 },
+                { note: 'D#3', relativeTo: 'D3', offset: 0.75 },
+                { note: 'F#3', relativeTo: 'F3', offset: 0.75 },
+                { note: 'G#3', relativeTo: 'G3', offset: 0.75 },
+                { note: 'A#3', relativeTo: 'A3', offset: 0.75 },
+                { note: 'C#4', relativeTo: 'C4', offset: 0.75 },
+                { note: 'D#4', relativeTo: 'D4', offset: 0.75 },
+                { note: 'F#4', relativeTo: 'F4', offset: 0.75 },
+                { note: 'G#4', relativeTo: 'G4', offset: 0.75 },
+                { note: 'A#4', relativeTo: 'A4', offset: 0.75 },
+                { note: 'C#5', relativeTo: 'C5', offset: 0.75 },
+                { note: 'D#5', relativeTo: 'D5', offset: 0.75 }
+            ];
+            
+            blackKeyPositions.forEach(({ note, relativeTo, offset }) => {
+                const key = document.createElement('div');
+                key.className = 'key black-key';
+                key.textContent = note;
+                key.dataset.note = note;
+                
+                // Position relative to the white key to the left
+                const whiteKeyElement = piano.querySelector(`[data-note="${relativeTo}"]`);
+                if (whiteKeyElement) {
+                    const whiteKeyRect = whiteKeyElement.getBoundingClientRect();
+                    const pianoRect = piano.getBoundingClientRect();
+                    const relativeLeft = whiteKeyRect.left - pianoRect.left + (whiteKeyRect.width * offset);
+                    key.style.left = `${relativeLeft}px`;
+                }
+                
+                key.addEventListener('mousedown', () => playNote(note));
+                key.addEventListener('mouseup', () => stopNote());
+                key.addEventListener('mouseleave', () => stopNote());
+                piano.appendChild(key);
+            });
+        }
+
+        // Audio functions are now in audioPlayer.js
+
+        // Recording functions
+        function startRecording() {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            isRecording = true;
+            currentNotes = [];
+            recordingStartTime = Date.now();
+        }
+
+        function rewindToBeginning() {
+            currentStep = 1;
+            updateDisplayAtCurrentStep();
+        }
+
+        function toggleStopPlayback() {
+
+            const stopButton = document.querySelector('.btn-play');
+
+            if (isPlaying) {
+                isRecording = false;
+                pausePlayback();
+                currentStep = 1;    
+                updateDisplayAtCurrentStep();
+                stopButton.textContent = 'Stop';
+            } else {
+                stopButton.textContent = 'Play from beginning';
+                currentStep = 1;
+                updateDisplayAtCurrentStep();
+                startPlayback();
+            }
+        }
+
+        function clearRecording() {
+            currentNotes = [];
+            isRecording = false;
+            isPlaying = false;
+            wasPlaying = false; // Reset wasPlaying when clearing
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+                playbackInterval = null;
+            }
+            document.getElementById('songData').value = '';
+        }
+
+        // Playback functions
+        function togglePlayback() {
+            // Try to load song data from textarea if no recorded notes
+            if (!currentNotes.length) {
+                const songDataTextarea = document.getElementById('songData');
+                if (songDataTextarea && songDataTextarea.value.trim()) {
+                    try {
+                        let songData = JSON.parse(songDataTextarea.value);
+                        songData = getProcessedSongData(songData);
+                        currentNotes = songData.notes || [];
+                        songKey = songData.key || "Unknown";
+                        tempo = songData.tempo || 120;
+                        eighthNoteLength = (60 / tempo / 2) * 1000;
+                        tracks = songData.tracks || { "1": { volume: 5 } };
+                        updatetrackControls();
+                        
+                        // Highlight keys in the current song's key
+                        highlightKeysInKey();
+                    } catch (e) {
+                        return;
+                    }
+                } else {
+                    return;
+                }
+            }
+
+            if (isPlaying) {
+                pausePlayback();
+            } else {
+                startPlayback();
+            }
+        }
+
+        // Function to get all lyrics with their step numbers
+        function getAllLyricsWithSteps() {
+            const lyricsMap = new Map();
+            currentNotes.forEach(note => {
+                if (note.lyrics && note.lyrics.trim()) {
+                    const step = note.step;
+                    if (!lyricsMap.has(step)) {
+                        lyricsMap.set(step, []);
+                    }
+                    lyricsMap.get(step).push(note.lyrics.trim());
+                }
+            });
+            return lyricsMap;
+        }
+
+        // Function to display lyrics with context (previous 4, current, next 4)
+        function displayLyricsWithContext(currentStep, currentLyrics) {
+            // If it's step 1 or 0, show the next lyrics, otherwise leave the previous lyric
+            // display the same. 
+            if (!currentLyrics && currentStep > 1) {
+                return;
+            }
+            const lyricsMap = getAllLyricsWithSteps();
+            const allSteps = Array.from(lyricsMap.keys()).sort((a, b) => a - b);
+            const currentStepIndex = allSteps.indexOf(currentStep);
+            
+            let displayText = '';
+            
+            // Add previous 4 lyrics
+            for (let i = Math.max(0, currentStepIndex - 4); i < currentStepIndex; i++) {
+                const step = allSteps[i];
+                const lyrics = lyricsMap.get(step).filter((lyric, index, arr) => arr.indexOf(lyric) === index).join(' ');
+                if (lyrics) {
+                    displayText += `<span style="color: #aaa; font-size: 18px;">${lyrics}</span> `;
+                }
+            }
+            
+            // Add current lyrics (highlighted)
+            if (currentLyrics) {
+                displayText += `<span style="color: #fff; font-size: 24px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">${currentLyrics}</span> `;
+            }
+            
+            // Add next 4 lyrics
+            for (let i = currentStepIndex + 1; i <= Math.min(allSteps.length - 1, currentStepIndex + 4); i++) {
+                const step = allSteps[i];
+                const lyrics = lyricsMap.get(step).filter((lyric, index, arr) => arr.indexOf(lyric) === index).join(' ');
+                if (lyrics) {
+                    displayText += `<span style="color: #aaa; font-size: 18px;">${lyrics}</span> `;
+                }
+            }
+            
+            const lyricsDisplay = document.getElementById('lyrics-display');
+            lyricsDisplay.innerHTML = displayText;
+        }
+
+        function startPlayback() {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            const playButton = document.querySelector('.btn-play');
+            playButton.textContent = '⏸️';
+            isPlaying = true;
+            
+            // Find the natural end of song
+            const naturalMaxStep = Math.max(...currentNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
+
+                
+            // Read loop bounds from inputs
+            const loopStartInput = document.getElementById('loopStart').value;
+            const loopEndInput = document.getElementById('loopEnd').value;
+
+            const loopStart = loopStartInput === "" ? 0 : parseInt(loopStartInput);
+            const loopEnd = loopEndInput === "" ? naturalMaxStep : parseInt(loopEndInput);
+
+            // Only reset currentStep if we weren't playing before or if we're at the end
+            if (!wasPlaying || currentStep >= loopEnd) {
+                currentStep = loopStart;
+            }
+
+            
+            playbackInterval = setInterval(() => {
+                // Play notes that start at current step
+                const notesToPlay = currentNotes.filter(n => n.step === currentStep);
+                
+                // Update display for current step
+                updateDisplayAtCurrentStep();
+                
+                // Play each note or chord with appropriate volume
+                const currentTime = audioContext.currentTime;
+                notesToPlay.forEach(n => {
+                    const trackVolume = tracks[n.track] ? tracks[n.track].volume : 5;
+                    playNoteOrChord(n, trackVolume, songKey, currentTime);
+                });
+                
+                currentStep++;
+                if (currentStep >= loopEnd) {
+                    currentStep = loopStart; // Loop back to defined start
+                }
+            }, eighthNoteLength);
+        }
+
+        function pausePlayback() {
+            wasPlaying = true; // Mark that we were playing
+            isPlaying = false;
+            stopAllOscillators();
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+                playbackInterval = null;
+            }
+            
+            // Update button text
+            const playButton = document.querySelector('.btn-play');
+            playButton.textContent = '▶️';
+        }
+        
+        // Navigation functions
+        function rewind() {
+            if (!currentNotes.length) return;
+            
+            // Get loop bounds
+            const loopStartInput = document.getElementById('loopStart').value;
+            const loopStart = loopStartInput === "" ? 0 : parseInt(loopStartInput);
+            
+            // Move back by 8 steps (or to loop start if we'd go past it)
+            currentStep = Math.max(loopStart, currentStep - 1);
+            
+            // Update display without starting playback
+            updateDisplayAtCurrentStep();
+        }
+        
+        function fastForward() {
+            if (!currentNotes.length) return;
+            
+            // Get loop bounds
+            const loopEndInput = document.getElementById('loopEnd').value;
+            const naturalMaxStep = Math.max(...currentNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
+            const loopEnd = loopEndInput === "" ? naturalMaxStep : parseInt(loopEndInput);
+            
+            // Move forward by 8 steps (or to loop end if we'd go past it)
+            currentStep = Math.min(loopEnd - 1, currentStep + 1);
+            
+            // Update display without starting playback
+            updateDisplayAtCurrentStep();
+        }
+        
+        function updateDisplayAtCurrentStep() {
+            // Get notes at current step
+            const notesAtStep = currentNotes.filter(n => n.step === currentStep);
+            
+            // Collect lyrics for this step
+            const lyricsAtStep = notesAtStep
+                .filter(n => n.lyrics && n.lyrics.trim())
+                .map(n => n.lyrics.trim())
+                .filter((lyric, index, arr) => arr.indexOf(lyric) === index)
+                .join(' ');
+            
+            // Display lyrics with context
+            displayLyricsWithContext(currentStep, lyricsAtStep);
+
+            // Update step counter
+            const stepCounter = document.getElementById('step-counter');
+            if (stepCounter) {
+                const naturalMaxStep = Math.max(...currentNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
+                stepCounter.textContent = `Step: ${currentStep} / ${naturalMaxStep}`;
+            }
+            
+            // Highlight keys based on which track is playing them
+            highlightKeysByTrack();
+            
+            // Update track degrees display
+            updateTrackDegreesDisplay();
+        }
+
+        // Tempo control
+        function updateTempo() {
+            tempo = parseInt(document.getElementById('tempo').value);
+            eighthNoteLength = (60 / tempo / 2) * 1000;
+            
+            // Restart playback if currently playing
+            if (isPlaying) {
+                pausePlayback();
+                setTimeout(startPlayback, 300);
+            }
+        }
+
+
+        // Update track controls
+        function updatetrackControls() {
+            console.log('updatetrackControls called');
+            console.log('Current tracks object:', tracks);
+            
+            const container = document.getElementById('trackControls');
+            const trackIds = Object.keys(tracks).sort();
+            
+            console.log('Track IDs found:', trackIds);
+            
+            container.innerHTML = `
+                <h4>Track Controls</h4>
+                <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                    ${trackIds.map((trackId, index) => {
+                        let trackNumber = index + 1;
+                        return `
+                        <div class="track-outline-${trackNumber}" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; background: rgba(255,255,255,0.1);">
+                            <div class="track-note-degrees-display" id="track-note-degrees-display-${trackId}">
+                            </div>
+                            
+                            <h5 style="margin: 0; color: white;">${trackId}</h5>
+                            
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <label style="font-size: 12px;">Volume:</label>
+                                <input type="range" id="volume_${trackId}" min="0" max="5" value="${tracks[trackId].volume || 5}" 
+                                       onchange="updatetrackVolume('${trackId}', this.value)"
+                                       style="width: 80px;">
+                                <span id="volumeLabel_${trackId}" style="min-width: 20px; text-align: center;">${tracks[trackId].volume || 5}</span>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <label style="font-size: 12px;">Octave:</label>
+                                <input type="range" id="octave_${trackId}" min="2" max="6" value="${tracks[trackId].default_octave || 4}" 
+                                       onchange="updatetrackOctave('${trackId}', this.value)"
+                                       style="width: 80px;">
+                                <span id="octaveLabel_${trackId}" style="min-width: 20px; text-align: center;">${tracks[trackId].default_octave || 4}</span>
+                            </div>
+                        </div>
+                    `;
+                    }).join('')}
+                </div>
+            `;
+            updateTrackDegreesDisplay();
+        }
+
+        // Update track volume
+        function updatetrackVolume(trackId, volume) {
+            console.log('updatetrackVolume called with:', trackId, volume);
+            console.log('Current tracks object:', tracks);
+            console.log('Track exists:', tracks[trackId]);
+            
+            if (tracks[trackId]) {
+                tracks[trackId].volume = parseInt(volume);
+                document.getElementById(`volumeLabel_${trackId}`).textContent = volume;
+                console.log('Volume updated successfully');
+            } else {
+                console.error(`Track ${trackId} not found in tracks object`);
+            }
+        }
+
+        // Update track octave
+        function updatetrackOctave(trackId, octave) {
+            console.log('updatetrackOctave called with:', trackId, octave);
+            console.log('Current tracks object:', tracks);
+            console.log('Track exists:', tracks[trackId]);
+
+            if (tracks[trackId]) {
+                tracks[trackId].default_octave = parseInt(octave);
+                document.getElementById(`octaveLabel_${trackId}`).textContent = octave;
+                console.log('Octave updated successfully');
+            } else {
+                console.error(`Track ${trackId} not found in tracks object`);
+            }
+        }
+
+        // Function to highlight keys in the current song's key
+        function highlightKeysInKey() {
+            
+            if (!songKey || songKey === "Unknown") {
+                console.log('No valid songKey, clearing highlights');
+                // Clear all highlights if no key
+                clearKeyHighlights();
+                return;
+            }
+            
+            // Get notes in the current key
+            const keyNotes = getNotesInKey(songKey);
+            
+            // Clear previous highlights
+            clearKeyHighlights();
+            
+            // Highlight keys and add degree indicators
+            keyNotes.forEach(({ note, degree }) => {
+                const keyElement = document.querySelector(`[data-note="${note}"]`);
+                if (keyElement) {
+                    // Add highlight class
+                    keyElement.classList.add('key-in-scale');
+                    
+                    // Add degree indicator
+                    const degreeIndicator = document.createElement('div');
+                    degreeIndicator.className = 'degree-indicator';
+                    degreeIndicator.textContent = degree;
+                    keyElement.appendChild(degreeIndicator);
+                    
+                }
+            });
+            
+        }
+        
+        // Function to clear key highlights
+        function clearKeyHighlights() {
+            const allKeys = document.querySelectorAll('.key');
+            allKeys.forEach(key => {
+                key.classList.remove('key-in-scale');
+                // Remove all track highlighting classes (1-4)
+                for (let i = 1; i <= 4; i++) {
+                    key.classList.remove(`key-track-${i}`);
+                }
+                const existingIndicator = key.querySelector('.degree-indicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+            });
+        }
+
+        // Function to highlight keys based on which track is playing them
+        function highlightKeysByTrack() {
+            if (!currentNotes || !currentNotes.length) return;
+            
+            // Clear previous track highlights
+            const allKeys = document.querySelectorAll('.key');
+            allKeys.forEach(key => {
+                for (let i = 1; i <= 4; i++) {
+                    key.classList.remove(`key-track-${i}`);
+                }
+            });
+            
+            // Get current step and find notes being played
+            const notesAtCurrentStep = currentNotes.filter(n => n.step === currentStep);
+            
+            // Create a map of track IDs to track numbers (1-4)
+            const trackIdToNumber = {};
+            const trackIds = Object.keys(tracks).sort();
+            trackIds.forEach((trackId, index) => {
+                if (index < 4) { // Support up to 4 tracks
+                    trackIdToNumber[trackId] = index + 1;
+                }
+            });
+            
+            highlightKeysInKey();
+            // Highlight keys for each track
+            notesAtCurrentStep.forEach(note => {
+                if (note.chord) {
+                    return;
+                }
+                const trackNumber = trackIdToNumber[note.track];
+                if (trackNumber) {
+                    let noteToHighlight = null;
+                    
+                    if (note.degree) {
+                        // Map scale degree to actual note
+                        noteToHighlight = mapUnparsedDegreeToNote(note.degree, songKey, note.track);
+                    } else if (note.note) {
+                        noteToHighlight = note.note;
+                    } else if (note.chord) {
+                        // For chords, we'll highlight the root note
+                        if (/\d+/.test(note.chord)) {
+                            const degree = parseInt(note.chord);
+                            noteToHighlight = mapUnparsedDegreeToNote(degree, songKey, note.track);
+                        } else {
+                            // For named chords, use the first note
+                            const chordNotes = chordDefinitions[note.chord];
+                            if (chordNotes && chordNotes.length > 0) {
+                                noteToHighlight = chordNotes[0];
+                            }
+                        }
+                    }
+                    
+                    if (noteToHighlight) {
+                        const keyElement = document.querySelector(`[data-note="${noteToHighlight}"]`);
+                        if (keyElement) {
+                            keyElement.classList.add(`key-track-${trackNumber}`);
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // Helper function to convert chord degree to actual chord name
+        function convertChordDegreeToName(degree, songKey) {
+            if (!songKey || songKey === "Unknown") {
+                return degree.toString(); // fallback to degree number
+            }
+            
+            // Determine if it's major or minor key
+            const isMinorKey = songKey.toLowerCase().includes('m');
+            const scale = isMinorKey ? getMinorScale(songKey) : getMajorScale(songKey);
+            
+            const chordPatterns = {
+                1: [0, 2, 4],
+                2: [1, 3, 5], 
+                3: [2, 4, 6],
+                4: [3, 5, 0],
+                5: [4, 6, 1],
+                6: [5, 0, 2],
+                7: [6, 1, 3]
+            };
+
+            const indices = chordPatterns[degree];
+            if (!indices) {
+                return degree.toString(); // fallback for invalid degrees
+            }
+            
+            const notes = indices.map(i => scale[i]);
+            const root = notes[0];
+
+            // Calculate intervals to determine chord quality
+            const intervals = [
+                (12 + (noteToSemitone(notes[1]) - noteToSemitone(root))) % 12,
+                (12 + (noteToSemitone(notes[2]) - noteToSemitone(root))) % 12
+            ];
+
+            let quality = "";
+            if (intervals[0] === 3 && intervals[1] === 7) quality = "m";      // minor triad
+            else if (intervals[0] === 4 && intervals[1] === 7) quality = "";  // major triad
+            else if (intervals[0] === 3 && intervals[1] === 6) quality = "dim"; // diminished
+    
+            return root + quality;
+        }
+
+        // Function to update track degrees display
+        function updateTrackDegreesDisplay() {
+            if (!currentNotes || !currentNotes.length) return;
+            
+            // Update each track's display
+            Object.keys(tracks).forEach(trackId => {
+                const displayElement = document.getElementById(`track-note-degrees-display-${trackId}`);
+                if (displayElement) {
+                    // Find previous, current, and next notes for this track    
+                    const notesAtCurrentStep = currentNotes.filter(n => n.track === trackId && n.step === currentStep);
+                    const currentNote = notesAtCurrentStep.length === 0 ? null : notesAtCurrentStep[0];
+
+                    if (!currentNote && currentStep > 1) {
+                        return;
+                    }
+                    // Walk backwards until we find a note that doesn't match the current note
+                    let previousNotes = [];
+                    const PREVIOUS_NOTES_LIMIT = 4;
+                    for (let i = currentStep - 1; i >= 0; i--) {
+                        const note = currentNotes.find(n => n.track === trackId && n.step === i);
+                        if (!note) {
+                            continue;
+                        }
+                        previousNotes.push(note);
+
+                        if (previousNotes.length >= PREVIOUS_NOTES_LIMIT) {
+                            break;
+                        }
+                    }
+
+                    const NEXT_NOTES_LIMIT = 4;
+                    // Walk forwards until we find a note that doesn't match the current note
+                    let nextNotes = [];
+                    for (let i = currentStep + 1; i < currentNotes.length; i++) {
+                        const note = currentNotes.find(n => n.track === trackId && n.step === i);
+                        if (!note) {
+                            continue;
+                        }
+                        nextNotes.push(note);
+                        if (nextNotes.length >= NEXT_NOTES_LIMIT) {
+                            break;
+                        }
+                    }
+                    
+                    let displayText = '';
+                    
+                    // Previous notes (dimmed)
+                    if (previousNotes.length > 0) {
+                        const prevTexts = previousNotes.map(note => {
+                            if (note.degree) return note.degree.toString();
+                            if (note.chord) {
+                                // If it's a numeric chord degree, convert to actual chord name
+                                if (/^\d+$/.test(note.chord)) {
+                                    return convertChordDegreeToName(note.chord, songKey);
+                                }
+                                return note.chord;
+                            }
+                            if (note.note) return note.note;
+                            return '';
+                        }).filter(text => text);
+                        if (prevTexts.length > 0) {
+                            displayText += `<span style="color: #666; font-size: 12px;">${prevTexts.join(' ')}</span> `;
+                        }
+                    }
+                    
+                    // Current notes (highlighted)
+                    if (notesAtCurrentStep.length > 0) {
+                        const currentTexts = notesAtCurrentStep.map(note => {
+                            if (note.degree) return note.degree.toString();
+                            if (note.chord) {
+                                // If it's a numeric chord degree, convert to actual chord name
+                                if (/^\d+$/.test(note.chord)) {
+                                    return convertChordDegreeToName(parseInt(note.chord), songKey);
+                                }
+                                return note.chord;
+                            }
+                            if (note.note) return note.note;
+                            return '';
+                        }).filter(text => text);
+                        if (currentTexts.length > 0) {
+                            displayText += `<span style="color: #fff; font-size: 14px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px;">${currentTexts.join(' ')}</span> `;
+                        }
+                    }
+                    
+                    // Next notes (dimmed)
+                    if (nextNotes.length > 0) {
+                        const nextTexts = nextNotes.map(note => {
+                            if (note.degree) return note.degree.toString();
+                            if (note.chord) {
+                                // If it's a numeric chord degree, convert to actual chord name
+                                if (/^\d+$/.test(note.chord)) {
+                                    return convertChordDegreeToName(parseInt(note.chord), songKey);
+                                }
+                                return note.chord;
+                            }
+                            if (note.note) return note.note;
+                            return '';
+                        }).filter(text => text);
+                        if (nextTexts.length > 0) {
+                            displayText += `<span style="color: #666; font-size: 12px;">${nextTexts.join(' ')}</span>`;
+                        }
+                    }
+                    
+                    displayElement.innerHTML = displayText;
+                    displayElement.style.minHeight = '20px';
+                    displayElement.style.textAlign = 'center';
+                }
+            });
+        }
+        
+
+        // Status updates
+        function updateStatus(message) {
+            // document.getElementById('status').textContent = message;
+        }
+
+        // Initialize key selector with all available keys
+        function initializeKeySelector() {
+            const keySelect = document.getElementById('keySelect');
+            if (!keySelect) {
+                console.log('Key selector element not found during initialization');
+                return;
+            }
+            
+            const keys = [
+                'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B',
+                'Cm', 'C#m', 'Dm', 'D#m', 'Em', 'Fm', 'F#m', 'Gm', 'G#m', 'Am', 'A#m', 'Bm'
+            ];
+            
+            keySelect.innerHTML = '<option value="">Select key...</option>';
+            keys.forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = key;
+                keySelect.appendChild(option);
+            });
+            
+            console.log(`Initialized key selector with ${keys.length} keys`);
+
+        }
+
+        // Initialize
+        async function initializeApp() {
+            createPiano();
+            
+            // Load songs first, then populate the dropdown
+            await loadSongs();
+            
+            // Add event listener to song select dropdown
+            const songSelect = document.getElementById('songSelect');
+            if (songSelect) {
+                songSelect.addEventListener('change', function() {
+                    if (this.value !== '') {
+                        loadSong();
+                    }
+                });
+                songSelect.value = "0";
+                loadSong();
+            }
+            
+
+            // Add event listener to key select dropdown
+            const keySelect = document.getElementById('keySelect');
+            if (keySelect) {
+                keySelect.addEventListener('change', function() {
+                    if (this.value !== '') {
+                        songKey = this.value;
+                        // Re-highlight keys for the new key
+                        if (typeof highlightKeysInKey === 'function') {
+                            highlightKeysInKey();
+                        }
+                    }
+                });
+            } else {
+                console.log('Key selector not found during initialization');
+            }
+            
+        }
+
+        // Initialize
+        initializeApp().catch(error => {
+            console.error('Failed to initialize app:', error);
+        });
+
+        const songDataTextarea = document.getElementById('songData');
+        if (songDataTextarea) {
+            songDataTextarea.addEventListener('input', function () {
+                const value = songDataTextarea.value.trim();
+                if (!value) {
+                    currentNotes = [];
+                    return;
+                }
+                try {
+                    let songData = JSON.parse(value);
+                    songData = getProcessedSongData(songData);
+                    currentNotes = songData.notes || [];
+                    tempo = songData.tempo || 120;
+                    songKey = songData.key || "Unknown";
+                    eighthNoteLength = (60 / tempo / 2) * 1000;
+                    tracks = songData.tracks || { "1": { volume: 5 } };
+                    wasPlaying = false; // Reset wasPlaying when loading new song data
+                    updatetrackControls();
+                    
+                    // Update key selector to match the new song data
+                    if (typeof updateKeySelector === 'function') {
+                        updateKeySelector(songData.key);
+                    }
+                    
+                    // Highlight keys in the current song's key
+                    highlightKeysInKey();
+                } catch (e) {
+                    updateStatus('❌ Invalid JSON in song data');
+                }
+            });
+        }
+        
+        // Add keyboard shortcuts for navigation
+        document.addEventListener('keydown', function(event) {
+            // Only handle shortcuts if not typing in an input field
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            switch(event.key) {
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    rewind();
+                    break;
+                case 'ArrowRight':
+                    event.preventDefault();
+                    fastForward();
+                    break;
+                case ' ':
+                    event.preventDefault();
+                    togglePlayback();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
