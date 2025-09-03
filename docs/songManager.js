@@ -11,6 +11,7 @@ async function loadSongs() {
         
         // Load the song files via script tags
         const songFiles = [
+            'sound_of_silence_v2.js',
             'country_roads_well_pennies_chorus.js',
             'country_roads_well_pennies_verse1.js',
             'calvary_chorus.js',
@@ -20,7 +21,6 @@ async function loadSongs() {
             'wayfaring_stranger.js',
             'mad_world_chorus.js',
             'country_roads_well_pennies_verse1.js',
-            'sound_of_silence.js',
         ];
             
         console.log('Song files to load:', songFiles);
@@ -99,32 +99,166 @@ function loadSong() {
 function getProcessedSongData(songData) {
     // Make a copy of the song data
     const processedSongData = JSON.parse(JSON.stringify(songData));
+    
+    // Determine version (default to 1 if not specified)
+    const version = processedSongData.version || 1;
+    
+    if (version === 2) {
+        // Version 2: notes are stored within each track
+        return processVersion2SongData(processedSongData);
+    } else {
+        // Version 1: notes are in a flat array (original format)
+        return processVersion1SongData(processedSongData);
+    }
+}
 
+function processVersion1SongData(songData) {
     // Process song data - loop through each entry, and if there is no step field, set it
     // to the previous step + the duration
     // of the previous entry with the same track.
-    for (let i = 0; i < processedSongData.notes.length; i++) {
-        if (!processedSongData.notes[i].step) {
+    for (let i = 0; i < songData.notes.length; i++) {
+        if (!songData.notes[i].step) {
             // Find the previous entry with the same track
             let previousEntry = null;
             for (let j = i - 1; j >= 0; j--) {
-                if (processedSongData.notes[j].track === processedSongData.notes[i].track) {
-                    previousEntry = processedSongData.notes[j];
+                if (songData.notes[j].track === songData.notes[i].track) {
+                    previousEntry = songData.notes[j];
                     break;
                 }
             }
             if (previousEntry) {
                 const duration = previousEntry.duration || 1;
                 const pause = previousEntry.pause || 0;
-                processedSongData.notes[i].step = previousEntry.step + duration + pause;
+                songData.notes[i].step = previousEntry.step + duration + pause;
             } else {
-                processedSongData.notes[i].step = 1;
+                songData.notes[i].step = 1;
             }
         }
     }
+    return songData;
+}
+
+function processVersion2SongData(songData) {
+    // Version 2: Convert track-based notes to flat array format for compatibility
+    const allNotes = [];
+    
+    // Process each track's notes independently
+    Object.keys(songData.tracks).forEach(trackId => {
+        const track = songData.tracks[trackId];
+        if (track.notes && Array.isArray(track.notes)) {
+            // Process step timing within this track first
+            for (let i = 0; i < track.notes.length; i++) {
+                if (!track.notes[i].step) {
+                    // Find the previous entry in the same track
+                    let previousEntry = null;
+                    for (let j = i - 1; j >= 0; j--) {
+                        if (track.notes[j].step) {
+                            previousEntry = track.notes[j];
+                            break;
+                        }
+                    }
+                    if (previousEntry) {
+                        const duration = previousEntry.duration || 1;
+                        const pause = previousEntry.pause || 0;
+                        track.notes[i].step = previousEntry.step + duration + pause;
+                    } else {
+                        track.notes[i].step = 1;
+                    }
+                }
+            }
+            
+            // Add track ID to each note and add to allNotes
+            track.notes.forEach(note => {
+                const noteWithTrack = { ...note, track: trackId };
+                allNotes.push(noteWithTrack);
+            });
+        }
+    });
+    
+    // Sort notes by step to maintain chronological order across all tracks
+    allNotes.sort((a, b) => (a.step || 0) - (b.step || 0));
+    
+    // Create a new song data object with the flat notes array
+    const processedSongData = {
+        ...songData,
+        notes: allNotes
+    };
+    
     return processedSongData;
 }
 
+// Helper function to convert version 1 format to version 2 format
+function convertToVersion2(songData) {
+    if (songData.version === 2) {
+        return songData; // Already version 2
+    }
+    
+    const version2Data = {
+        version: 2,
+        tempo: songData.tempo,
+        key: songData.key,
+        title: songData.title,
+        tracks: {}
+    };
+    
+    // Initialize tracks with their properties
+    Object.keys(songData.tracks || {}).forEach(trackId => {
+        version2Data.tracks[trackId] = {
+            volume: songData.tracks[trackId].volume,
+            default_octave: songData.tracks[trackId].default_octave,
+            notes: []
+        };
+    });
+    
+    // Group notes by track
+    (songData.notes || []).forEach(note => {
+        const trackId = note.track;
+        if (version2Data.tracks[trackId]) {
+            // Remove track field from note since it's now implicit
+            const { track, ...noteWithoutTrack } = note;
+            version2Data.tracks[trackId].notes.push(noteWithoutTrack);
+        }
+    });
+    
+    return version2Data;
+}
+
+// Helper function to convert version 2 format to version 1 format
+function convertToVersion1(songData) {
+    if (songData.version !== 2) {
+        return songData; // Already version 1 or no version
+    }
+    
+    const version1Data = {
+        version: 1,
+        tempo: songData.tempo,
+        key: songData.key,
+        title: songData.title,
+        tracks: {},
+        notes: []
+    };
+    
+    // Copy track properties (without notes)
+    Object.keys(songData.tracks || {}).forEach(trackId => {
+        const { notes, ...trackProps } = songData.tracks[trackId];
+        version1Data.tracks[trackId] = trackProps;
+    });
+    
+    // Flatten notes from tracks
+    Object.keys(songData.tracks || {}).forEach(trackId => {
+        const track = songData.tracks[trackId];
+        if (track.notes && Array.isArray(track.notes)) {
+            track.notes.forEach(note => {
+                version1Data.notes.push({
+                    ...note,
+                    track: trackId
+                });
+            });
+        }
+    });
+    
+    return version1Data;
+}
 
 function loadSongFromBankAtIndex(songIndex) {
     let songData = songBank[songIndex];

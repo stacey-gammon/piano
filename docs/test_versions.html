@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Version Format Test</title>
+</head>
+<body>
+    <h1>Testing Song Version Formats</h1>
+    <div id="results"></div>
+
+    <script src="songManager.js"></script>
+    <script>
+        // Test data - Version 1 format
+        const version1Song = {
+            "notes": [
+                {
+                    "degree": "1",
+                    "step": 1,
+                    "lyrics": "Hello",
+                    "track": "1"
+                },
+                {
+                    "degree": "3",
+                    "step": 2,
+                    "lyrics": "World",
+                    "track": "1"
+                }
+            ],
+            "tempo": 120,
+            "key": "C",
+            "title": "Test Song V1",
+            "tracks": {
+                "1": {
+                    "volume": 5,
+                    "default_octave": 4
+                }
+            }
+        };
+
+        // Test data - Version 2 format
+        const version2Song = {
+            "version": 2,
+            "tempo": 120,
+            "key": "C",
+            "title": "Test Song V2",
+            "tracks": {
+                "1": {
+                    "volume": 5,
+                    "default_octave": 4,
+                    "notes": [
+                        {
+                            "degree": "1",
+                            "step": 1,
+                            "lyrics": "Hello"
+                        },
+                        {
+                            "degree": "3",
+                            "step": 2,
+                            "lyrics": "World"
+                        }
+                    ]
+                }
+            }
+        };
+
+        function runTests() {
+            const results = document.getElementById('results');
+            let output = '<h2>Test Results:</h2>';
+
+            // Test Version 1 processing
+            try {
+                const processedV1 = getProcessedSongData(version1Song);
+                output += '<h3>Version 1 Processing:</h3>';
+                output += '<p>✅ Successfully processed version 1 song</p>';
+                output += `<p>Notes count: ${processedV1.notes.length}</p>`;
+                output += `<p>First note: ${JSON.stringify(processedV1.notes[0])}</p>`;
+            } catch (error) {
+                output += '<h3>Version 1 Processing:</h3>';
+                output += `<p>❌ Error: ${error.message}</p>`;
+            }
+
+            // Test Version 2 processing
+            try {
+                const processedV2 = getProcessedSongData(version2Song);
+                output += '<h3>Version 2 Processing:</h3>';
+                output += '<p>✅ Successfully processed version 2 song</p>';
+                output += `<p>Notes count: ${processedV2.notes.length}</p>`;
+                output += `<p>First note: ${JSON.stringify(processedV2.notes[0])}</p>`;
+            } catch (error) {
+                output += '<h3>Version 2 Processing:</h3>';
+                output += `<p>❌ Error: ${error.message}</p>`;
+            }
+
+            // Test conversion functions
+            try {
+                const convertedV1toV2 = convertToVersion2(version1Song);
+                output += '<h3>Version 1 to Version 2 Conversion:</h3>';
+                output += '<p>✅ Successfully converted</p>';
+                output += `<p>Version: ${convertedV1toV2.version}</p>`;
+                output += `<p>Track 1 notes count: ${convertedV1toV2.tracks["1"].notes.length}</p>`;
+            } catch (error) {
+                output += '<h3>Version 1 to Version 2 Conversion:</h3>';
+                output += `<p>❌ Error: ${error.message}</p>`;
+            }
+
+            try {
+                const convertedV2toV1 = convertToVersion1(version2Song);
+                output += '<h3>Version 2 to Version 1 Conversion:</h3>';
+                output += '<p>✅ Successfully converted</p>';
+                output += `<p>Version: ${convertedV2toV1.version}</p>`;
+                output += `<p>Notes count: ${convertedV2toV1.notes.length}</p>`;
+            } catch (error) {
+                output += '<h3>Version 2 to Version 1 Conversion:</h3>';
+                output += `<p>❌ Error: ${error.message}</p>`;
+            }
+
+            results.innerHTML = output;
+        }
+
+        // Run tests when page loads
+        window.onload = runTests;
+    </script>
+</body>
+</html>
