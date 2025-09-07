@@ -126,7 +126,6 @@ function playNote(note, trackVolume = null, duration = .25, startTime = null) {
         volume = (trackVolume / 5) * 0.3;
         // Apply frequency scaling so low notes aren’t overpowering
         volume *= perceivedLoudnessScale(freq);
-        console.log('Setting volume to', volume, 'for note', note, 'at time', playTime, 'trackVolume', trackVolume);
     }
     
     gainNode.gain.setValueAtTime(0, playTime);
@@ -203,10 +202,13 @@ function playChord(chordName, trackVolume = null, duration = 1, songKey = null, 
 function mapUnparsedDegreeToNote(degree, songKey, trackId = null) {
     let raiseSemitone = 0;
 
-    // Check for raised degree
+    // Check for raised degree - support both # at start and #/^ at end
     if (degree.startsWith("#")) {
         raiseSemitone = 1; // raise by one semitone
         degree = degree.slice(1); // remove "#" before parsing
+    } else if (degree.endsWith("#") || degree.endsWith("^")) {
+        raiseSemitone = 1; // raise by one semitone
+        degree = degree.slice(0, -1); // remove "#" or "^" from end
     }
 
     // Check for octave specification

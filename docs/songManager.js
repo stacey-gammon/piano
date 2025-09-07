@@ -11,8 +11,10 @@ async function loadSongs() {
         
         // Load the song files via script tags
         const songFiles = [
+            'valerie_valeries.js',
+            'american_flowers.js',
             'sound_of_silence_v2.js',
-            'country_roads_well_pennies_chorus.js',
+            'country_roads_well_pennies_chorus_v2.js',
             'country_roads_well_pennies_verse1.js',
             'calvary_chorus.js',
             'until_the_last_light_fades.js',
