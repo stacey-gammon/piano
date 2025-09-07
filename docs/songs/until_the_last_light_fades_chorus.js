@@ -343,7 +343,7 @@ const lastLightFadesChorus = {
         "track": "harmony"
       },
       {
-        "degree": "1",
+        "degree": "5",
         "duration": 2,
         "lyrics": "these",
         "track": "main"
@@ -361,7 +361,7 @@ const lastLightFadesChorus = {
         "track": "chords"
       },
       {
-        "degree": "1",
+        "degree": "5",
         "duration": 1,
         "lyrics": "ey-",
         "track": "main"
