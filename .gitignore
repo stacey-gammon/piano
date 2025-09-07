@@ -1,0 +1,12 @@
+/.DS_Store
+py/.DS_Store
+py/music_env
+/py/music_env/.DS_Store
+/py/outputs
+/py/songs
+/py/tmp
+/py/.DS_Store
+py/music_env/bin/activate
+docs/songs/extra_songs/*
+music_env/
+music_env/bin

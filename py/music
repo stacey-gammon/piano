@@ -8,7 +8,267 @@ import subprocess
 import sys
 import os
 import glob
+import tempfile
 from pathlib import Path
+
+# Beat detection imports
+import numpy as np
+import librosa
+import soundfile as sf
+BEAT_DETECTION_AVAILABLE = True
+
+def detect_beats_and_tempo(audio_file, start_time=None, end_time=None):
+    """Detect beats, downbeats, and tempo using librosa"""
+    if not BEAT_DETECTION_AVAILABLE:
+        print("Error: Beat detection libraries not available. Install with: pip install librosa soundfile")
+        return None
+    
+    try:
+        # Load audio file
+        y, sr = librosa.load(audio_file, sr=None)
+        
+        # If time range specified, trim the audio
+        if start_time is not None and end_time is not None:
+            start_sample = int(start_time * sr)
+            end_sample = int(end_time * sr)
+            y = y[start_sample:end_sample]
+        
+        # Detect tempo and beats
+        tempo, beats = librosa.beat.beat_track(y=y, sr=sr, units='time')
+        
+        # Convert beat times to samples for downbeat detection
+        beat_samples = librosa.time_to_samples(beats, sr=sr)
+        
+        # Detect downbeats using onset strength
+        onset_env = librosa.onset.onset_strength(y=y, sr=sr)
+        # Use a simple approach: every 4th beat is a downbeat (assuming 4/4 time)
+        downbeats = beats[::4]  # Every 4th beat
+        
+        return {
+            'tempo': tempo,
+            'beats': beats,
+            'downbeats': downbeats,
+            'sample_rate': sr,
+            'duration': len(y) / sr
+        }
+    except Exception as e:
+        print(f"Error detecting beats: {e}")
+        return None
+
+def create_metronome_click(tempo, duration, sample_rate=44100, click_volume=0.3):
+    """Create a metronome click sound"""
+    # Create a short click sound (sine wave with envelope)
+    click_duration = 0.1  # 100ms click
+    click_samples = int(click_duration * sample_rate)
+    
+    # Generate click frequency (higher pitch for downbeats)
+    click_freq = 1000  # 1kHz
+    
+    # Create click envelope (quick attack, quick decay)
+    t = np.linspace(0, click_duration, click_samples)
+    envelope = np.exp(-t * 20)  # Quick decay
+    
+    # Generate click sound
+    click = np.sin(2 * np.pi * click_freq * t) * envelope * click_volume
+    
+    return click
+
+def add_fixed_tempo_metronome(input_file, tempo, output_file, start_time=None, end_time=None):
+    """Add fixed tempo metronome clicks to audio file"""
+    if not BEAT_DETECTION_AVAILABLE:
+        print("Error: Beat detection libraries not available")
+        return False
+    
+    try:
+        # Load original audio
+        y, sr = librosa.load(input_file, sr=None)
+        
+        # If time range specified, trim the audio
+        if start_time is not None and end_time is not None:
+            start_sample = int(start_time * sr)
+            end_sample = int(end_time * sr)
+            y = y[start_sample:end_sample]
+        
+        # Calculate beat interval in samples
+        beat_interval = 60.0 / tempo  # seconds per beat
+        beat_interval_samples = int(beat_interval * sr)
+        
+        # Create metronome track
+        metronome = np.zeros_like(y)
+        
+        # Add regular metronome clicks
+        current_beat = 0
+        beat_sample = 0
+        
+        while beat_sample < len(y):
+            # Create click
+            click = create_metronome_click(tempo, 0.1, sr)
+            click_end = min(beat_sample + len(click), len(y))
+            click_len = click_end - beat_sample
+            
+            # Stronger click for downbeats (every 4th beat)
+            if current_beat % 4 == 0:
+                click = create_metronome_click(tempo, 0.15, sr, click_volume=0.5)
+                click_end = min(beat_sample + len(click), len(y))
+                click_len = click_end - beat_sample
+            
+            metronome[beat_sample:click_end] += click[:click_len]
+            
+            # Move to next beat
+            current_beat += 1
+            beat_sample += beat_interval_samples
+        
+        # Mix original audio with metronome
+        mixed_audio = y + metronome
+        
+        # Normalize to prevent clipping
+        max_val = np.max(np.abs(mixed_audio))
+        if max_val > 1.0:
+            mixed_audio = mixed_audio / max_val
+        
+        # Save the result
+        sf.write(output_file, mixed_audio, sr)
+        return True
+        
+    except Exception as e:
+        print(f"Error adding fixed tempo metronome: {e}")
+        return False
+
+def add_downbeats_only_metronome(input_file, beat_info, output_file, start_time=None, end_time=None):
+    """Add only downbeat clicks to audio file"""
+    if not BEAT_DETECTION_AVAILABLE:
+        print("Error: Beat detection libraries not available")
+        return False
+    
+    try:
+        # Load original audio
+        y, sr = librosa.load(input_file, sr=None)
+        
+        # If time range specified, trim the audio
+        if start_time is not None and end_time is not None:
+            start_sample = int(start_time * sr)
+            end_sample = int(end_time * sr)
+            y = y[start_sample:end_sample]
+        
+        # Create metronome track
+        metronome = np.zeros_like(y)
+        
+        # Add only downbeat clicks (stronger and more prominent)
+        for downbeat_time in beat_info['downbeats']:
+            downbeat_sample = int(downbeat_time * sr)
+            if downbeat_sample < len(y):
+                # Strong click for downbeats only
+                click = create_metronome_click(beat_info['tempo'], 0.2, sr, click_volume=0.6)
+                click_end = min(downbeat_sample + len(click), len(y))
+                click_len = click_end - downbeat_sample
+                metronome[downbeat_sample:click_end] += click[:click_len]
+        
+        # Mix original audio with metronome
+        mixed_audio = y + metronome
+        
+        # Normalize to prevent clipping
+        max_val = np.max(np.abs(mixed_audio))
+        if max_val > 1.0:
+            mixed_audio = mixed_audio / max_val
+        
+        # Save the result
+        sf.write(output_file, mixed_audio, sr)
+        return True
+        
+    except Exception as e:
+        print(f"Error adding downbeats metronome: {e}")
+        return False
+
+def add_metronome_to_audio(input_file, beat_info, output_file, start_time=None, end_time=None):
+    """Add metronome clicks to audio file at detected beat positions"""
+    if not BEAT_DETECTION_AVAILABLE:
+        print("Error: Beat detection libraries not available")
+        return False
+    
+    try:
+        # Load original audio
+        y, sr = librosa.load(input_file, sr=None)
+        
+        # If time range specified, trim the audio
+        if start_time is not None and end_time is not None:
+            start_sample = int(start_time * sr)
+            end_sample = int(end_time * sr)
+            y = y[start_sample:end_sample]
+        
+        # Create metronome track
+        metronome = np.zeros_like(y)
+        
+        # Add clicks at beat positions
+        for beat_time in beat_info['beats']:
+            beat_sample = int(beat_time * sr)
+            if beat_sample < len(y):
+                click = create_metronome_click(beat_info['tempo'], 0.1, sr)
+                click_end = min(beat_sample + len(click), len(y))
+                click_len = click_end - beat_sample
+                metronome[beat_sample:click_end] += click[:click_len]
+        
+        # Add stronger clicks at downbeat positions
+        for downbeat_time in beat_info['downbeats']:
+            downbeat_sample = int(downbeat_time * sr)
+            if downbeat_sample < len(y):
+                # Stronger click for downbeats
+                click = create_metronome_click(beat_info['tempo'], 0.15, sr, click_volume=0.5)
+                click_end = min(downbeat_sample + len(click), len(y))
+                click_len = click_end - downbeat_sample
+                metronome[downbeat_sample:click_end] += click[:click_len]
+        
+        # Mix original audio with metronome
+        mixed_audio = y + metronome
+        
+        # Normalize to prevent clipping
+        max_val = np.max(np.abs(mixed_audio))
+        if max_val > 1.0:
+            mixed_audio = mixed_audio / max_val
+        
+        # Save the result
+        sf.write(output_file, mixed_audio, sr)
+        return True
+        
+    except Exception as e:
+        print(f"Error adding metronome: {e}")
+        return False
+
+def export_with_beats(input_file, output_file, start_time=None, end_time=None, downbeats_only=False):
+    """Export audio file with metronome overlay"""
+    if not BEAT_DETECTION_AVAILABLE:
+        print("Error: Beat detection libraries not available. Install with: pip install librosa soundfile")
+        return False
+    
+    print(f"Exporting {input_file} with metronome overlay...")
+    print("Analyzing audio for beats and tempo...")
+    
+    # Detect beats on the full song (or specified range)
+    beat_info = detect_beats_and_tempo(input_file, start_time, end_time)
+    
+    if not beat_info:
+        print("Beat detection failed")
+        return False
+    
+    tempo = float(beat_info['tempo'].item()) if hasattr(beat_info['tempo'], 'item') else float(beat_info['tempo'])
+    print(f"Detected tempo: {tempo:.1f} BPM")
+    print(f"Found {len(beat_info['beats'])} beats")
+    print(f"Found {len(beat_info['downbeats'])} downbeats")
+    print(f"Duration: {beat_info['duration']:.1f} seconds")
+    
+    # Add metronome overlay
+    if downbeats_only:
+        print("Adding downbeat clicks only...")
+        success = add_downbeats_only_metronome(input_file, beat_info, output_file, start_time, end_time)
+    else:
+        print("Adding all beat clicks...")
+        success = add_metronome_to_audio(input_file, beat_info, output_file, start_time, end_time)
+    
+    if success:
+        print(f"Exported with metronome overlay: {output_file}")
+        return True
+    else:
+        print("Failed to add metronome overlay")
+        return False
 
 def cleanup_old_temp_files():
     """Clean up any leftover temporary files from previous runs"""
@@ -73,7 +333,7 @@ def extract_audio(input_file, start_time, end_time, output_file=None):
         print(f"Error extracting audio: {result.stderr}")
         return None
 
-def loop_audio(input_files, start_time=None, end_time=None):
+def loop_audio(input_files, start_time=None, end_time=None, add_beats=False):
     """Loop audio using streaming approach - supports multiple files"""
     temp_files = []
     
@@ -89,7 +349,41 @@ def loop_audio(input_files, start_time=None, end_time=None):
             file_list = [input_files]
         
         print(f"Looping {len(file_list)} audio file(s): {', '.join(file_list)}")
-        print("Press Ctrl+C to stop...")
+        
+        # Beat detection and metronome overlay
+        if add_beats and BEAT_DETECTION_AVAILABLE:
+            print("\n=== BEAT DETECTION ===")
+            print("Analyzing audio for beats and tempo...")
+            
+            # Use the first file for beat detection
+            main_file = file_list[0]
+            beat_info = detect_beats_and_tempo(main_file, start_time, end_time)
+            
+            if beat_info:
+                tempo = float(beat_info['tempo'].item()) if hasattr(beat_info['tempo'], 'item') else float(beat_info['tempo'])
+                print(f"Detected tempo: {tempo:.1f} BPM")
+                print(f"Found {len(beat_info['beats'])} beats")
+                print(f"Found {len(beat_info['downbeats'])} downbeats")
+                print(f"Duration: {beat_info['duration']:.1f} seconds")
+                
+                # Create metronome overlay
+                print("Adding metronome clicks...")
+                metronome_file = tmp_dir / f"metronome_{os.getpid()}.wav"
+                temp_files.append(str(metronome_file))
+                
+                if add_metronome_to_audio(main_file, beat_info, str(metronome_file), start_time, end_time):
+                    print(f"Metronome overlay saved to: {metronome_file}")
+                    # Use the metronome file for looping instead of original
+                    file_list[0] = str(metronome_file)
+                else:
+                    print("Failed to add metronome overlay, using original audio")
+            else:
+                print("Beat detection failed, using original audio")
+        elif add_beats and not BEAT_DETECTION_AVAILABLE:
+            print("Warning: Beat detection requested but libraries not available")
+            print("Install with: pip install librosa soundfile")
+        
+        print("\nPress Ctrl+C to stop...")
         
         # Stream directly to ffplay without creating large files
         print("Starting looped audio stream...")
@@ -281,7 +575,9 @@ def split_audio(input_file):
     # Use demucs command line (more reliable than Python API)
     # Try to use the virtual environment Python if available
     python_cmd = sys.executable
-    if Path("music_env/bin/python").exists():
+    if Path("py/music_env/bin/python").exists():
+        python_cmd = str(Path("py/music_env/bin/python").absolute())
+    elif Path("music_env/bin/python").exists():
         python_cmd = str(Path("music_env/bin/python").absolute())
     
     cmd = [
@@ -357,6 +653,7 @@ def main():
     loop_parser.add_argument('input_files', help='Input audio file(s) - use commas to separate multiple files')
     loop_parser.add_argument('--start', help='Start time (e.g., :10 or 1:30)')
     loop_parser.add_argument('--end', help='End time (e.g., :30 or 2:00)')
+    loop_parser.add_argument('--beats', action='store_true', help='Add metronome clicks at detected beats and downbeats')
     
     # Download command
     download_parser = subparsers.add_parser('download', help='Download audio from YouTube URL')
@@ -368,6 +665,14 @@ def main():
     # Split command
     split_parser = subparsers.add_parser('split', help='Split audio into vocals and no_vocals using Demucs')
     split_parser.add_argument('input_file', help='Input audio file to split')
+    
+    # Export with beats command
+    export_parser = subparsers.add_parser('export-beats', help='Export audio with metronome overlay')
+    export_parser.add_argument('input_file', help='Input audio file')
+    export_parser.add_argument('--output', help='Output file (default: input_file_with_beats.wav)')
+    export_parser.add_argument('--start', help='Start time (e.g., :10 or 1:30)')
+    export_parser.add_argument('--end', help='End time (e.g., :30 or 2:00)')
+    export_parser.add_argument('--downbeats-only', action='store_true', help='Only add downbeat clicks (every 4th beat)')
     
     args = parser.parse_args()
     
@@ -393,13 +698,34 @@ def main():
                 print("Error: Start time must be before end time")
                 sys.exit(1)
         
-        loop_audio(args.input_files, start_time, end_time)
+        loop_audio(args.input_files, start_time, end_time, args.beats)
     
     elif args.command == 'download':
         download_audio(args.url, args.format, args.quality, args.output_dir)
     
     elif args.command == 'split':
         split_audio(args.input_file)
+    
+    elif args.command == 'export-beats':
+        start_time = None
+        end_time = None
+        
+        if args.start and args.end:
+            start_time = parse_time(args.start)
+            end_time = parse_time(args.end)
+            
+            if start_time >= end_time:
+                print("Error: Start time must be before end time")
+                sys.exit(1)
+        
+        # Generate output filename if not provided
+        if args.output:
+            output_file = args.output
+        else:
+            input_path = Path(args.input_file)
+            output_file = f"{input_path.stem}_with_beats.wav"
+        
+        export_with_beats(args.input_file, output_file, start_time, end_time, args.downbeats_only)
         
     else:
         parser.print_help()
