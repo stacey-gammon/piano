@@ -131,8 +131,8 @@ function processVersion1SongData(songData) {
                 }
             }
             if (previousEntry) {
-                const duration = previousEntry.duration || 1;
-                const pause = previousEntry.pause || 0;
+                const duration = parseInt(previousEntry.duration) || 1;
+                const pause = parseInt(previousEntry.pause) || 0;
                 songData.notes[i].step = previousEntry.step + duration + pause;
             } else {
                 songData.notes[i].step = 1;
@@ -162,8 +162,8 @@ function processVersion2SongData(songData) {
                         }
                     }
                     if (previousEntry) {
-                        const duration = previousEntry.duration || 1;
-                        const pause = previousEntry.pause || 0;
+                        const duration = parseInt(previousEntry.duration) || 1;
+                        const pause = parseInt(previousEntry.pause) || 0;
                         track.notes[i].step = previousEntry.step + duration + pause;
                     } else {
                         track.notes[i].step = 1;

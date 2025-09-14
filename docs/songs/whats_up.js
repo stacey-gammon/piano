@@ -403,22 +403,22 @@ const whatsUp = {
           {
             "degree": "1",
             "step": 1,
-            "duration": "12",
+            "duration": 12,
           },
           {
             "degree": "2",
             "step": 15,
-            "duration": "10",
+            "duration": 10,
           },
           {
             "degree": "4",
             "step": 29,
-            "duration": "15",
+            "duration": 15,
           },
           {
             "degree": "1",
             "step": 39,
-            "duration": "10",
+            "duration": 10,
           },
         ]
       }
