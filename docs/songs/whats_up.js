@@ -165,12 +165,12 @@ const whatsUp = {
             "lyrics": "my"
           },
           {
-            "degree": "3",
+            "degree": "5",
             "duration": 2,
             "lyrics": "life"
           },
           {
-            "degree": "3",
+            "degree": "5",
             "lyrics": "is"
           },
           {
