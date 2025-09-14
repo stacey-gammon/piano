@@ -417,7 +417,7 @@ const whatsUp = {
           },
           {
             "degree": "1",
-            "step": 40,
+            "step": 39,
             "duration": "10",
           },
         ]

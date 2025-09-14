@@ -421,6 +421,16 @@
             <div class="track-controls" id="trackControls" style="margin: 20px 0; text-align: center;">
                 <!-- track volume controls will be added here dynamically -->
             </div>
+            
+            <!-- Play and Hold Controls -->
+            <div class="play-hold-controls" style="margin: 20px 0; text-align: center;">
+                <button id="playHoldBtn" class="btn btn-play-hold" onclick="startPlayHold()" style="background: linear-gradient(45deg, #00b894, #00a085); color: white; margin-right: 10px;">
+                    ▶️ Play & Hold
+                </button>
+                <button id="stopHoldBtn" class="btn btn-stop-hold" onclick="stopPlayHold()" style="background: linear-gradient(45deg, #e17055, #d63031); color: white;" disabled>
+                    ⏹️ Stop
+                </button>
+            </div>
 
             <div class="tempo-control">
                 <label>Tempo (BPM): </label>
@@ -470,6 +480,10 @@
         let playbackInterval = null;
         let currentStep = 1;
         let wasPlaying = false; // Track if we were playing before
+        
+        // Play and hold variables
+        let isPlayHolding = false;
+        let playHoldInterval = null;
 
         // Generate piano keys
         function createPiano() {
@@ -668,6 +682,11 @@
                 audioContext.resume();
             }
             
+            // Stop play-and-hold if it's running
+            if (isPlayHolding) {
+                stopPlayHold();
+            }
+            
             const playButton = document.querySelector('.btn-play');
             playButton.textContent = '⏸️';
             isPlaying = true;
@@ -723,6 +742,123 @@
             const playButton = document.querySelector('.btn-play');
             playButton.textContent = '▶️';
         }
+        
+        // Play and hold functions
+        function startPlayHold() {
+            if (isPlayHolding) return;
+            
+            // Stop regular playback if it's running
+            if (isPlaying) {
+                pausePlayback();
+            }
+            
+            isPlayHolding = true;
+            document.getElementById('playHoldBtn').disabled = true;
+            document.getElementById('stopHoldBtn').disabled = false;
+            
+            // Play current step notes continuously
+            playCurrentStepNotes();
+            
+            // Set up interval to keep playing the same notes
+            playHoldInterval = setInterval(() => {
+                playCurrentStepNotes();
+            }, eighthNoteLength);
+        }
+        
+        function stopPlayHold() {
+            if (!isPlayHolding) return;
+            
+            isPlayHolding = false;
+            document.getElementById('playHoldBtn').disabled = false;
+            document.getElementById('stopHoldBtn').disabled = true;
+            
+            // Stop the interval
+            if (playHoldInterval) {
+                clearInterval(playHoldInterval);
+                playHoldInterval = null;
+            }
+            
+            // Stop all active oscillators
+            stopAllOscillators();
+        }
+        
+        function playCurrentStepNotes() {
+            // Get notes at current step
+            const notesAtStep = currentNotes.filter(n => n.step === currentStep);
+            
+            // Stop any existing oscillators from previous play-hold cycles
+            stopAllOscillators();
+            
+            // Play each note
+            notesAtStep.forEach(note => {
+                if (note.chord) {
+                    // Handle chord notes
+                    playChordNote(note);
+                } else if (note.degree) {
+                    // Handle degree-based notes
+                    playDegreeNote(note);
+                }
+            });
+        }
+        
+        function playChordNote(note) {
+            if (!note.chord) return;
+            
+            // Get chord notes based on the chord definition
+            let chordNotes = [];
+            if (/\d+/.test(note.chord)) {
+                // Numeric chord (scale degree)
+                const degree = parseInt(note.chord);
+                chordNotes = getChordNotes(songKey, degree);
+            } else {
+                // Named chord
+                chordNotes = chordDefinitions[note.chord] || [];
+            }
+            
+            // Play each note in the chord
+            chordNotes.forEach(chordNote => {
+                const octave = tracks[note.track]?.default_octave || defaultOctave;
+                const noteWithOctave = chordNote + octave;
+                playContinuousNote(noteWithOctave, note.track);
+            });
+        }
+        
+        function playDegreeNote(note) {
+            if (!note.degree) return;
+            
+            // Map degree to actual note
+            const actualNote = mapUnparsedDegreeToNote(note.degree, songKey, note.track);
+            if (actualNote) {
+                playContinuousNote(actualNote, note.track);
+            }
+        }
+        
+        function playContinuousNote(note, trackId) {
+            const freq = noteFreqs[note];
+            if (!freq) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            oscillator.type = 'triangle';
+            
+            // Set volume based on track volume
+            const trackVolume = tracks[trackId]?.volume || 5;
+            const volume = (trackVolume / 5) * 0.3; // Scale to 0-0.3 range
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+            
+            oscillator.start(audioContext.currentTime);
+            
+            // Store oscillator for later stopping (compatible with audioPlayer.js)
+            activeOscillators.push(oscillator);
+        }
+        
         
         // Navigation functions
         function rewind() {
