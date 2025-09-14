@@ -1,253 +1,240 @@
 const lastLightFadesV2 = {
-  "notes": [
-    {
-      "chord": "B",
-      "step": 1,
-      "duration": 8,
-      "track": "chords"
-    },
-    {
-      "degree": "3",
-      "step": 1,
-      "duration": 1,
-      "lyrics": "fath",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 1,
-      "lyrics": "er",
-      "track": "1"
-    },
-    {
-      "degree": "3",
-      "duration": 2,
-      "lyrics": "oh",
-      "track": "1"
-    },
-    {
-      "degree": "3",
-      "duration": 2,
-      "lyrics": "my",
-      "track": "1"
-    },
-    {
-      "degree": "3",
-      "duration": 1,
-      "lyrics": "fath",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 1,
-      "lyrics": "er",
-      "track": "1"
-    },
-    {
-      "degree": "1",
-      "duration": 2,
-      "lyrics": "i'll",
-      "track": "1"
-    },
-    {
-      "degree": "1",
-      "duration": 2,
-      "lyrics": "be",
-      "track": "1"
-    },
-    {
-      "degree": "6[-1]",
-      "duration": 2,
-      "lyrics": "stan",
-      "track": "1"
-    },
-    {
-      "degree": "1]",
-      "duration": 2,
-      "lyrics": "din",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 2,
-      "lyrics": "in",
-      "track": "1"
-    },
-    {
-      "degree": "1",
-      "duration": 3,
-      "lyrics": "line",
-      "track": "1"
-    },
-    {
-      "degree": "1",
-      "lyrics": "to",
-      "track": "1"
-    },
-    {
-      "degree": "3",
-      "duration": 3,
-      "lyrics": "face",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 1,
-      "lyrics": "what",
-      "track": "1"
-    },
-    {
-      "degree": "1",
-      "duration": 3,
-      "lyrics": "faults",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 2,
-      "lyrics": "are",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 4,
-      "lyrics": "mine",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 2,
-      "lyrics": "it's",
-      "track": "1"
-    },
-    {
-      "degree": "6",
-      "duration": 1,
-      "lyrics": "not",
-      "track": "1"
-    },
-    {
-      "degree": "6",
-      "duration": 2,
-      "lyrics": "these",
-      "track": "1"
-    },
-    {
-      "degree": "6",
-      "duration": 1,
-      "lyrics": "old",
-      "track": "1"
-    },
-    {
-      "degree": "5",
-      "duration": 2,
-      "lyrics": "bones",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "lyrics": "that",
-      "track": "1"
-    },
-    {
-      "degree": "1",
-      "lyrics": "i'll",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 2,
-      "lyrics": "miss",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 1,
-      "lyrics": "in",
-      "track": "1"
-    },
-    {
-      "degree": "1",
-      "duration": 1,
-      "lyrics": "my",
-      "track": "1"
-    },
-    {
-      "degree": "1",
-      "duration": 2,
-      "lyrics": "dy",
-      "track": "1"
-    },
-    {
-      "degree": "3",
-      "duration": 2,
-      "lyrics": "-in",
-      "track": "1"
-    },
-    {
-      "degree": "3",
-      "duration": 2,
-      "lyrics": "its",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 1,
-      "lyrics": "the",
-      "track": "1"
-    },
-    {
-      "degree": "3",
-      "duration": 2,
-      "pause": 2,
-      "lyrics": "girl",
-      "track": "1"
-    },
-    {
-      "degree": "1",
-      "duration": 1,
-      "lyrics": "im",
-      "track": "1"
-    },
-    {
-      "degree": "3",
-      "duration": 2,
-      "lyrics": "leav-",
-      "track": "1"
-    },
-    {
-      "degree": "3",
-      "duration": 3,
-      "lyrics": "-in",
-      "track": "1"
-    },
-    {
-      "degree": "2",
-      "duration": 2,
-      "lyrics": "be-",
-      "track": "1"
-    },
-    {
-      "degree": "1",
-      "duration": 3,
-      "lyrics": "hind",
-      "track": "1"
-    }
-  ],
+  "version": 2,
   "tempo": 120,
   "key": "B",
   "title": "Until the last light fades [Verse Two]",
   "tracks": {
     "1": {
       "volume": 5,
-      "default_octave": 3
+      "default_octave": 3,
+      "notes": [
+        {
+          "degree": "3",
+          "step": 1,
+          "duration": 1,
+          "lyrics": "fath"
+        },
+        {
+          "degree": "3",
+          "duration": 1,
+          "lyrics": "er"
+        },
+        {
+          "degree": "3",
+          "duration": 2,
+          "lyrics": "oh"
+        },
+        {
+          "degree": "3",
+          "duration": 2,
+          "lyrics": "my"
+        },
+        {
+          "degree": "3",
+          "duration": 1,
+          "lyrics": "fath"
+        },
+        {
+          "degree": "2",
+          "duration": 1,
+          "lyrics": "er"
+        },
+        {
+          "degree": "1",
+          "duration": 2,
+          "lyrics": "i'll"
+        },
+        {
+          "degree": "1",
+          "duration": 2,
+          "lyrics": "be"
+        },
+        {
+          "degree": "6[-1]",
+          "duration": 2,
+          "lyrics": "stan"
+        },
+        {
+          "degree": "6[-1]",
+          "duration": 2,
+          "lyrics": "din"
+        },
+        {
+          "degree": "1",
+          "duration": 2,
+          "lyrics": "in"
+        },
+        {
+          "degree": "5[-1]",
+          "duration": 3,
+          "lyrics": "line"
+        },
+        {
+          "degree": "1",
+          "lyrics": "to"
+        },
+        {
+          "degree": "3",
+          "duration": 3,
+          "lyrics": "face"
+        },
+        {
+          "degree": "2",
+          "duration": 1,
+          "lyrics": "what"
+        },
+        {
+          "degree": "1",
+          "duration": 3,
+          "lyrics": "faults"
+        },
+        {
+          "degree": "2",
+          "duration": 2,
+          "lyrics": "are"
+        },
+        {
+          "degree": "2",
+          "duration": 4,
+          "lyrics": "mine"
+        },
+        {
+          "degree": "2",
+          "duration": 2,
+          "lyrics": "it's"
+        },
+        {
+          "degree": "6",
+          "duration": 1,
+          "lyrics": "not"
+        },
+        {
+          "degree": "6",
+          "duration": 2,
+          "lyrics": "these"
+        },
+        {
+          "degree": "6",
+          "duration": 1,
+          "lyrics": "old"
+        },
+        {
+          "degree": "5",
+          "duration": 2,
+          "lyrics": "bones"
+        },
+        {
+          "degree": "2",
+          "lyrics": "that"
+        },
+        {
+          "degree": "1",
+          "lyrics": "i'll"
+        },
+        {
+          "degree": "2",
+          "duration": 2,
+          "lyrics": "miss"
+        },
+        {
+          "degree": "2",
+          "duration": 1,
+          "lyrics": "in"
+        },
+        {
+          "degree": "1",
+          "duration": 1,
+          "lyrics": "my"
+        },
+        {
+          "degree": "1",
+          "duration": 2,
+          "lyrics": "dy"
+        },
+        {
+          "degree": "3",
+          "duration": 2,
+          "lyrics": "-in"
+        },
+        {
+          "degree": "3",
+          "duration": 2,
+          "lyrics": "its"
+        },
+        {
+          "degree": "2",
+          "duration": 1,
+          "lyrics": "the"
+        },
+        {
+          "degree": "3",
+          "duration": 2,
+          "pause": 2,
+          "lyrics": "girl"
+        },
+        {
+          "degree": "1",
+          "duration": 1,
+          "lyrics": "im"
+        },
+        {
+          "degree": "3",
+          "duration": 2,
+          "lyrics": "leav-"
+        },
+        {
+          "degree": "3",
+          "duration": 3,
+          "lyrics": "-in"
+        },
+        {
+          "degree": "2",
+          "duration": 2,
+          "lyrics": "be-"
+        },
+        {
+          "degree": "1",
+          "duration": 3,
+          "lyrics": "hind"
+        }
+      ]
     },
     "2": {
       "volume": 2,
-      "default_octave": 4
+      "default_octave": 4,
+      "notes": [
+        {
+          "degree": "1",
+          "lyrics": "not"
+        },
+        {
+          "degree": "1",
+          "lyrics": "these"
+        },
+        {
+          "degree": "1",
+          "lyrics": "old"
+        },
+        {
+          "degree": "7[-1]",
+          "duration": 2,
+          "lyrics": "bones"
+        },
+        {
+          "degree": "6[-1]",
+          "lyrics": "I'll"
+        }
+      ]
     },
     "chords": {
-      "volume": 5
+      "volume": 5,
+      "notes": [
+        {
+          "chord": "B",
+          "step": 1,
+          "duration": 8
+        }
+      ]
     }
   }
 }

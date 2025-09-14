@@ -125,20 +125,19 @@
     return chromaticScale[newIndex] + chordSuffix;
   }
 
-
   function transposeText(text, steps) {
-    if (steps === 0) return text;
-    const lines = text.split('\n');
-    return lines.map(line => {
-      const chordPattern = /\b[A-G][#b]?[^\s]*\b/g;
-      return line.replace(chordPattern, match => {
-        if (/^[A-G][#b]?(?:m|maj|min|dim|aug|\d|sus|add|\d+)?(?:\/[A-G][#b]?)?$/i.test(match.trim())) {
-          return transposeChord(match, steps);
-        }
-        return match;
-      });
-    }).join('\n');
-  }
+  if (steps === 0) return text;
+  const lines = text.split('\n');
+
+  return lines.map(line => {
+    // Match a chord token once (preserve the prefix like space or punctuation)
+    return line.replace(/(^|[^A-Za-z0-9_])([A-G][#b]?[^\s]*)/g, (full, prefix, chordTok) => {
+      // prefix is either '' (start of line) or the non-word character before the chord
+      // chordTok is the chord token we want to transpose (e.g. C#, C#m7, C#/F#)
+      return prefix + transposeChord(chordTok, steps);
+    });
+  }).join('\n');
+}
 
   function updateOutput() {
     const text = inputText.value;
