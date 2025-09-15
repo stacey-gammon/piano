@@ -74,11 +74,11 @@ const whatsUp = {
             "lyrics": "that"
           },
           {
-            "degree": "4",
+            "degree": "5",
             "lyrics": "great"
           },
           {
-            "degree": "4",
+            "degree": "5",
             "duration": 2,
             "lyrics": "big"
           },
@@ -205,11 +205,11 @@ const whatsUp = {
             "lyrics": "that"
           },
           {
-            "degree": "6",
+            "degree": "1",
             "lyrics": "great"
           },
           {
-            "degree": "6",
+            "degree": "1",
             "duration": 2,
             "lyrics": "big"
           },
@@ -336,11 +336,11 @@ const whatsUp = {
             "lyrics": "that"
           },
           {
-            "degree": "2",
+            "degree": "3",
             "lyrics": "great"
           },
           {
-            "degree": "2",
+            "degree": "3",
             "duration": 2,
             "lyrics": "big"
           },
@@ -418,7 +418,7 @@ const whatsUp = {
           {
             "degree": "1",
             "step": 39,
-            "duration": 10,
+            "duration": 5,
           },
         ]
       }

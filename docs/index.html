@@ -1170,96 +1170,133 @@
             Object.keys(tracks).forEach(trackId => {
                 const displayElement = document.getElementById(`track-note-degrees-display-${trackId}`);
                 if (displayElement) {
-                    // Find previous, current, and next notes for this track    
-                    const notesAtCurrentStep = currentNotes.filter(n => n.track === trackId && n.step === currentStep);
-                    const currentNote = notesAtCurrentStep.length === 0 ? null : notesAtCurrentStep[0];
-
-                    if (!currentNote && currentStep > 1) {
+                    // Get all notes for this track, sorted by step
+                    const trackNotes = currentNotes.filter(n => n.track === trackId).sort((a, b) => (a.step || 0) - (b.step || 0));
+                    
+                    if (trackNotes.length === 0) {
+                        displayElement.innerHTML = '';
                         return;
                     }
-                    // Walk backwards until we find a note that doesn't match the current note
-                    let previousNotes = [];
-                    const PREVIOUS_NOTES_LIMIT = 4;
-                    for (let i = currentStep - 1; i >= 0; i--) {
-                        const note = currentNotes.find(n => n.track === trackId && n.step === i);
-                        if (!note) {
-                            continue;
+                    
+                    // Find the current note (the one that should be playing at currentStep)
+                    let currentNote = null;
+                    let currentNoteIndex = -1;
+                    let referenceNoteIndex = -1; // This will be used for finding prev/next notes
+                    
+                    for (let i = 0; i < trackNotes.length; i++) {
+                        const note = trackNotes[i];
+                        const noteStart = note.step || 1;
+                        const noteDuration = parseInt(note.duration) || 1;
+                        const notePause = parseInt(note.pause) || 0;
+                        const noteEnd = noteStart + noteDuration - 1; // Don't include pause in active note range
+                        const pauseStart = noteEnd + 1;
+                        const pauseEnd = pauseStart + notePause - 1;
+                        
+                        // Check if we're in the note playing range (not pause)
+                        if (currentStep >= noteStart && currentStep <= noteEnd) {
+                            currentNote = note;
+                            currentNoteIndex = i;
+                            referenceNoteIndex = i;
+                            break;
                         }
-                        previousNotes.push(note);
-
-                        if (previousNotes.length >= PREVIOUS_NOTES_LIMIT) {
+                        // If we're in a pause, find the note that just finished
+                        else if (currentStep >= pauseStart && currentStep <= pauseEnd) {
+                            // We're in a pause, so the reference note is the one that just finished
+                            referenceNoteIndex = i;
+                            break;
+                        }
+                        // If we're before any note, use the first note as reference
+                        else if (currentStep < noteStart) {
+                            referenceNoteIndex = i;
                             break;
                         }
                     }
-
-                    const NEXT_NOTES_LIMIT = 4;
-                    // Walk forwards until we find a note that doesn't match the current note
+                    
+                    // If we haven't found a reference note, use the last note
+                    if (referenceNoteIndex === -1) {
+                        referenceNoteIndex = trackNotes.length - 1;
+                    }
+                    
+                    // Get previous and next notes
+                    const PREVIOUS_NOTES_LIMIT = 2;
+                    const NEXT_NOTES_LIMIT = 2;
+                    
+                    let previousNotes = [];
                     let nextNotes = [];
-                    for (let i = currentStep + 1; i < currentNotes.length; i++) {
-                        const note = currentNotes.find(n => n.track === trackId && n.step === i);
-                        if (!note) {
-                            continue;
-                        }
-                        nextNotes.push(note);
-                        if (nextNotes.length >= NEXT_NOTES_LIMIT) {
-                            break;
-                        }
+                    
+                    // Get previous notes
+                    // If we're in a pause, include the note that just finished as a previous note
+                    let startIndex = referenceNoteIndex;
+                    if (currentNote === null && referenceNoteIndex >= 0) {
+                        // We're in a pause, so include the note that just finished
+                        previousNotes.unshift(trackNotes[referenceNoteIndex]);
+                        startIndex = referenceNoteIndex - 1;
+                    } else {
+                        // We're playing a note, so start from the note before it
+                        startIndex = referenceNoteIndex - 1;
+                    }
+                    
+                    for (let i = startIndex; i >= 0 && previousNotes.length < PREVIOUS_NOTES_LIMIT; i--) {
+                        previousNotes.unshift(trackNotes[i]);
+                    }
+                    
+                    // Get next notes
+                    for (let i = referenceNoteIndex + 1; i < trackNotes.length && nextNotes.length < NEXT_NOTES_LIMIT; i++) {
+                        nextNotes.push(trackNotes[i]);
                     }
                     
                     let displayText = '';
                     
+                    // Helper function to format a note with duration (no pause display)
+                    function formatNote(note) {
+                        if (!note) return '';
+                        
+                        let text = '';
+                        if (note.degree) {
+                            text = note.degree.toString();
+                        } else if (note.chord) {
+                            // If it's a numeric chord degree, convert to actual chord name
+                            if (/^\d+$/.test(note.chord)) {
+                                text = convertChordDegreeToName(note.chord, songKey);
+                            } else {
+                                text = note.chord;
+                            }
+                        } else if (note.note) {
+                            text = note.note;
+                        } else {
+                            return '';
+                        }
+                        
+                        // Add duration in parentheses if not default (1)
+                        const duration = parseInt(note.duration) || 1;
+                        if (duration !== 1) {
+                            text += `(${duration})`;
+                        }
+                        
+                        // Don't display pause information
+                        
+                        return text;
+                    }
+                    
                     // Previous notes (dimmed)
                     if (previousNotes.length > 0) {
-                        const prevTexts = previousNotes.map(note => {
-                            if (note.degree) return note.degree.toString();
-                            if (note.chord) {
-                                // If it's a numeric chord degree, convert to actual chord name
-                                if (/^\d+$/.test(note.chord)) {
-                                    return convertChordDegreeToName(note.chord, songKey);
-                                }
-                                return note.chord;
-                            }
-                            if (note.note) return note.note;
-                            return '';
-                        }).filter(text => text);
+                        const prevTexts = previousNotes.map(formatNote).filter(text => text);
                         if (prevTexts.length > 0) {
                             displayText += `<span style="color: #666; font-size: 12px;">${prevTexts.join(' ')}</span> `;
                         }
                     }
                     
-                    // Current notes (highlighted)
-                    if (notesAtCurrentStep.length > 0) {
-                        const currentTexts = notesAtCurrentStep.map(note => {
-                            if (note.degree) return note.degree.toString();
-                            if (note.chord) {
-                                // If it's a numeric chord degree, convert to actual chord name
-                                if (/^\d+$/.test(note.chord)) {
-                                    return convertChordDegreeToName(parseInt(note.chord), songKey);
-                                }
-                                return note.chord;
-                            }
-                            if (note.note) return note.note;
-                            return '';
-                        }).filter(text => text);
-                        if (currentTexts.length > 0) {
-                            displayText += `<span style="color: #fff; font-size: 14px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px;">${currentTexts.join(' ')}</span> `;
+                    // Current note (highlighted)
+                    if (currentNote) {
+                        const currentText = formatNote(currentNote);
+                        if (currentText) {
+                            displayText += `<span style="color: #fff; font-size: 14px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px;">${currentText}</span> `;
                         }
                     }
                     
                     // Next notes (dimmed)
                     if (nextNotes.length > 0) {
-                        const nextTexts = nextNotes.map(note => {
-                            if (note.degree) return note.degree.toString();
-                            if (note.chord) {
-                                // If it's a numeric chord degree, convert to actual chord name
-                                if (/^\d+$/.test(note.chord)) {
-                                    return convertChordDegreeToName(parseInt(note.chord), songKey);
-                                }
-                                return note.chord;
-                            }
-                            if (note.note) return note.note;
-                            return '';
-                        }).filter(text => text);
+                        const nextTexts = nextNotes.map(formatNote).filter(text => text);
                         if (nextTexts.length > 0) {
                             displayText += `<span style="color: #666; font-size: 12px;">${nextTexts.join(' ')}</span>`;
                         }
