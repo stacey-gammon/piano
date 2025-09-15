@@ -306,6 +306,13 @@ function mapDegreeToNote(scaleDegree, octave, songKey, raiseSemitone = 0) {
 function playNoteOrChord(noteObject, trackVolume = null, songKey = null, startTime = null) {
     const durationSeconds = (noteObject.duration || 1) * eighthNoteLength / 1000;
     let mappedNote = null;
+
+    is_chord_track = noteObject.track === "chords";
+    if (noteObject.chord || is_chord_track) {
+        playChord(noteObject.chord || noteObject.degree, trackVolume, durationSeconds, songKey, startTime);
+        return;
+    }
+
     // Check if this is a scale degree mapping (new feature)
     if (noteObject.degree !== undefined) {
         // Map the scale degree to an actual note
@@ -317,9 +324,7 @@ function playNoteOrChord(noteObject, trackVolume = null, songKey = null, startTi
         }
     }
     
-    if (noteObject.chord) {
-        playChord(noteObject.chord, trackVolume, durationSeconds, songKey, startTime);
-    } else if (noteObject.note || mappedNote) {
+    if (noteObject.note || mappedNote) {
         playNote(noteObject.note || mappedNote, trackVolume, durationSeconds, startTime);
     } else {
         console.warn('Note object has neither note, chord, nor degree field:', noteObject);

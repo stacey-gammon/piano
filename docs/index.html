@@ -806,7 +806,8 @@
             
             // Play each note (volume is handled naturally in playContinuousNote)
             notesAtStep.forEach(note => {
-                if (note.chord) {
+                is_chord_track = note.track == "chords";
+                if (note.chord || is_chord_track) {
                     // Handle chord notes
                     playChordNote(note);
                 } else if (note.degree) {
@@ -817,17 +818,17 @@
         }
         
         function playChordNote(note) {
-            if (!note.chord) return;
+            chord = note.chord || note.degree;
             
             // Get chord notes based on the chord definition
             let chordNotes = [];
-            if (/\d+/.test(note.chord)) {
+            if (/\d+/.test(chord)) {
                 // Numeric chord (scale degree)
-                const degree = parseInt(note.chord);
+                const degree = parseInt(chord);
                 chordNotes = getChordNotes(songKey, degree);
             } else {
                 // Named chord
-                chordNotes = chordDefinitions[note.chord] || [];
+                chordNotes = chordDefinitions[chord] || [];
             }
             
             // Play each note in the chord
