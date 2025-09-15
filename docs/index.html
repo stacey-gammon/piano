@@ -804,7 +804,7 @@
             // Stop any existing oscillators from previous play-hold cycles
             stopAllOscillators();
             
-            // Play each note
+            // Play each note (volume is handled naturally in playContinuousNote)
             notesAtStep.forEach(note => {
                 if (note.chord) {
                     // Handle chord notes
@@ -882,8 +882,14 @@
             oscillator.type = 'triangle';
             
             // Set volume based on track volume
-            const trackVolume = tracks[trackId]?.volume || 5;
-            const volume = (trackVolume / 5) * 0.3; // Scale to 0-0.3 range
+            const trackVolume = tracks[trackId]?.volume ?? 5;
+            let volume = 0.3;
+            if (trackVolume !== null) {
+                if (trackVolume === 0) return;
+                volume = (trackVolume / 5) * 0.3;
+                // Apply frequency scaling so low notes aren't overpowering
+                volume *= perceivedLoudnessScale(freq);
+            }
             
             gainNode.gain.setValueAtTime(0, audioContext.currentTime);
             gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
@@ -1021,6 +1027,14 @@
                 tracks[trackId].volume = parseInt(volume);
                 document.getElementById(`volumeLabel_${trackId}`).textContent = volume;
                 console.log('Volume updated successfully');
+                
+                // If Play and Hold is active, restart it to reflect volume changes
+                if (isPlayHolding) {
+                    // Stop current playback
+                    stopAllOscillators();
+                    // Restart with new volume settings
+                    playCurrentStepNotes();
+                }
             } else {
                 console.error(`Track ${trackId} not found in tracks object`);
             }
@@ -1036,6 +1050,14 @@
                 tracks[trackId].default_octave = parseInt(octave);
                 document.getElementById(`octaveLabel_${trackId}`).textContent = octave;
                 console.log('Octave updated successfully');
+                
+                // If Play and Hold is active, restart it to reflect octave changes
+                if (isPlayHolding) {
+                    // Stop current playback
+                    stopAllOscillators();
+                    // Restart with new octave settings
+                    playCurrentStepNotes();
+                }
             } else {
                 console.error(`Track ${trackId} not found in tracks object`);
             }
