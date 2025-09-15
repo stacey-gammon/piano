@@ -836,6 +836,18 @@
                 const noteWithOctave = chordNote + octave;
                 playContinuousNote(noteWithOctave, note.track);
             });
+            
+            // Visual feedback for chord (highlight multiple keys)
+            chordNotes.forEach(chordNote => {
+                const octave = tracks[note.track]?.default_octave || defaultOctave;
+                const noteWithOctave = chordNote + octave;
+                const keyElement = document.querySelector(`[data-note="${noteWithOctave}"]`);
+                if (keyElement) {
+                    keyElement.classList.add('active');
+                    // Remove active class after a short duration for visual feedback
+                    setTimeout(() => keyElement.classList.remove('active'), 100);
+                }
+            });
         }
         
         function playDegreeNote(note) {
@@ -845,6 +857,14 @@
             const actualNote = mapUnparsedDegreeToNote(note.degree, songKey, note.track);
             if (actualNote) {
                 playContinuousNote(actualNote, note.track);
+                
+                // Visual feedback for single note
+                const keyElement = document.querySelector(`[data-note="${actualNote}"]`);
+                if (keyElement) {
+                    keyElement.classList.add('active');
+                    // Remove active class after a short duration for visual feedback
+                    setTimeout(() => keyElement.classList.remove('active'), 100);
+                }
             }
         }
         
