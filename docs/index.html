@@ -424,11 +424,8 @@
             
             <!-- Play and Hold Controls -->
             <div class="play-hold-controls" style="margin: 20px 0; text-align: center;">
-                <button id="playHoldBtn" class="btn btn-play-hold" onclick="startPlayHold()" style="background: linear-gradient(45deg, #00b894, #00a085); color: white; margin-right: 10px;">
+                <button id="playHoldToggleBtn" class="btn btn-play-hold" onclick="togglePlayHold()" style="background: linear-gradient(45deg, #00b894, #00a085); color: white;">
                     ▶️ Play & Hold
-                </button>
-                <button id="stopHoldBtn" class="btn btn-stop-hold" onclick="stopPlayHold()" style="background: linear-gradient(45deg, #e17055, #d63031); color: white;" disabled>
-                    ⏹️ Stop
                 </button>
             </div>
 
@@ -744,6 +741,14 @@
         }
         
         // Play and hold functions
+        function togglePlayHold() {
+            if (isPlayHolding) {
+                stopPlayHold();
+            } else {
+                startPlayHold();
+            }
+        }
+        
         function startPlayHold() {
             if (isPlayHolding) return;
             
@@ -753,8 +758,9 @@
             }
             
             isPlayHolding = true;
-            document.getElementById('playHoldBtn').disabled = true;
-            document.getElementById('stopHoldBtn').disabled = false;
+            const toggleBtn = document.getElementById('playHoldToggleBtn');
+            toggleBtn.textContent = '⏹️ Stop';
+            toggleBtn.style.background = 'linear-gradient(45deg, #e17055, #d63031)';
             
             // Play current step notes continuously
             playCurrentStepNotes();
@@ -769,8 +775,9 @@
             if (!isPlayHolding) return;
             
             isPlayHolding = false;
-            document.getElementById('playHoldBtn').disabled = false;
-            document.getElementById('stopHoldBtn').disabled = true;
+            const toggleBtn = document.getElementById('playHoldToggleBtn');
+            toggleBtn.textContent = '▶️ Play & Hold';
+            toggleBtn.style.background = 'linear-gradient(45deg, #00b894, #00a085)';
             
             // Stop the interval
             if (playHoldInterval) {
@@ -783,9 +790,17 @@
         }
         
         function playCurrentStepNotes() {
-            // Get notes at current step
-            const notesAtStep = currentNotes.filter(n => n.step === currentStep);
-            
+            // Get notes that should be playing at current step (including notes from previous steps that are still within their duration)
+            const notesAtStep = currentNotes.filter(n => {
+                const noteStart = n.step || 1;
+                const noteDuration = parseInt(n.duration) || 1;
+                const notePause = parseInt(n.pause) || 0;
+                const noteEnd = noteStart + noteDuration + notePause - 1;
+                
+                // Include notes that are currently playing (not in pause)
+                return currentStep >= noteStart && currentStep < noteStart + noteDuration;
+            });
+
             // Stop any existing oscillators from previous play-hold cycles
             stopAllOscillators();
             

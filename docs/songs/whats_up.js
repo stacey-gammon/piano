@@ -205,11 +205,11 @@ const whatsUp = {
             "lyrics": "that"
           },
           {
-            "degree": "1",
+            "degree": "1[+1]",
             "lyrics": "great"
           },
           {
-            "degree": "1",
+            "degree": "1[+1]",
             "duration": 2,
             "lyrics": "big"
           },
