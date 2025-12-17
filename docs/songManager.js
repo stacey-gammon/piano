@@ -11,6 +11,7 @@ async function loadSongs() {
         
         // Load the song files via script tags
         const songFiles = [
+            'sweet_child.js',
             'whats_up.js',
             'valerie_brothers_chorus.js',
             'valerie_glee_chorus.js',
