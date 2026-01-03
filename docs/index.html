@@ -706,8 +706,12 @@
 
             
             playbackInterval = setInterval(() => {
-                // Play notes that start at current step
-                const notesToPlay = currentNotes.filter(n => n.step === currentStep);
+                // Play notes that start at current step (support fractional steps)
+                const notesToPlay = currentNotes.filter(n => {
+                    const noteStep = parseFloat(n.step) || 1;
+                    // Allow small floating point tolerance for step matching
+                    return Math.abs(noteStep - currentStep) < 0.001;
+                });
                 
                 // Update display for current step
                 updateDisplayAtCurrentStep();
@@ -793,8 +797,8 @@
             // Get notes that should be playing at current step (including notes from previous steps that are still within their duration)
             const notesAtStep = currentNotes.filter(n => {
                 const noteStart = n.step || 1;
-                const noteDuration = parseInt(n.duration) || 1;
-                const notePause = parseInt(n.pause) || 0;
+                const noteDuration = parseFloat(n.duration) || 1;
+                const notePause = parseFloat(n.pause) || 0;
                 const noteEnd = noteStart + noteDuration + notePause - 1;
                 
                 // Include notes that are currently playing (not in pause)
@@ -933,8 +937,13 @@
         }
         
         function updateDisplayAtCurrentStep() {
-            // Get notes at current step
-            const notesAtStep = currentNotes.filter(n => n.step === currentStep);
+            // Get notes at current step (support fractional steps)
+            const notesAtStep = currentNotes.filter(n => {
+                const noteStep = parseFloat(n.step) || 1;
+                // Allow small floating point tolerance for step matching
+                return Math.abs(noteStep - currentStep) < 0.001 || 
+                       (currentStep >= noteStep && currentStep < noteStep + (parseFloat(n.duration) || 1));
+            });
             
             // Collect lyrics for this step
             const lyricsAtStep = notesAtStep
@@ -1243,9 +1252,9 @@
                     
                     for (let i = 0; i < trackNotes.length; i++) {
                         const note = trackNotes[i];
-                        const noteStart = note.step || 1;
-                        const noteDuration = parseInt(note.duration) || 1;
-                        const notePause = parseInt(note.pause) || 0;
+                        const noteStart = parseFloat(note.step) || 1;
+                        const noteDuration = parseFloat(note.duration) || 1;
+                        const notePause = parseFloat(note.pause) || 0;
                         const noteEnd = noteStart + noteDuration - 1; // Don't include pause in active note range
                         const pauseStart = noteEnd + 1;
                         const pauseEnd = pauseStart + notePause - 1;
@@ -1326,8 +1335,8 @@
                         }
                         
                         // Add duration in parentheses if not default (1)
-                        const duration = parseInt(note.duration) || 1;
-                        if (duration !== 1) {
+                        const duration = parseFloat(note.duration) || 1;
+                        if (Math.abs(duration - 1) > 0.001) {
                             text += `(${duration})`;
                         }
                         
@@ -1346,9 +1355,18 @@
                     
                     // Current note (highlighted)
                     if (currentNote) {
-                        const currentText = formatNote(currentNote);
-                        if (currentText) {
-                            displayText += `<span style="color: #fff; font-size: 14px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px;">${currentText}</span> `;
+                        // Skip notes without degrees, chords, or note values (silent notes)
+                        if (currentNote.degree || currentNote.chord || currentNote.note) {
+                            const currentText = formatNote(currentNote);
+                            if (currentText) {
+                                displayText += `<span style="color: #fff; font-size: 14px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px;">${currentText}</span> `;
+                            }
+                        } else if (nextNotes.length > 0 && nextNotes[0]) {
+                            // If current note is silent, show the next note as "upcoming"
+                            const nextText = formatNote(nextNotes[0]);
+                            if (nextText) {
+                                displayText += `<span style="color: #aaa; font-size: 12px;">→ ${nextText}</span> `;
+                            }
                         }
                     }
                     

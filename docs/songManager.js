@@ -11,6 +11,7 @@ async function loadSongs() {
         
         // Load the song files via script tags
         const songFiles = [
+            'cross_muddy_waters_chorus.js',
             'sweet_child.js',
             'whats_up.js',
             'valerie_brothers_chorus.js',
@@ -51,7 +52,9 @@ async function loadSongs() {
 function loadSongFile(songFile) {
     return new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = `songs/${songFile}`;
+        // Add cache-busting parameter to force reload
+        const cacheBuster = new Date().getTime();
+        script.src = `songs/${songFile}?v=${cacheBuster}`;
         script.onload = () => {
             console.log(`Successfully loaded: ${songFile}`);
             resolve();
@@ -132,8 +135,8 @@ function processVersion1SongData(songData) {
                 }
             }
             if (previousEntry) {
-                const duration = parseInt(previousEntry.duration) || 1;
-                const pause = parseInt(previousEntry.pause) || 0;
+                const duration = parseFloat(previousEntry.duration) || 1;
+                const pause = parseFloat(previousEntry.pause) || 0;
                 songData.notes[i].step = previousEntry.step + duration + pause;
             } else {
                 songData.notes[i].step = 1;
@@ -163,8 +166,8 @@ function processVersion2SongData(songData) {
                         }
                     }
                     if (previousEntry) {
-                        const duration = parseInt(previousEntry.duration) || 1;
-                        const pause = parseInt(previousEntry.pause) || 0;
+                        const duration = parseFloat(previousEntry.duration) || 1;
+                        const pause = parseFloat(previousEntry.pause) || 0;
                         track.notes[i].step = previousEntry.step + duration + pause;
                     } else {
                         track.notes[i].step = 1;
