@@ -361,6 +361,7 @@ function parseAndLoad() {
   document.getElementById('errorMsg').textContent = '';
   stop();
   sequence = res.sequence;
+  updateUrl();
   segIdx = 0; beatIdx = 0;
   renderStrip();
   renderDisplay();
@@ -473,15 +474,28 @@ function syncBpm(val) {
   bpm = val;
   document.getElementById('bpmSlider').value = val;
   document.getElementById('bpmNum').value = val;
+  updateUrl();
+}
+
+// ── URL state ──────────────────────────────────────────────────────────────
+function updateUrl() {
+  const seq = document.getElementById('seqInput').value.trim();
+  const params = new URLSearchParams();
+  if (seq) params.set('seq', seq);
+  params.set('bpm', bpm);
+  history.replaceState(null, '', '?' + params.toString());
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // Pre-load the example sequence
-  document.getElementById('seqInput').value = 'D3 G4 A2 Bm9 G4 A2 D8 D3 G4';
+  const params = new URLSearchParams(window.location.search);
+  const seq = params.get('seq') || 'D3 G4 A2 Bm9 G4 A2 D8 D3 G4';
+  const initialBpm = parseInt(params.get('bpm')) || 80;
+
+  syncBpm(initialBpm);
+  document.getElementById('seqInput').value = seq;
   parseAndLoad();
 
-  // Allow Enter to load
   document.getElementById('seqInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') parseAndLoad();
   });
