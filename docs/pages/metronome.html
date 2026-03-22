@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Irregular Metronome</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    h1 {
+      font-size: 1.6em;
+      margin-bottom: 20px;
+      color: #a29bfe;
+      letter-spacing: 1px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 0.85em;
+      color: #a0a0b0;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .sequence-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .sequence-row input {
+      flex: 1;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1.1em;
+      font-family: monospace;
+      letter-spacing: 1px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .sequence-row input:focus {
+      border-color: #a29bfe;
+    }
+
+    .parse-btn {
+      padding: 12px 20px;
+      background: #6c5ce7;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9em;
+      white-space: nowrap;
+    }
+    .parse-btn:hover { background: #a29bfe; }
+
+    .bpm-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    input[type=range] {
+      flex: 1;
+      accent-color: #a29bfe;
+      cursor: pointer;
+    }
+
+    .bpm-num {
+      width: 60px;
+      padding: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1em;
+      text-align: center;
+      outline: none;
+    }
+
+    /* Main display */
+    .display-card {
+      text-align: center;
+    }
+
+    .chord-name {
+      font-size: 6em;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      min-height: 1.1em;
+      transition: color 0.1s;
+    }
+    .chord-name.flash { color: #fdcb6e; }
+
+    .beat-counter {
+      font-size: 2em;
+      color: #a29bfe;
+      margin-top: 8px;
+      min-height: 1.3em;
+      letter-spacing: 2px;
+    }
+
+    /* Sequence strip */
+    .strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    .strip-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      font-size: 0.9em;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .strip-item .s-chord { font-size: 1.2em; font-weight: 600; }
+    .strip-item .s-beats { font-size: 0.75em; color: #a0a0b0; margin-top: 2px; }
+    .strip-item.active {
+      background: rgba(162, 155, 254, 0.25);
+      border-color: #a29bfe;
+      transform: scale(1.08);
+    }
+    .strip-item.done {
+      opacity: 0.4;
+    }
+
+    /* Beat dots */
+    .beat-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      min-height: 24px;
+    }
+    .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transition: background 0.05s;
+    }
+    .dot.beat1 { background: rgba(253, 203, 110, 0.5); }
+    .dot.active { background: #fdcb6e; transform: scale(1.3); }
+    .dot.done { background: rgba(162, 155, 254, 0.4); }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .btn {
+      padding: 14px 36px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.96); }
+
+    .btn-play  { background: #00b894; color: #fff; }
+    .btn-play:hover  { background: #55efc4; color: #1a1a2e; }
+    .btn-stop  { background: #d63031; color: #fff; }
+    .btn-stop:hover  { background: #ff7675; }
+    .btn-reset { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-reset:hover { background: rgba(255,255,255,0.2); }
+
+    .error-msg {
+      color: #ff7675;
+      font-size: 0.85em;
+      margin-top: 6px;
+      min-height: 1.2em;
+    }
+
+    .hint {
+      font-size: 0.78em;
+      color: #666;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Irregular Metronome</h1>
+
+<!-- Input card -->
+<div class="card">
+  <label>Sequence — chord+beats, space-separated (e.g. <code style="color:#a29bfe">D3 G4 A2 Bm9 G4 A2 D8</code>)</label>
+  <div class="sequence-row">
+    <input type="text" id="seqInput" placeholder="D3 G4 A2 Bm9 G4 A2 D8 D3 G4" spellcheck="false" autocomplete="off">
+    <button class="parse-btn" onclick="parseAndLoad()">Load</button>
+  </div>
+  <div class="error-msg" id="errorMsg"></div>
+  <p class="hint">Chord = note + optional quality (m, maj, dim, sus4…), beats = number. Example: <code>Bm9</code> = B minor, 9 beats</p>
+
+  <div class="bpm-row">
+    <label style="margin:0;white-space:nowrap">BPM</label>
+    <input type="range" id="bpmSlider" min="40" max="240" value="80" oninput="syncBpm(this.value)">
+    <input type="number" id="bpmNum" class="bpm-num" min="40" max="240" value="80" oninput="syncBpm(this.value)">
+  </div>
+</div>
+
+<!-- Display card -->
+<div class="card display-card">
+  <div class="chord-name" id="chordName">—</div>
+  <div class="beat-counter" id="beatCounter"></div>
+  <div class="beat-dots" id="beatDots"></div>
+  <div class="strip" id="strip"></div>
+  <div class="controls" style="margin-top:24px">
+    <button class="btn btn-play"  id="playBtn"  onclick="play()">Play</button>
+    <button class="btn btn-stop"  id="stopBtn"  onclick="stop()" disabled>Stop</button>
+    <button class="btn btn-reset" id="resetBtn" onclick="reset()">Reset</button>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let sequence = [];     // [{chord:'D', beats:3}, …]
+let segIdx   = 0;
+let beatIdx  = 0;      // 0-based within current segment
+let running  = false;
+let timerId  = null;
+let bpm      = 80;
+let audioCtx = null;
+
+// ── Audio ──────────────────────────────────────────────────────────────────
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function tick() {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.frequency.value = 800;
+  gain.gain.setValueAtTime(0.25, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.06);
+}
+
+const NOTE_FREQS = {
+  'C':261.63,'C#':277.18,'Db':277.18,
+  'D':293.66,'D#':311.13,'Eb':311.13,
+  'E':329.63,
+  'F':349.23,'F#':369.99,'Gb':369.99,
+  'G':392.00,'G#':415.30,'Ab':415.30,
+  'A':440.00,'A#':466.16,'Bb':466.16,
+  'B':493.88
+};
+
+// semitone offsets for chord intervals above root
+const CHORD_INTERVALS = {
+  '':   [0, 4, 7],       // major
+  'm':  [0, 3, 7],       // minor
+  'maj':[0, 4, 7],
+  'min':[0, 3, 7],
+  'dim':[0, 3, 6],
+  'aug':[0, 4, 8],
+  'sus2':[0,2,7],
+  'sus4':[0,5,7],
+  '7':  [0, 4, 7, 10],
+  'maj7':[0,4,7,11],
+  'm7': [0,3,7,10],
+};
+
+function semitoneOffset(baseFreq, semitones) {
+  return baseFreq * Math.pow(2, semitones / 12);
+}
+
+function playChord(chordName) {
+  const ctx = getAudioCtx();
+  // Parse root + quality  e.g. "Bm" → root="B", quality="m"
+  const m = chordName.match(/^([A-G][#b]?)(.*)?$/);
+  if (!m) return tick(); // fallback
+  const root = m[1];
+  const quality = (m[2] || '').replace(/\d+/g, ''); // strip any trailing digits
+  const intervals = CHORD_INTERVALS[quality] || CHORD_INTERVALS[''];
+  const rootFreq = NOTE_FREQS[root];
+  if (!rootFreq) return tick();
+
+  const now = ctx.currentTime;
+  const duration = 0.6;
+
+  intervals.forEach((semitones, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'triangle';
+    osc.frequency.value = semitoneOffset(rootFreq, semitones);
+    const vol = i === 0 ? 0.35 : 0.2;
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.start(now);
+    osc.stop(now + duration);
+  });
+}
+
+// ── Parse ──────────────────────────────────────────────────────────────────
+function parseSequence(raw) {
+  const tokens = raw.trim().split(/\s+/);
+  const result = [];
+  for (const tok of tokens) {
+    // Trailing digits = beat count; everything before = chord name
+    const m = tok.match(/^([A-Ga-g][#b♭]?(?:m|maj|min|dim|aug|sus[24]?|add\d+|[Mm]7?|M7)*)(\d+)$/);
+    if (!m) return { error: `Can't parse token: "${tok}". Expected like D3, Bm9, G#maj4` };
+    result.push({ chord: m[1], beats: parseInt(m[2], 10) });
+  }
+  if (result.length === 0) return { error: 'No tokens found.' };
+  return { sequence: result };
+}
+
+function parseAndLoad() {
+  const raw = document.getElementById('seqInput').value;
+  const res = parseSequence(raw);
+  if (res.error) {
+    document.getElementById('errorMsg').textContent = res.error;
+    return;
+  }
+  document.getElementById('errorMsg').textContent = '';
+  stop();
+  sequence = res.sequence;
+  segIdx = 0; beatIdx = 0;
+  renderStrip();
+  renderDisplay();
+}
+
+// ── Strip ──────────────────────────────────────────────────────────────────
+function renderStrip() {
+  const strip = document.getElementById('strip');
+  strip.innerHTML = '';
+  sequence.forEach((seg, i) => {
+    const el = document.createElement('div');
+    el.className = 'strip-item';
+    el.id = `seg-${i}`;
+    el.innerHTML = `<span class="s-chord">${seg.chord}</span><span class="s-beats">${seg.beats}b</span>`;
+    strip.appendChild(el);
+  });
+}
+
+function updateStrip() {
+  sequence.forEach((_, i) => {
+    const el = document.getElementById(`seg-${i}`);
+    if (!el) return;
+    el.classList.remove('active', 'done');
+    if (i < segIdx) el.classList.add('done');
+    else if (i === segIdx) el.classList.add('active');
+  });
+}
+
+// ── Display ────────────────────────────────────────────────────────────────
+function renderDisplay() {
+  if (sequence.length === 0) {
+    document.getElementById('chordName').textContent = '—';
+    document.getElementById('beatCounter').textContent = '';
+    document.getElementById('beatDots').innerHTML = '';
+    return;
+  }
+  const seg = sequence[segIdx];
+  document.getElementById('chordName').textContent = seg.chord;
+  document.getElementById('beatCounter').textContent = `${beatIdx + 1} / ${seg.beats}`;
+  renderDots(seg.beats, beatIdx);
+  updateStrip();
+}
+
+function renderDots(total, current) {
+  const container = document.getElementById('beatDots');
+  container.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' beat1' : '') + (i < current ? ' done' : '') + (i === current ? ' active' : '');
+    container.appendChild(d);
+  }
+}
+
+function flashChord() {
+  const el = document.getElementById('chordName');
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 100);
+}
+
+// ── Playback ───────────────────────────────────────────────────────────────
+function play() {
+  if (sequence.length === 0) {
+    parseAndLoad();
+    if (sequence.length === 0) return;
+  }
+  running = true;
+  document.getElementById('playBtn').disabled = true;
+  document.getElementById('stopBtn').disabled = false;
+  step();
+}
+
+function step() {
+  if (!running) return;
+  const seg = sequence[segIdx];
+  const isFirst = beatIdx === 0;
+  if (isFirst) {
+    playChord(seg.chord);
+    flashChord();
+  } else {
+    tick();
+  }
+  renderDisplay();
+
+  beatIdx++;
+  if (beatIdx >= seg.beats) {
+    beatIdx = 0;
+    segIdx = (segIdx + 1) % sequence.length;
+  }
+
+  const interval = (60 / bpm) * 1000;
+  timerId = setTimeout(step, interval);
+}
+
+function stop() {
+  running = false;
+  clearTimeout(timerId);
+  timerId = null;
+  document.getElementById('playBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+}
+
+function reset() {
+  stop();
+  segIdx = 0; beatIdx = 0;
+  renderDisplay();
+}
+
+function syncBpm(val) {
+  val = Math.max(40, Math.min(240, parseInt(val) || 80));
+  bpm = val;
+  document.getElementById('bpmSlider').value = val;
+  document.getElementById('bpmNum').value = val;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Pre-load the example sequence
+  document.getElementById('seqInput').value = 'D3 G4 A2 Bm9 G4 A2 D8 D3 G4';
+  parseAndLoad();
+
+  // Allow Enter to load
+  document.getElementById('seqInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') parseAndLoad();
+  });
+});
+</script>
+</body>
+</html>
