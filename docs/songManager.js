@@ -11,6 +11,7 @@ async function loadSongs() {
         
         // Load the song files via script tags
         const songFiles = [
+            'teach_your_children_bridge.js',
             'cross_muddy_waters_chorus.js',
             'sweet_child.js',
             'whats_up.js',
@@ -102,6 +103,11 @@ function loadSong() {
     highlightKeysInKey();
     updateDisplayAtCurrentStep();
     updatetrackControls();
+    
+    // Update karaoke display if it exists
+    if (typeof updateKaraokeDisplay === 'function') {
+        updateKaraokeDisplay();
+    }
 }
 
 function getProcessedSongData(songData) {
@@ -309,6 +315,11 @@ function loadSongFromBankAtIndex(songIndex) {
     setTimeout(() => {
         updateKeySelector(songData.key);
     }, 100);
+    
+    // Update karaoke display if it exists
+    if (typeof updateKaraokeDisplay === 'function') {
+        updateKaraokeDisplay();
+    }
 }
 
 // Function to update the key selector to show the current song's key

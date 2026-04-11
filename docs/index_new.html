@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Practice App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar for controls */
+        .sidebar {
+            width: 280px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .sidebar h3 {
+            margin-top: 0;
+            font-size: 18px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .control-group input,
+        .control-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .control-group input[type="range"] {
+            padding: 0;
+        }
+
+        .track-control-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .track-control-item h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-play {
+            background: linear-gradient(45deg, #00b894, #00a085);
+        }
+
+        .btn-rewind {
+            background: linear-gradient(45deg, #feca57, #ff9ff3);
+        }
+
+        .btn-ff {
+            background: linear-gradient(45deg, #48dbf8, #0abde3);
+        }
+
+        /* Main content area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .karaoke-display {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+        }
+
+        .track-row {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .track-row.active {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .track-row.track-1 { border-left-color: #19e70a; }
+        .track-row.track-2 { border-left-color: #ea1dce; }
+        .track-row.track-3 { border-left-color: #45b7d1; }
+        .track-row.track-4 { border-left-color: #f39c12; }
+        .track-row.track-chords { border-left-color: #ffd700; }
+
+        .track-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .track-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .track-degrees {
+            font-size: 32px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .degree-item {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .degree-item.prev {
+            opacity: 0.4;
+            font-size: 24px;
+        }
+
+        .degree-item.current {
+            background: rgba(255, 255, 255, 0.3);
+            font-size: 36px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .degree-item.next {
+            opacity: 0.6;
+            font-size: 24px;
+        }
+
+        .track-lyrics {
+            text-align: center;
+            font-size: 20px;
+            margin-top: 10px;
+            min-height: 30px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .piano {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            height: 180px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .key {
+            cursor: pointer;
+            border: 2px solid #222;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            font-weight: bold;
+            transition: all 0.1s ease;
+            user-select: none;
+            position: relative;
+        }
+
+        .white-key {
+            background: linear-gradient(to bottom, #fff, #f0f0f0);
+            color: #333;
+            width: 50px;
+            height: 160px;
+            margin: 0 1px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .black-key {
+            background: linear-gradient(to bottom, #333, #111);
+            color: white;
+            width: 30px;
+            height: 100px;
+            position: absolute;
+            z-index: 2;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .key:active, .key.active {
+            transform: scale(0.95);
+        }
+
+        .white-key:active, .white-key.active {
+            background: linear-gradient(to bottom, #e0e0e0, #d0d0d0);
+        }
+
+        .black-key:active, .black-key.active {
+            background: linear-gradient(to bottom, #222, #000);
+        }
+
+        .key-in-scale {
+            box-shadow: 0 0 10px #ffd700;
+            border-color: #ffd700 !important;
+        }
+
+        .key-track-1 {
+            box-shadow: 0 0 15px #19e70a;
+            border-color: #19e70a !important;
+        }
+
+        .key-track-2 {
+            box-shadow: 0 0 15px #ea1dce;
+            border-color: #ea1dce !important;
+        }
+
+        .key-track-3 {
+            box-shadow: 0 0 15px #45b7d1;
+            border-color: #45b7d1 !important;
+        }
+
+        .key-track-4 {
+            box-shadow: 0 0 15px #f39c12;
+            border-color: #f39c12 !important;
+        }
+
+        .degree-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ffd700;
+            color: #333;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .step-counter {
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.7;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                height: 100vh;
+                z-index: 999;
+            }
+
+            .main-content {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    
+    <div class="app-container">
+        <div class="sidebar" id="sidebar">
+            <h3>Controls</h3>
+            
+            <div class="control-group">
+                <label>Song</label>
+                <select id="songSelect" onchange="loadSong()"></select>
+            </div>
+
+            <div class="control-group">
+                <label>Key</label>
+                <select id="keySelect">
+                    <option value="">Select key...</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Tempo (BPM)</label>
+                <input type="number" id="tempo" value="120" min="60" max="200" onchange="updateTempo()">
+            </div>
+
+            <div class="control-group">
+                <label>Loop Start (step)</label>
+                <input type="number" id="loopStart" min="0" placeholder="Start">
+            </div>
+
+            <div class="control-group">
+                <label>Loop End (step)</label>
+                <input type="number" id="loopEnd" min="0" placeholder="End">
+            </div>
+
+            <div class="control-group">
+                <button class="btn btn-play" onclick="togglePlayback()">▶️ Play</button>
+                <button class="btn btn-rewind" onclick="rewindToBeginning()">⏪⏪</button>
+                <button class="btn btn-rewind" onclick="rewind()">⏪</button>
+                <button class="btn btn-ff" onclick="fastForward()">⏩</button>
+            </div>
+
+            <div class="control-group">
+                <button class="btn" id="playHoldToggleBtn" onclick="togglePlayHold()" style="background: linear-gradient(45deg, #00b894, #00a085);">
+                    ▶️ Play & Hold
+                </button>
+            </div>
+
+            <div id="trackControls">
+                <!-- Track controls will be added here -->
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>🎹 Piano Practice</h1>
+                <div class="step-counter" id="step-counter">Step: 0</div>
+            </div>
+
+            <div class="karaoke-display" id="karaokeDisplay">
+                <!-- Track rows will be added here -->
+            </div>
+
+            <div class="piano" id="piano">
+                <!-- Piano keys will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="songManager.js"></script>
+    <script src="audioPlayer.js"></script>
+    <script src="musicTheory.js"></script>
+    <script>
+        // Audio context and notes
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Recording variables
+        let isRecording = false;
+        let currentNotes = [];
+        let recordingStartTime = 0;
+        let tempo = 120;
+        let defaultOctave = 4;
+        let eighthNoteLength = (60 / tempo / 2) * 1000; // 1/8 note in ms
+        let currentSong = null;
+        let tracks = { "1": { volume: 5 } }; // Default track
+        let songKey = "Unknown";
+
+        // Playback variables
+        let isPlaying = false;
+        let playbackInterval = null;
+        let currentStep = 1;
+        let wasPlaying = false;
+        
+        // Play and hold variables
+        let isPlayHolding = false;
+        let playHoldInterval = null;
+
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        // Generate piano keys
+        function createPiano() {
+            const piano = document.getElementById('piano');
+            piano.innerHTML = '';
+            const whiteKeys = ['B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5'];
+            const blackKeys = ['C#3', 'D#3', 'F#3', 'G#3', 'A#3', 'C#4', 'D#4', 'F#4', 'G#4', 'A#4', 'C#5', 'D#5'];
+            
+            // Create white keys
+            whiteKeys.forEach((note, index) => {
+                const key = document.createElement('div');
+                key.className = 'key white-key';
+                key.textContent = note;
+                key.dataset.note = note;
+                key.addEventListener('mousedown', () => playNote(note));
+                key.addEventListener('mouseup', () => stopNote());
+                key.addEventListener('mouseleave', () => stopNote());
+                piano.appendChild(key);
+            });
+
+            // Create black keys with relative positioning
+            const blackKeyPositions = [
+                { note: 'C#3', relativeTo: 'C3', offset: 0.75 },
+                { note: 'D#3', relativeTo: 'D3', offset: 0.75 },
+                { note: 'F#3', relativeTo: 'F3', offset: 0.75 },
+                { note: 'G#3', relativeTo: 'G3', offset: 0.75 },
+                { note: 'A#3', relativeTo: 'A3', offset: 0.75 },
+                { note: 'C#4', relativeTo: 'C4', offset: 0.75 },
+                { note: 'D#4', relativeTo: 'D4', offset: 0.75 },
+                { note: 'F#4', relativeTo: 'F4', offset: 0.75 },
+                { note: 'G#4', relativeTo: 'G4', offset: 0.75 },
+                { note: 'A#4', relativeTo: 'A4', offset: 0.75 },
+                { note: 'C#5', relativeTo: 'C5', offset: 0.75 },
+                { note: 'D#5', relativeTo: 'D5', offset: 0.75 }
+            ];
+            
+            blackKeyPositions.forEach(({ note, relativeTo, offset }) => {
+                const key = document.createElement('div');
+                key.className = 'key black-key';
+                key.textContent = note;
+                key.dataset.note = note;
+                
+                const whiteKeyElement = piano.querySelector(`[data-note="${relativeTo}"]`);
+                if (whiteKeyElement) {
+                    const whiteKeyRect = whiteKeyElement.getBoundingClientRect();
+                    const pianoRect = piano.getBoundingClientRect();
+                    const relativeLeft = whiteKeyRect.left - pianoRect.left + (whiteKeyRect.width * offset);
+                    key.style.left = `${relativeLeft}px`;
+                }
+                
+                key.addEventListener('mousedown', () => playNote(note));
+                key.addEventListener('mouseup', () => stopNote());
+                key.addEventListener('mouseleave', () => stopNote());
+                piano.appendChild(key);
+            });
+        }
+
+        // Update karaoke display
+        function updateKaraokeDisplay() {
+            const karaokeDisplay = document.getElementById('karaokeDisplay');
+            karaokeDisplay.innerHTML = '';
+            
+            if (!currentNotes || currentNotes.length === 0) {
+                karaokeDisplay.innerHTML = '<div style="text-align: center; opacity: 0.5;">No song loaded</div>';
+                return;
+            }
+
+            const trackIds = Object.keys(tracks).sort();
+            
+            trackIds.forEach((trackId, index) => {
+                const trackNumber = index + 1;
+                const trackRow = document.createElement('div');
+                trackRow.className = `track-row track-${trackNumber === 1 && trackId !== 'chords' ? trackNumber : trackId === 'chords' ? 'chords' : trackNumber}`;
+                trackRow.id = `track-row-${trackId}`;
+                
+                const trackHeader = document.createElement('div');
+                trackHeader.className = 'track-header';
+                
+                const trackName = document.createElement('div');
+                trackName.className = 'track-name';
+                trackName.textContent = trackId === 'chords' ? 'Chords' : `Track ${trackId}`;
+                trackHeader.appendChild(trackName);
+                
+                const trackDegrees = document.createElement('div');
+                trackDegrees.className = 'track-degrees';
+                trackDegrees.id = `track-degrees-${trackId}`;
+                trackHeader.appendChild(trackDegrees);
+                
+                const trackLyrics = document.createElement('div');
+                trackLyrics.className = 'track-lyrics';
+                trackLyrics.id = `track-lyrics-${trackId}`;
+                
+                trackRow.appendChild(trackHeader);
+                trackRow.appendChild(trackLyrics);
+                karaokeDisplay.appendChild(trackRow);
+            });
+            
+            updateTrackDisplays();
+        }
+
+        // Update individual track displays
+        function updateTrackDisplays() {
+            if (!currentNotes || currentNotes.length === 0) return;
+            
+            Object.keys(tracks).forEach(trackId => {
+                const trackNotes = currentNotes.filter(n => n.track === trackId).sort((a, b) => (a.step || 0) - (b.step || 0));
+                
+                if (trackNotes.length === 0) return;
+                
+                // Find current note
+                let currentNote = null;
+                let currentNoteIndex = -1;
+                let referenceNoteIndex = -1;
+                
+                for (let i = 0; i < trackNotes.length; i++) {
+                    const note = trackNotes[i];
+                    const noteStart = parseFloat(note.step) || 1;
+                    const noteDuration = parseFloat(note.duration) || 1;
+                    const notePause = parseFloat(note.pause) || 0;
+                    const noteEnd = noteStart + noteDuration - 1;
+                    const pauseStart = noteEnd + 1;
+                    const pauseEnd = pauseStart + notePause - 1;
+                    
+                    if (currentStep >= noteStart && currentStep <= noteEnd) {
+                        currentNote = note;
+                        currentNoteIndex = i;
+                        referenceNoteIndex = i;
+                        break;
+                    } else if (currentStep >= pauseStart && currentStep <= pauseEnd) {
+                        referenceNoteIndex = i;
+                        break;
+                    } else if (currentStep < noteStart) {
+                        referenceNoteIndex = i;
+                        break;
+                    }
+                }
+                
+                if (referenceNoteIndex === -1) {
+                    referenceNoteIndex = trackNotes.length - 1;
+                }
+                
+                // Get previous and next notes
+                const previousNotes = [];
+                const nextNotes = [];
+                
+                for (let i = referenceNoteIndex - 1; i >= 0 && previousNotes.length < 2; i--) {
+                    previousNotes.unshift(trackNotes[i]);
+                }
+                
+                for (let i = referenceNoteIndex + 1; i < trackNotes.length && nextNotes.length < 2; i++) {
+                    nextNotes.push(trackNotes[i]);
+                }
+                
+                // Format note for display
+                function formatNote(note) {
+                    if (!note) return '';
+                    if (!note.degree && !note.chord && !note.note) return '';
+                    
+                    let text = '';
+                    if (note.degree) {
+                        text = note.degree.toString();
+                    } else if (note.chord) {
+                        if (/^\d+$/.test(note.chord)) {
+                            text = convertChordDegreeToName ? convertChordDegreeToName(note.chord, songKey) : note.chord;
+                        } else {
+                            text = note.chord;
+                        }
+                    } else if (note.note) {
+                        text = note.note;
+                    }
+                    
+                    const duration = parseFloat(note.duration) || 1;
+                    if (Math.abs(duration - 1) > 0.001) {
+                        text += `(${duration})`;
+                    }
+                    return text;
+                }
+                
+                // Update degrees display
+                const degreesElement = document.getElementById(`track-degrees-${trackId}`);
+                if (degreesElement) {
+                    let degreesHtml = '';
+                    
+                    previousNotes.forEach(note => {
+                        const text = formatNote(note);
+                        if (text) {
+                            degreesHtml += `<span class="degree-item prev">${text}</span>`;
+                        }
+                    });
+                    
+                    if (currentNote) {
+                        const text = formatNote(currentNote);
+                        if (text) {
+                            degreesHtml += `<span class="degree-item current">${text}</span>`;
+                        }
+                    }
+                    
+                    nextNotes.forEach(note => {
+                        const text = formatNote(note);
+                        if (text) {
+                            degreesHtml += `<span class="degree-item next">${text}</span>`;
+                        }
+                    });
+                    
+                    degreesElement.innerHTML = degreesHtml || '<span style="opacity: 0.3;">—</span>';
+                }
+                
+                // Update lyrics display - FIXED: Only show lyrics for current note, not previous/next
+                const lyricsElement = document.getElementById(`track-lyrics-${trackId}`);
+                if (lyricsElement) {
+                    if (currentNote && currentNote.lyrics && currentNote.lyrics.trim()) {
+                        lyricsElement.textContent = currentNote.lyrics.trim();
+                    } else {
+                        lyricsElement.textContent = '';
+                    }
+                }
+                
+                // Update active state
+                const trackRow = document.getElementById(`track-row-${trackId}`);
+                if (trackRow) {
+                    if (currentNote && (currentNote.degree || currentNote.chord || currentNote.note)) {
+                        trackRow.classList.add('active');
+                    } else {
+                        trackRow.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        // Continue with rest of the functions from original file...
+        // (I'll need to copy the rest of the JavaScript functions)
+        
+        // Initialize
+        async function initializeApp() {
+            createPiano();
+            await loadSongs();
+            
+            const songSelect = document.getElementById('songSelect');
+            if (songSelect) {
+                songSelect.addEventListener('change', function() {
+                    if (this.value !== '') {
+                        loadSong();
+                    }
+                });
+                songSelect.value = "0";
+                loadSong();
+            }
+            
+            const keySelect = document.getElementById('keySelect');
+            if (keySelect) {
+                keySelect.addEventListener('change', function() {
+                    if (this.value !== '') {
+                        songKey = this.value;
+                        highlightKeysInKey();
+                    }
+                });
+                initializeKeySelector();
+            }
+        }
+
+        // Initialize
+        initializeApp().catch(error => {
+            console.error('Failed to initialize app:', error);
+        });
+    </script>
+</body>
+</html>
+

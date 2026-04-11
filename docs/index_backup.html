@@ -3,241 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piano Practice App</title>
+    <title>Simple Piano Recording App</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar for controls */
-        .sidebar {
-            width: 280px;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
             padding: 20px;
-            overflow-y: auto;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .sidebar.collapsed {
-            transform: translateX(-100%);
-        }
-
-        .sidebar-toggle {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.6);
-            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 20px;
+            min-height: 100vh;
         }
 
-        .sidebar h3 {
-            margin-top: 0;
-            font-size: 18px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-
-        .control-group {
-            margin-bottom: 20px;
-        }
-
-        .control-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        .control-group input,
-        .control-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
             background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 14px;
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        .control-group input[type="range"] {
-            padding: 0;
-        }
-
-        .track-control-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        .track-control-item h4 {
-            margin: 0 0 8px 0;
-            font-size: 14px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            margin: 5px;
-            width: calc(50% - 10px);
-        }
-
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .btn-play {
-            background: linear-gradient(45deg, #00b894, #00a085);
-        }
-
-        .btn-rewind {
-            background: linear-gradient(45deg, #feca57, #ff9ff3);
-        }
-
-        .btn-ff {
-            background: linear-gradient(45deg, #48dbf8, #0abde3);
-        }
-
-        /* Main content area */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-        }
-
-        .header {
+        h1 {
             text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 2em;
+            margin-bottom: 30px;
+            font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .karaoke-display {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 20px;
-            overflow-y: auto;
-        }
-
-        .track-row {
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border-left: 4px solid;
-            transition: all 0.3s ease;
-        }
-
-        .track-row.active {
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-        }
-
-        .track-row.track-1 { border-left-color: #19e70a; }
-        .track-row.track-2 { border-left-color: #ea1dce; }
-        .track-row.track-3 { border-left-color: #45b7d1; }
-        .track-row.track-4 { border-left-color: #f39c12; }
-        .track-row.track-chords { border-left-color: #ffd700; }
-
-        .track-header {
+        .controls {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .track-name {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .track-degrees {
-            font-size: 32px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            text-align: center;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
             justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .key-selector {
+            display: flex;
+            align-items: center;
             gap: 10px;
-            flex: 1;
+        }
+        
+        .key-selector label {
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
-        .degree-item {
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            transition: all 0.2s ease;
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .degree-item:hover {
-            background: rgba(255, 255, 255, 0.25);
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .degree-item.prev {
-            opacity: 0.4;
-            font-size: 24px;
+        .btn-record {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
         }
 
-        .degree-item.current {
-            background: rgba(255, 255, 255, 0.3);
-            font-size: 36px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
+        .btn-stop {
+            background: linear-gradient(45deg, #54a0ff, #2e86de);
+            color: white;
         }
 
-        .degree-item.next {
-            opacity: 0.6;
-            font-size: 24px;
+        .btn-play {
+            background: linear-gradient(45deg, #5f27cd, #341f97);
+            color: white;
         }
 
-        .track-lyrics {
+        .btn-clear {
+            background: linear-gradient(45deg, #ff9ff3, #f368e0);
+            color: white;
+        }
+        
+        .btn-rewind {
+            background: linear-gradient(45deg, #feca57, #ff9ff3);
+            color: white;
+        }
+        
+        .btn-ff {
+            background: linear-gradient(45deg, #48dbf8, #0abde3);
+            color: white;
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .left-side-container,
+            .right-side-container {
+                flex: none;
+            }
+            
+            .song-data textarea {
+                height: 300px; /* Shorter on mobile */
+            }
+        }
+
+        .recording-status {
             text-align: center;
-            font-size: 20px;
-            margin-top: 10px;
-            min-height: 30px;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 18px;
+            margin: 10px 0;
+            min-height: 25px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .left-side-container {
+            flex: 4; /* 80% of the space (4/5) */
+        }
+
+        .right-side-container {
+            flex: 1; /* 20% of the space (1/5) */
+        }
+
+        .piano {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            height: 200px;
+            background: #333;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%; /* Full width at bottom */
+            margin: 20px 0;
         }
 
         .key {
@@ -256,8 +179,8 @@
         .white-key {
             background: linear-gradient(to bottom, #fff, #f0f0f0);
             color: #333;
-            width: 50px;
-            height: 160px;
+            width: 60px;
+            height: 180px;
             margin: 0 1px;
             border-radius: 0 0 8px 8px;
         }
@@ -265,15 +188,19 @@
         .black-key {
             background: linear-gradient(to bottom, #333, #111);
             color: white;
-            width: 30px;
-            height: 100px;
+            width: 35px;
+            height: 120px;
             position: absolute;
             z-index: 2;
             border-radius: 0 0 6px 6px;
         }
 
+        .key:hover {
+            transform: scale(1.02);
+        }
+
         .key:active, .key.active {
-            transform: scale(0.95);
+            transform: scale(0.98);
         }
 
         .white-key:active, .white-key.active {
@@ -284,40 +211,150 @@
             background: linear-gradient(to bottom, #222, #000);
         }
 
-        .piano {
+        .song-data {
             display: flex;
-            justify-content: center;
-            position: relative;
-            height: 180px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 20px;
+            flex-direction: column;
+            height: 100%; /* Take full height of right container */
         }
 
+        .song-data h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .song-data textarea {
+            width: 100%;
+            height: 500px; /* Even taller for the narrow column */
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            resize: vertical;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 1; /* Take up remaining space in the column */
+        }
+
+        .load-save-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-load, .btn-save {
+            background: linear-gradient(45deg, #00d2d3, #54a0ff);
+            color: white;
+        }
+
+        .tempo-control {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .tempo-control input {
+            width: 80px;
+            padding: 8px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .playback-indicator {
+            text-align: center;
+            font-size: 16px;
+            margin: 10px 0;
+            min-height: 20px;
+        }
+
+        /* Key highlighting styles */
         .key-in-scale {
-            box-shadow: 0 0 10px #ffd700;
+            box-shadow: 0 0 15px #ffd700, inset 0 0 10px rgba(255, 215, 0, 0.3);
             border-color: #ffd700 !important;
         }
 
+        .white-key.key-in-scale {
+            background: linear-gradient(to bottom, #fff8dc, #f0f8ff);
+        }
+
+        .black-key.key-in-scale {
+            background: linear-gradient(to bottom, #2f4f4f, #1a1a1a);
+        }
+
+        /* Track-specific key highlighting - dynamic classes for up to 4 tracks */
         .key-track-1 {
-            box-shadow: 0 0 15px #19e70a;
+            box-shadow: 0 0 15px #19e70a, inset 0 0 10px rgba(255, 107, 107, 0.3);
             border-color: #19e70a !important;
         }
 
         .key-track-2 {
-            box-shadow: 0 0 15px #ea1dce;
+            box-shadow: 0 0 15px #ea1dce, inset 0 0 10px rgba(78, 205, 196, 0.3);
             border-color: #ea1dce !important;
         }
 
         .key-track-3 {
-            box-shadow: 0 0 15px #45b7d1;
+            box-shadow: 0 0 15px #45b7d1, inset 0 0 10px rgba(69, 183, 209, 0.3);
             border-color: #45b7d1 !important;
         }
 
         .key-track-4 {
-            box-shadow: 0 0 15px #f39c12;
+            box-shadow: 0 0 15px #f39c12, inset 0 0 10px rgba(243, 156, 18, 0.3);
             border-color: #f39c12 !important;
+        }
+
+        .white-key.key-track-1 {
+            background: linear-gradient(to bottom, #ffe6e6, #fff0f0);
+        }
+
+        .black-key.key-track-1 {
+            background: linear-gradient(to bottom, #4a2f2f, #2a1a1a);
+        }
+
+        .white-key.key-track-2 {
+            background: linear-gradient(to bottom, #e6fff9, #f0fffd);
+        }
+
+        .black-key.key-track-2 {
+            background: linear-gradient(to bottom, #2f4a4a, #1a2a2a);
+        }
+
+        .white-key.key-track-3 {
+            background: linear-gradient(to bottom, #e6f4ff, #f0f9ff);
+        }
+
+        .black-key.key-track-3 {
+            background: linear-gradient(to bottom, #2f3f4a, #1a232a);
+        }
+
+        .white-key.key-track-4 {
+            background: linear-gradient(to bottom, #fff8e6, #fffbf0);
+        }
+
+        .black-key.key-track-4 {
+            background: linear-gradient(to bottom, #4a3f2f, #2a231a);
+        }
+
+        /* Track outline colors - dynamic classes for up to 4 tracks */
+        .track-outline-1 {
+            border: 2px solid #19e70a !important;
+        }
+
+        .track-outline-2 {
+            border: 2px solid #ea1dce !important;
+        }
+
+        .track-outline-3 {
+            border: 2px solid #45b7d1 !important;
+        }
+
+        .track-outline-4 {
+            border: 2px solid #f39c12 !important;
         }
 
         .degree-indicator {
@@ -327,100 +364,92 @@
             background: #ffd700;
             color: #333;
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .step-counter {
-            text-align: center;
-            font-size: 14px;
-            opacity: 0.7;
-            margin: 10px 0;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                height: 100vh;
-                z-index: 999;
-            }
-
-            .main-content {
-                width: 100%;
-            }
+        .black-key .degree-indicator {
+            top: 3px;
+            right: 3px;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
         }
     </style>
 </head>
 <body>
-    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
-    
-    <div class="app-container">
-        <div class="sidebar" id="sidebar">
-            <h3>Controls</h3>
+    <div class="container">
+        <h1>🎹 Piano Practice App</h1>
+
+        <div class="main-content">
+            <div class="left-side-container">
             
-            <div class="control-group">
-                <label>Song</label>
-                <select id="songSelect" onchange="loadSong()"></select>
+            <div class="controls">
+                <button class="btn btn-play" onclick="togglePlayback()">▶️ </button>
+                <button class="btn btn-rewind" onclick="rewindToBeginning()">⏪⏪ </button>
+                <button class="btn btn-rewind" onclick="rewind()">⏪ </button>
+                <button class="btn btn-ff" onclick="fastForward()">⏩ </button>
             </div>
 
-            <div class="control-group">
-                <label>Key</label>
-                <select id="keySelect">
-                    <option value="">Select key...</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <label>Tempo (BPM)</label>
-                <input type="number" id="tempo" value="120" min="60" max="200" onchange="updateTempo()">
-            </div>
-
-            <div class="control-group">
-                <label>Loop Start (step)</label>
+            <div class="tempo-control">
+                <label>Loop Start (step): </label>
                 <input type="number" id="loopStart" min="0" placeholder="Start">
-            </div>
-
-            <div class="control-group">
-                <label>Loop End (step)</label>
+                <label style="margin-left: 20px;">Loop End (step): </label>
                 <input type="number" id="loopEnd" min="0" placeholder="End">
             </div>
-
-            <div class="control-group">
-                <button class="btn btn-play" onclick="togglePlayback()" style="width: 100%; font-size: 16px; padding: 14px;">▶️ Play</button>
-                <button class="btn btn-rewind" onclick="rewindToBeginning()">⏪⏪</button>
-                <button class="btn btn-rewind" onclick="rewind()">⏪</button>
-                <button class="btn btn-ff" onclick="fastForward()">⏩</button>
+            
+            <div class="controls">
+                <select id="songSelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #00d2d3, #54a0ff);">
+                </select>
+                <div class="key-selector">
+                    <label>Key:</label>
+                    <select id="keySelect" class="btn" style="padding: 8px 16px; background: linear-gradient(45deg, #ff9ff3, #f368e0);">
+                        <option value="">Select key...</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="control-group">
-                <button class="btn" id="playHoldToggleBtn" onclick="togglePlayHold()" style="background: rgba(255,255,255,0.15); width: 100%; font-size: 13px;">
-                    🔔 Play &amp; Hold
+            <div class="playback-indicator" id="lyrics-display" style="font-size: 24px; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); min-height: 35px;"></div>
+            <div class="step-counter" id="step-counter" style="text-align: center; font-size: 16px; color: #ccc; margin: 10px 0;">Step: 0</div>
+
+            <div class="track-controls" id="trackControls" style="margin: 20px 0; text-align: center;">
+                <!-- track volume controls will be added here dynamically -->
+            </div>
+            
+            <!-- Play and Hold Controls -->
+            <div class="play-hold-controls" style="margin: 20px 0; text-align: center;">
+                <button id="playHoldToggleBtn" class="btn btn-play-hold" onclick="togglePlayHold()" style="background: linear-gradient(45deg, #00b894, #00a085); color: white;">
+                    ▶️ Play & Hold
                 </button>
             </div>
 
-            <div id="trackControls">
-                <!-- Track controls will be added here -->
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="header">
-                <h1>🎹 Piano Practice</h1>
-                <div class="step-counter" id="step-counter">Step: 0</div>
+            <div class="tempo-control">
+                <label>Tempo (BPM): </label>
+                <input type="number" id="tempo" value="120" min="60" max="200" onchange="updateTempo()">
             </div>
 
-            <div class="karaoke-display" id="karaokeDisplay">
-                <!-- Track rows will be added here -->
-                <div class="piano" id="piano" style="margin-top: 15px;">
-                    <!-- Piano keys will be generated here -->
+
+            </div>
+            <div class="right-side-container">
+            <div class="song-data">
+                <textarea id="songData" placeholder="Your song data will appear here..."></textarea>
+                <div class="load-save-controls">
+                    
                 </div>
             </div>
+            </div>
         </div>
+        <div class="piano" id="piano">
+            <!-- Piano keys will be generated here -->
+        </div>
+
+
     </div>
 
     <script src="songManager.js"></script>
@@ -448,284 +477,14 @@
         let playbackInterval = null;
         let currentStep = 1;
         let wasPlaying = false; // Track if we were playing before
-
+        
         // Play and hold variables
         let isPlayHolding = false;
-
-        // Muted tracks
-        const mutedTracks = {};
         let playHoldInterval = null;
-
-        // Solo note state (clicking a degree in a track plays only that track's note)
-        let soloPlayingTrack = null;
-        let soloPlayingStep = null;
-        let soloOscillators = [];
-
-        function stopSoloNote() {
-            soloOscillators.forEach(osc => { try { osc.stop(); } catch(e) {} });
-            soloOscillators = [];
-            soloPlayingTrack = null;
-            soloPlayingStep = null;
-            updateTrackDisplays();
-        }
-
-        function playTrackNoteToggle(trackId, step) {
-            if (audioContext.state === 'suspended') audioContext.resume();
-            // Toggle off if same note clicked again
-            if (soloPlayingTrack === trackId && soloPlayingStep === step) {
-                stopSoloNote();
-                return;
-            }
-            stopSoloNote();
-
-            const note = currentNotes.find(n => n.track === trackId && Math.abs(parseFloat(n.step) - parseFloat(step)) < 0.001);
-            if (!note) return;
-
-            soloPlayingTrack = trackId;
-            soloPlayingStep = step;
-
-            const isChordTrack = trackId.toLowerCase() === 'chords';
-            if (note.chord || isChordTrack) {
-                const chord = note.chord || note.degree;
-                let chordNotes = [];
-                if (/\d+/.test(chord)) {
-                    chordNotes = getChordNotes(songKey, parseInt(chord));
-                } else {
-                    chordNotes = chordDefinitions[chord] || [];
-                }
-                const octave = tracks[trackId]?.default_octave || defaultOctave;
-                chordNotes.forEach(cn => playSoloNote(cn + octave, trackId));
-            } else if (note.degree) {
-                const actualNote = mapUnparsedDegreeToNote(note.degree, songKey, trackId);
-                if (actualNote) playSoloNote(actualNote, trackId);
-            }
-            updateTrackDisplays();
-        }
-
-        function playSoloNote(note, trackId) {
-            const freq = noteFreqs[note];
-            if (!freq) return;
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-            osc.type = 'triangle';
-            const vol = ((tracks[trackId]?.volume ?? 5) / 5) * 0.3 * perceivedLoudnessScale(freq);
-            gain.gain.setValueAtTime(0, audioContext.currentTime);
-            gain.gain.linearRampToValueAtTime(vol, audioContext.currentTime + 0.01);
-            osc.start(audioContext.currentTime);
-            soloOscillators.push(osc);
-        }
-
-        function toggleMute(trackId) {
-            mutedTracks[trackId] = !mutedTracks[trackId];
-            const btn = document.getElementById(`mute-btn-${trackId}`);
-            const row = document.getElementById(`track-row-${trackId}`);
-            if (mutedTracks[trackId]) {
-                if (btn) { btn.textContent = '🔇'; btn.style.opacity = '0.5'; }
-                if (row) row.style.opacity = '0.4';
-            } else {
-                if (btn) { btn.textContent = '🔊'; btn.style.opacity = '1'; }
-                if (row) row.style.opacity = '1';
-            }
-        }
-
-        // Sidebar toggle
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('collapsed');
-        }
-
-        // Update karaoke display
-        function updateKaraokeDisplay() {
-            const karaokeDisplay = document.getElementById('karaokeDisplay');
-            karaokeDisplay.innerHTML = '';
-            
-            if (!currentNotes || currentNotes.length === 0) {
-                karaokeDisplay.innerHTML = '<div style="text-align: center; opacity: 0.5;">No song loaded</div>';
-                return;
-            }
-
-            const trackIds = Object.keys(tracks).sort();
-            
-            trackIds.forEach((trackId, index) => {
-                const trackNumber = index + 1;
-                const trackRow = document.createElement('div');
-                const trackClass = trackId === 'chords' ? 'chords' : trackNumber;
-                trackRow.className = `track-row track-${trackClass}`;
-                trackRow.id = `track-row-${trackId}`;
-                
-                const trackHeader = document.createElement('div');
-                trackHeader.className = 'track-header';
-                
-                const trackName = document.createElement('div');
-                trackName.className = 'track-name';
-                trackName.textContent = trackId.charAt(0).toUpperCase() + trackId.slice(1);
-                trackHeader.appendChild(trackName);
-
-                const muteBtn = document.createElement('button');
-                muteBtn.id = `mute-btn-${trackId}`;
-                muteBtn.textContent = '🔊';
-                muteBtn.title = 'Mute/unmute';
-                muteBtn.style.cssText = 'background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-size: 13px; margin-left: 8px;';
-                muteBtn.onclick = () => toggleMute(trackId);
-                trackHeader.appendChild(muteBtn);
-                
-                const trackDegrees = document.createElement('div');
-                trackDegrees.className = 'track-degrees';
-                trackDegrees.id = `track-degrees-${trackId}`;
-                trackHeader.appendChild(trackDegrees);
-                
-                const trackLyrics = document.createElement('div');
-                trackLyrics.className = 'track-lyrics';
-                trackLyrics.id = `track-lyrics-${trackId}`;
-                
-                trackRow.appendChild(trackHeader);
-                trackRow.appendChild(trackLyrics);
-                karaokeDisplay.appendChild(trackRow);
-            });
-            
-            updateTrackDisplays();
-        }
-
-        // Update individual track displays (replaces updateTrackDegreesDisplay)
-        function updateTrackDisplays() {
-            if (!currentNotes || currentNotes.length === 0) return;
-            
-            Object.keys(tracks).forEach(trackId => {
-                const trackNotes = currentNotes.filter(n => n.track === trackId).sort((a, b) => (a.step || 0) - (b.step || 0));
-                
-                if (trackNotes.length === 0) return;
-                
-                // Find current note
-                let currentNote = null;
-                let referenceNoteIndex = -1;
-                
-                for (let i = 0; i < trackNotes.length; i++) {
-                    const note = trackNotes[i];
-                    const noteStart = parseFloat(note.step) || 1;
-                    const noteDuration = parseFloat(note.duration) || 1;
-                    const notePause = parseFloat(note.pause) || 0;
-                    const noteEnd = noteStart + noteDuration - 1;
-                    const pauseStart = noteEnd + 1;
-                    const pauseEnd = pauseStart + notePause - 1;
-                    
-                    if (currentStep >= noteStart && currentStep <= noteEnd) {
-                        currentNote = note;
-                        referenceNoteIndex = i;
-                        break;
-                    } else if (currentStep >= pauseStart && currentStep <= pauseEnd) {
-                        referenceNoteIndex = i;
-                        break;
-                    } else if (currentStep < noteStart) {
-                        referenceNoteIndex = i;
-                        break;
-                    }
-                }
-                
-                if (referenceNoteIndex === -1) {
-                    referenceNoteIndex = trackNotes.length - 1;
-                }
-                
-                // Get previous and next notes
-                const previousNotes = [];
-                const nextNotes = [];
-                
-                for (let i = referenceNoteIndex - 1; i >= 0 && previousNotes.length < 2; i--) {
-                    previousNotes.unshift(trackNotes[i]);
-                }
-                
-                for (let i = referenceNoteIndex + 1; i < trackNotes.length && nextNotes.length < 2; i++) {
-                    nextNotes.push(trackNotes[i]);
-                }
-                
-                // Format note for display
-                function formatNote(note) {
-                    if (!note) return '';
-                    if (!note.degree && !note.chord && !note.note) return '';
-                    
-                    let text = '';
-                    if (note.degree) {
-                        text = note.degree.toString();
-                    } else if (note.chord) {
-                        if (/^\d+$/.test(note.chord)) {
-                            text = convertChordDegreeToName ? convertChordDegreeToName(note.chord, songKey) : note.chord;
-                        } else {
-                            text = note.chord;
-                        }
-                    } else if (note.note) {
-                        text = note.note;
-                    }
-                    
-                    const duration = parseFloat(note.duration) || 1;
-                    if (Math.abs(duration - 1) > 0.001) {
-                        text += `(${duration})`;
-                    }
-                    return text;
-                }
-                
-                // Update degrees display
-                const degreesElement = document.getElementById(`track-degrees-${trackId}`);
-                if (degreesElement) {
-                    let degreesHtml = '';
-                    
-                    previousNotes.forEach(note => {
-                        const text = formatNote(note);
-                        if (text) {
-                            const isSolo = soloPlayingTrack === trackId && soloPlayingStep === note.step;
-                            const soloStyle = isSolo ? ' outline: 2px solid #ffd700;' : '';
-                            degreesHtml += `<span class="degree-item prev" onclick="playTrackNoteToggle('${trackId}', ${note.step})" title="Play/stop this note" style="${soloStyle}">${text}</span>`;
-                        }
-                    });
-
-                    if (currentNote) {
-                        const text = formatNote(currentNote);
-                        if (text) {
-                            const isSolo = soloPlayingTrack === trackId && soloPlayingStep === currentNote.step;
-                            const soloStyle = isSolo ? ' outline: 2px solid #ffd700;' : '';
-                            degreesHtml += `<span class="degree-item current" onclick="playTrackNoteToggle('${trackId}', ${currentNote.step})" title="Play/stop this note" style="${soloStyle}">${text}</span>`;
-                        }
-                    }
-
-                    nextNotes.forEach(note => {
-                        const text = formatNote(note);
-                        if (text) {
-                            const isSolo = soloPlayingTrack === trackId && soloPlayingStep === note.step;
-                            const soloStyle = isSolo ? ' outline: 2px solid #ffd700;' : '';
-                            degreesHtml += `<span class="degree-item next" onclick="playTrackNoteToggle('${trackId}', ${note.step})" title="Play/stop this note" style="${soloStyle}">${text}</span>`;
-                        }
-                    });
-                    
-                    degreesElement.innerHTML = degreesHtml || '<span style="opacity: 0.3;">—</span>';
-                }
-                
-                // Update lyrics display - FIXED: Only show current lyrics, not previous/next
-                const lyricsElement = document.getElementById(`track-lyrics-${trackId}`);
-                if (lyricsElement) {
-                    if (currentNote && currentNote.lyrics && currentNote.lyrics.trim()) {
-                        lyricsElement.textContent = currentNote.lyrics.trim();
-                    } else {
-                        lyricsElement.textContent = '';
-                    }
-                }
-                
-                // Update active state
-                const trackRow = document.getElementById(`track-row-${trackId}`);
-                if (trackRow) {
-                    if (currentNote && (currentNote.degree || currentNote.chord || currentNote.note)) {
-                        trackRow.classList.add('active');
-                    } else {
-                        trackRow.classList.remove('active');
-                    }
-                }
-            });
-        }
 
         // Generate piano keys
         function createPiano() {
             const piano = document.getElementById('piano');
-            piano.innerHTML = '';
             const whiteKeys = ['B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5'];
             const blackKeys = ['C#3', 'D#3', 'F#3', 'G#3', 'A#3', 'C#4', 'D#4', 'F#4', 'G#4', 'A#4', 'C#5', 'D#5'];
             
@@ -757,26 +516,25 @@
                 { note: 'D#5', relativeTo: 'D5', offset: 0.75 }
             ];
             
-            // Position black keys after white keys are laid out
-            requestAnimationFrame(() => {
-                blackKeyPositions.forEach(({ note, relativeTo, offset }) => {
-                    const key = document.createElement('div');
-                    key.className = 'key black-key';
-                    key.textContent = note;
-                    key.dataset.note = note;
-
-                    const whiteKeyElement = piano.querySelector(`[data-note="${relativeTo}"]`);
-                    if (whiteKeyElement) {
-                        // offsetLeft is relative to piano (position:relative), accurate regardless of scroll
-                        const relativeLeft = whiteKeyElement.offsetLeft + (whiteKeyElement.offsetWidth * offset);
-                        key.style.left = `${relativeLeft}px`;
-                    }
-
-                    key.addEventListener('mousedown', () => playNote(note));
-                    key.addEventListener('mouseup', () => stopNote());
-                    key.addEventListener('mouseleave', () => stopNote());
-                    piano.appendChild(key);
-                });
+            blackKeyPositions.forEach(({ note, relativeTo, offset }) => {
+                const key = document.createElement('div');
+                key.className = 'key black-key';
+                key.textContent = note;
+                key.dataset.note = note;
+                
+                // Position relative to the white key to the left
+                const whiteKeyElement = piano.querySelector(`[data-note="${relativeTo}"]`);
+                if (whiteKeyElement) {
+                    const whiteKeyRect = whiteKeyElement.getBoundingClientRect();
+                    const pianoRect = piano.getBoundingClientRect();
+                    const relativeLeft = whiteKeyRect.left - pianoRect.left + (whiteKeyRect.width * offset);
+                    key.style.left = `${relativeLeft}px`;
+                }
+                
+                key.addEventListener('mousedown', () => playNote(note));
+                key.addEventListener('mouseup', () => stopNote());
+                key.addEventListener('mouseleave', () => stopNote());
+                piano.appendChild(key);
             });
         }
 
@@ -825,13 +583,33 @@
                 clearInterval(playbackInterval);
                 playbackInterval = null;
             }
-            updateKaraokeDisplay();
+            document.getElementById('songData').value = '';
         }
 
         // Playback functions
         function togglePlayback() {
+            // Try to load song data from textarea if no recorded notes
             if (!currentNotes.length) {
-                return; // No song loaded
+                const songDataTextarea = document.getElementById('songData');
+                if (songDataTextarea && songDataTextarea.value.trim()) {
+                    try {
+                        let songData = JSON.parse(songDataTextarea.value);
+                        songData = getProcessedSongData(songData);
+                        currentNotes = songData.notes || [];
+                        songKey = songData.key || "Unknown";
+                        tempo = songData.tempo || 120;
+                        eighthNoteLength = (60 / tempo / 2) * 1000;
+                        tracks = songData.tracks || { "1": { volume: 5 } };
+                        updatetrackControls();
+                        
+                        // Highlight keys in the current song's key
+                        highlightKeysInKey();
+                    } catch (e) {
+                        return;
+                    }
+                } else {
+                    return;
+                }
             }
 
             if (isPlaying) {
@@ -907,7 +685,7 @@
             }
             
             const playButton = document.querySelector('.btn-play');
-            if (playButton) playButton.textContent = '⏸️ Pause';
+            playButton.textContent = '⏸️';
             isPlaying = true;
             
             // Find the natural end of song
@@ -941,7 +719,6 @@
                 // Play each note or chord with appropriate volume
                 const currentTime = audioContext.currentTime;
                 notesToPlay.forEach(n => {
-                    if (mutedTracks[n.track]) return;
                     const trackVolume = tracks[n.track] ? tracks[n.track].volume : 5;
                     playNoteOrChord(n, trackVolume, songKey, currentTime);
                 });
@@ -964,7 +741,7 @@
             
             // Update button text
             const playButton = document.querySelector('.btn-play');
-            if (playButton) playButton.textContent = '▶️ Play';
+            playButton.textContent = '▶️';
         }
         
         // Play and hold functions
@@ -989,8 +766,13 @@
             toggleBtn.textContent = '⏹️ Stop';
             toggleBtn.style.background = 'linear-gradient(45deg, #e17055, #d63031)';
             
-            // Play current step notes once — oscillators run indefinitely until stopPlayHold()
+            // Play current step notes continuously
             playCurrentStepNotes();
+            
+            // Set up interval to keep playing the same notes
+            playHoldInterval = setInterval(() => {
+                playCurrentStepNotes();
+            }, eighthNoteLength);
         }
         
         function stopPlayHold() {
@@ -1028,7 +810,6 @@
             
             // Play each note (volume is handled naturally in playContinuousNote)
             notesAtStep.forEach(note => {
-                if (mutedTracks[note.track]) return;
                 is_chord_track = note.track == "chords";
                 if (note.chord || is_chord_track) {
                     // Handle chord notes
@@ -1156,23 +937,36 @@
         }
         
         function updateDisplayAtCurrentStep() {
+            // Get notes at current step (support fractional steps)
+            const notesAtStep = currentNotes.filter(n => {
+                const noteStep = parseFloat(n.step) || 1;
+                // Allow small floating point tolerance for step matching
+                return Math.abs(noteStep - currentStep) < 0.001 || 
+                       (currentStep >= noteStep && currentStep < noteStep + (parseFloat(n.duration) || 1));
+            });
+            
+            // Collect lyrics for this step
+            const lyricsAtStep = notesAtStep
+                .filter(n => n.lyrics && n.lyrics.trim())
+                .map(n => n.lyrics.trim())
+                .filter((lyric, index, arr) => arr.indexOf(lyric) === index)
+                .join(' ');
+            
+            // Display lyrics with context
+            displayLyricsWithContext(currentStep, lyricsAtStep);
+
             // Update step counter
             const stepCounter = document.getElementById('step-counter');
-            if (stepCounter && currentNotes.length > 0) {
-                const naturalMaxStep = Math.max(...currentNotes.map(n => parseFloat(n.step) + (parseFloat(n.duration) || 1) - 1)) + 1;
+            if (stepCounter) {
+                const naturalMaxStep = Math.max(...currentNotes.map(n => n.step + (n.duration || n.stretch || 1) - 1)) + 1;
                 stepCounter.textContent = `Step: ${currentStep} / ${naturalMaxStep}`;
             }
             
             // Highlight keys based on which track is playing them
             highlightKeysByTrack();
             
-            // Update karaoke display (replaces old track degrees display)
-            if (document.getElementById('karaokeDisplay')) {
-                updateTrackDisplays();
-            } else {
-                // Fallback to old display if karaoke display doesn't exist yet
-                updateTrackDegreesDisplay();
-            }
+            // Update track degrees display
+            updateTrackDegreesDisplay();
         }
 
         // Tempo control
@@ -1190,38 +984,47 @@
 
         // Update track controls
         function updatetrackControls() {
+            console.log('updatetrackControls called');
+            console.log('Current tracks object:', tracks);
+            
             const container = document.getElementById('trackControls');
             const trackIds = Object.keys(tracks).sort();
             
-            container.innerHTML = `
-                <h3>Track Controls</h3>
-                ${trackIds.map((trackId, index) => {
-                    return `
-                    <div class="track-control-item">
-                        <h4>${trackId.charAt(0).toUpperCase() + trackId.slice(1)}</h4>
-                        
-                        <div class="control-group">
-                            <label>Volume</label>
-                            <input type="range" id="volume_${trackId}" min="0" max="5" value="${tracks[trackId].volume || 5}" 
-                                   onchange="updatetrackVolume('${trackId}', this.value)">
-                            <span id="volumeLabel_${trackId}">${tracks[trackId].volume || 5}</span>
-                        </div>
-                        
-                        <div class="control-group">
-                            <label>Octave</label>
-                            <input type="range" id="octave_${trackId}" min="2" max="6" value="${tracks[trackId].default_octave || 4}" 
-                                   onchange="updatetrackOctave('${trackId}', this.value)">
-                            <span id="octaveLabel_${trackId}">${tracks[trackId].default_octave || 4}</span>
-                        </div>
-                    </div>
-                `;
-                }).join('')}
-            `;
+            console.log('Track IDs found:', trackIds);
             
-            // Update karaoke display when tracks change
-            if (document.getElementById('karaokeDisplay')) {
-                updateKaraokeDisplay();
-            }
+            container.innerHTML = `
+                <h4>Track Controls</h4>
+                <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                    ${trackIds.map((trackId, index) => {
+                        let trackNumber = index + 1;
+                        return `
+                        <div class="track-outline-${trackNumber}" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; background: rgba(255,255,255,0.1);">
+                            <div class="track-note-degrees-display" id="track-note-degrees-display-${trackId}">
+                            </div>
+                            
+                            <h5 style="margin: 0; color: white;">${trackId}</h5>
+                            
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <label style="font-size: 12px;">Volume:</label>
+                                <input type="range" id="volume_${trackId}" min="0" max="5" value="${tracks[trackId].volume || 5}" 
+                                       onchange="updatetrackVolume('${trackId}', this.value)"
+                                       style="width: 80px;">
+                                <span id="volumeLabel_${trackId}" style="min-width: 20px; text-align: center;">${tracks[trackId].volume || 5}</span>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <label style="font-size: 12px;">Octave:</label>
+                                <input type="range" id="octave_${trackId}" min="2" max="6" value="${tracks[trackId].default_octave || 4}" 
+                                       onchange="updatetrackOctave('${trackId}', this.value)"
+                                       style="width: 80px;">
+                                <span id="octaveLabel_${trackId}" style="min-width: 20px; text-align: center;">${tracks[trackId].default_octave || 4}</span>
+                            </div>
+                        </div>
+                    `;
+                    }).join('')}
+                </div>
+            `;
+            updateTrackDegreesDisplay();
         }
 
         // Update track volume
@@ -1645,11 +1448,10 @@
                         }
                     }
                 });
-                initializeKeySelector();
+            } else {
+                console.log('Key selector not found during initialization');
             }
             
-            // Initialize karaoke display
-            updateKaraokeDisplay();
         }
 
         // Initialize
@@ -1657,7 +1459,37 @@
             console.error('Failed to initialize app:', error);
         });
 
-        // Note: songData textarea removed from new UI - editing happens in song files directly
+        const songDataTextarea = document.getElementById('songData');
+        if (songDataTextarea) {
+            songDataTextarea.addEventListener('input', function () {
+                const value = songDataTextarea.value.trim();
+                if (!value) {
+                    currentNotes = [];
+                    return;
+                }
+                try {
+                    let songData = JSON.parse(value);
+                    songData = getProcessedSongData(songData);
+                    currentNotes = songData.notes || [];
+                    tempo = songData.tempo || 120;
+                    songKey = songData.key || "Unknown";
+                    eighthNoteLength = (60 / tempo / 2) * 1000;
+                    tracks = songData.tracks || { "1": { volume: 5 } };
+                    wasPlaying = false; // Reset wasPlaying when loading new song data
+                    updatetrackControls();
+                    
+                    // Update key selector to match the new song data
+                    if (typeof updateKeySelector === 'function') {
+                        updateKeySelector(songData.key);
+                    }
+                    
+                    // Highlight keys in the current song's key
+                    highlightKeysInKey();
+                } catch (e) {
+                    updateStatus('❌ Invalid JSON in song data');
+                }
+            });
+        }
         
         // Add keyboard shortcuts for navigation
         document.addEventListener('keydown', function(event) {

@@ -1,4 +1,4 @@
-const valerieValeries = {
+const valerieGleeChorus = {
     "version": 2,
     "tempo": 140,
     "key": "F",
@@ -158,5 +158,5 @@ const valerieValeries = {
 
 // Register this song with the main application
 if (typeof registerSong === 'function') {
-  registerSong(valerieValeries);
+  registerSong(valerieGleeChorus);
 }

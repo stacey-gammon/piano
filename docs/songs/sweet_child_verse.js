@@ -8,62 +8,7 @@ const sweetChildOMineVerse = {
         "volume": 3,
         "default_octave": 4,
         "notes": [
-          {
-            "degree": "1[+1]",
-            "duration": 3,
-            "lyrics": "ooo"
-          },
-          {
-            "degree": "6",
-            "lyrics": "oh"
-          },
-          {
-            "degree": "5",
-            "lyrics": "oh"
-          },
-          {
-            "degree": "6",
-            "lyrics": "oh"
-          },
-          {
-            "degree": "1[+1]",
-            "duration": 2,
-            "lyrics": "oh"
-          },
-          {
-            "degree": "6",
-            "duration": 3,
-            "lyrics": "oh"
-          },
-          {
-            "degree": "4",
-            "duration": 2,
-            "lyrics": "Sweet"
-          },
-          {
-            "degree": "4",
-            "duration": 2,
-            "lyrics": "love"
-          },
-          {
-            "degree": "3",
-            "duration": 2,
-            "lyrics": "of"
-          },
-          {
-            "degree": "3",
-            "duration": 2,
-            "lyrics": "Mi"
-          },
-          {
-            "degree": "2",
-            "lyrics": "ii"
-          },
-          {
-            "degree": "1",
-            "duration": 3,
-            "lyrics": "ne"
-          },
+         
         ]
       },
       "chords": {

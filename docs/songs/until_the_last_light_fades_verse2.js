@@ -124,10 +124,6 @@ const lastLightFadesV2 = {
           "lyrics": "bones"
         },
         {
-          "degree": "2",
-          "lyrics": "that"
-        },
-        {
           "degree": "1",
           "lyrics": "i'll"
         },
