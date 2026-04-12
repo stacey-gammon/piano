@@ -504,6 +504,41 @@
         let soloOscillators = [];
         let pendingLoopLineValue = '';
         let displayMode = 'degrees';
+        let audioUnlockAttempted = false;
+
+        async function unlockAudioContext() {
+            if (!audioContext) return false;
+
+            try {
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+
+                // iOS Safari can still require an actual graph start/stop after resume.
+                const buffer = audioContext.createBuffer(1, 1, 22050);
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioContext.destination);
+                source.start(0);
+                source.stop(0);
+                audioUnlockAttempted = true;
+                return true;
+            } catch (error) {
+                console.warn('Audio unlock failed:', error);
+                return false;
+            }
+        }
+
+        function registerAudioUnlockHandlers() {
+            const unlockOnce = async () => {
+                if (audioUnlockAttempted && audioContext.state === 'running') return;
+                await unlockAudioContext();
+            };
+
+            ['touchstart', 'touchend', 'pointerdown', 'click'].forEach(eventName => {
+                document.addEventListener(eventName, unlockOnce, { passive: true });
+            });
+        }
 
         function stopSoloNote() {
             soloOscillators.forEach(osc => { try { osc.stop(); } catch(e) {} });
@@ -513,8 +548,8 @@
             updateTrackDisplays();
         }
 
-        function playTrackNoteToggle(trackId, step) {
-            if (audioContext.state === 'suspended') audioContext.resume();
+        async function playTrackNoteToggle(trackId, step) {
+            await unlockAudioContext();
             // Toggle off if same note clicked again
             if (soloPlayingTrack === trackId && soloPlayingStep === step) {
                 stopSoloNote();
@@ -953,6 +988,26 @@
             piano.innerHTML = '';
             const whiteKeys = ['B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5'];
             const blackKeyWidth = 30;
+
+            function attachKeyHandlers(key, note) {
+                const startNote = async (event) => {
+                    event.preventDefault();
+                    await unlockAudioContext();
+                    playNote(note);
+                };
+
+                const endNote = () => stopNote();
+
+                key.addEventListener('mousedown', startNote);
+                key.addEventListener('mouseup', endNote);
+                key.addEventListener('mouseleave', endNote);
+                key.addEventListener('touchstart', startNote, { passive: false });
+                key.addEventListener('touchend', endNote);
+                key.addEventListener('touchcancel', endNote);
+                key.addEventListener('pointerdown', startNote);
+                key.addEventListener('pointerup', endNote);
+                key.addEventListener('pointercancel', endNote);
+            }
             
             // Create white keys
             whiteKeys.forEach((note, index) => {
@@ -960,9 +1015,7 @@
                 key.className = 'key white-key';
                 key.textContent = note;
                 key.dataset.note = note;
-                key.addEventListener('mousedown', () => playNote(note));
-                key.addEventListener('mouseup', () => stopNote());
-                key.addEventListener('mouseleave', () => stopNote());
+                attachKeyHandlers(key, note);
                 piano.appendChild(key);
             });
 
@@ -996,9 +1049,7 @@
                         key.style.left = `${relativeLeft}px`;
                     }
 
-                    key.addEventListener('mousedown', () => playNote(note));
-                    key.addEventListener('mouseup', () => stopNote());
-                    key.addEventListener('mouseleave', () => stopNote());
+                    attachKeyHandlers(key, note);
                     piano.appendChild(key);
                 });
             });
@@ -1008,10 +1059,7 @@
 
         // Recording functions
         function startRecording() {
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            
+            unlockAudioContext();
             isRecording = true;
             currentNotes = [];
             recordingStartTime = Date.now();
@@ -1120,11 +1168,9 @@
             lyricsDisplay.innerHTML = displayText;
         }
 
-        function startPlayback() {
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            
+        async function startPlayback() {
+            await unlockAudioContext();
+
             // Stop play-and-hold if it's running
             if (isPlayHolding) {
                 stopPlayHold();
@@ -1190,8 +1236,9 @@
             }
         }
         
-        function startPlayHold() {
+        async function startPlayHold() {
             if (isPlayHolding) return;
+            await unlockAudioContext();
             
             // Stop regular playback if it's running
             if (isPlaying) {
@@ -1857,6 +1904,7 @@
 
         // Initialize
         async function initializeApp() {
+            registerAudioUnlockHandlers();
             createPiano();
 
             // Load songs first, then populate the dropdown
