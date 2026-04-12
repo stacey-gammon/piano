@@ -289,12 +289,17 @@ function loadSongFromBankAtIndex(songIndex) {
     
     songData = getProcessedSongData(songData);
     // Also load into the playback system
+    currentSong = songData;
     currentNotes = songData.notes || [];
     tempo = songData.tempo || 120;
     songKey = songData.key || "Unknown";
     eighthNoteLength = (60 / tempo / 2) * 1000;
     tracks = songData.tracks || { "1": { volume: 5 } };
     defaultOctave = songData.default_octave || 4;
+
+    // Sync UI fields
+    const tempoInput = document.getElementById('tempo');
+    if (tempoInput) tempoInput.value = tempo;
     
     // Reset playback state when loading a new song
     if (typeof wasPlaying !== 'undefined') {
@@ -319,6 +324,10 @@ function loadSongFromBankAtIndex(songIndex) {
     // Update karaoke display if it exists
     if (typeof updateKaraokeDisplay === 'function') {
         updateKaraokeDisplay();
+    }
+
+    if (typeof refreshLoopLineOptions === 'function') {
+        refreshLoopLineOptions();
     }
 }
 
