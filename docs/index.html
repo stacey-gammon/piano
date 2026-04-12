@@ -412,6 +412,14 @@
             </div>
 
             <div class="control-group">
+                <label>Show</label>
+                <select id="displayModeSelect">
+                    <option value="degrees">Degrees</option>
+                    <option value="notes">Notes</option>
+                </select>
+            </div>
+
+            <div class="control-group">
                 <label>Tempo (BPM)</label>
                 <input type="number" id="tempo" value="120" min="60" max="200" onchange="updateTempo()">
             </div>
@@ -495,6 +503,7 @@
         let soloPlayingStep = null;
         let soloOscillators = [];
         let pendingLoopLineValue = '';
+        let displayMode = 'degrees';
 
         function stopSoloNote() {
             soloOscillators.forEach(osc => { try { osc.stop(); } catch(e) {} });
@@ -666,6 +675,41 @@
             return { start, end };
         }
 
+        function getSelectedDisplayMode() {
+            const select = document.getElementById('displayModeSelect');
+            return select?.value || displayMode || 'degrees';
+        }
+
+        function formatDisplayText(note, trackId) {
+            if (!note || (!note.degree && !note.chord && !note.note)) return null;
+
+            const currentDisplayMode = getSelectedDisplayMode();
+
+            if (note.degree) {
+                if (currentDisplayMode === 'notes') {
+                    const actualNote = mapUnparsedDegreeToNote(note.degree, songKey, trackId);
+                    if (actualNote) {
+                        return actualNote.replace(/\d+$/, '');
+                    }
+                }
+                return note.degree.toString().replace(/\[.*?\]/g, '');
+            }
+
+            if (note.chord) {
+                return /^\d+$/.test(note.chord)
+                    ? (convertChordDegreeToName ? convertChordDegreeToName(note.chord, songKey) : note.chord)
+                    : note.chord;
+            }
+
+            if (note.note) {
+                return currentDisplayMode === 'notes'
+                    ? note.note.replace(/\d+$/, '')
+                    : note.note;
+            }
+
+            return null;
+        }
+
         function refreshLoopLineOptions() {
             const select = document.getElementById('loopLineSelect');
             if (!select) return;
@@ -822,21 +866,8 @@
                 
                 // Format note for display — returns { text, duration }
                 function formatNote(note) {
-                    if (!note) return null;
-                    if (!note.degree && !note.chord && !note.note) return null;
-
-                    let text = '';
-                    if (note.degree) {
-                        // Strip octave modifiers like [+1], [-1], [3] — not meaningful in UI
-                        text = note.degree.toString().replace(/\[.*?\]/g, '');
-                    } else if (note.chord) {
-                        text = /^\d+$/.test(note.chord)
-                            ? (convertChordDegreeToName ? convertChordDegreeToName(note.chord, songKey) : note.chord)
-                            : note.chord;
-                    } else if (note.note) {
-                        text = note.note;
-                    }
-
+                    const text = formatDisplayText(note, trackId);
+                    if (!text) return null;
                     const duration = parseFloat(note.duration) || 1;
                     return { text, duration };
                 }
@@ -1797,6 +1828,10 @@
             if (songSelect && songSelect.value !== '') params.set('song', songSelect.value);
             const tempoEl = document.getElementById('tempo');
             if (tempoEl) params.set('tempo', tempoEl.value);
+            const displayModeSelect = document.getElementById('displayModeSelect');
+            if (displayModeSelect && displayModeSelect.value && displayModeSelect.value !== 'degrees') {
+                params.set('displayMode', displayModeSelect.value);
+            }
             const loopLineSelect = document.getElementById('loopLineSelect');
             if (loopLineSelect && loopLineSelect.value) params.set('loopLine', loopLineSelect.value);
             if (songKey && songKey !== 'Unknown') params.set('key', songKey);
@@ -1810,6 +1845,11 @@
                 document.getElementById('tempo').value = t;
                 tempo = t;
                 eighthNoteLength = (60 / tempo / 2) * 1000;
+            }
+            displayMode = params.get('displayMode') || 'degrees';
+            const displayModeSelect = document.getElementById('displayModeSelect');
+            if (displayModeSelect) {
+                displayModeSelect.value = displayMode;
             }
             pendingLoopLineValue = params.get('loopLine') || '';
             return params.get('song'); // returns saved song index or null
@@ -1861,6 +1901,16 @@
                         if (typeof highlightKeysInKey === 'function') highlightKeysInKey();
                         saveUrlParams();
                     }
+                });
+            }
+
+            const displayModeSelect = document.getElementById('displayModeSelect');
+            if (displayModeSelect) {
+                displayModeSelect.value = displayMode;
+                displayModeSelect.addEventListener('change', function() {
+                    displayMode = this.value || 'degrees';
+                    updateDisplayAtCurrentStep();
+                    saveUrlParams();
                 });
             }
 
