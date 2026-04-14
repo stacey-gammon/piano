@@ -307,7 +307,7 @@ function playNoteOrChord(noteObject, trackVolume = null, songKey = null, startTi
     const durationSeconds = (noteObject.duration || 1) * eighthNoteLength / 1000;
     let mappedNote = null;
 
-    is_chord_track = noteObject.track === "chords";
+    const is_chord_track = String(noteObject.track || '').toLowerCase() === "chords";
     if (noteObject.chord || is_chord_track) {
         playChord(noteObject.chord || noteObject.degree, trackVolume, durationSeconds, songKey, startTime);
         return;
@@ -389,4 +389,3 @@ function getNotesInKey(songKey) {
     }
     return notes;
 }
-

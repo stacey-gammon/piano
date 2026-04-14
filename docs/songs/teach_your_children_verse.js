@@ -59,10 +59,10 @@ const teachYourChildrenVerse = {
       "volume": 5,
       "default_octave": 3,
       "notes": [
-        { "degree": "1", "lyrics": "You", "duration": 7, "start_of_line": true },
-        { "degree": "4", "lyrics": "Road", "duration": 1 },
-        { "degree": "4", "lyrics": "Must", "duration": 3, "start_of_line": true },
-        { "degree": "1", "lyrics": "Code", "duration": 4 },
+        { "chord": "1", "lyrics": "You", "duration": 7, "start_of_line": true },
+        { "chord": "4", "lyrics": "Road", "duration": 1 },
+        { "chord": "4", "lyrics": "Must", "duration": 3, "start_of_line": true },
+        { "chord": "1", "lyrics": "Code", "duration": 4 },
       ]
     }
   }

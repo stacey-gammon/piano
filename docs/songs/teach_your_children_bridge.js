@@ -32,7 +32,7 @@ const teachYourChildrenBridge = {
         { "degree": "3", "lyrics": "look" },
         { "degree": "3", "lyrics": "at" },
         { "degree": "5", "lyrics": "them" },
-        { "degree": "1[+1]", "lyrics": "and" },
+        { "degree": "5", "lyrics": "and" },
         { "degree": "6", "duration": 4, "lyrics": "siii" },
         { "degree": "6", "duration": 2, "lyrics": "iii" },
         { "degree": "6", "duration": 2, "lyrics": "iigh" },
@@ -74,7 +74,7 @@ const teachYourChildrenBridge = {
         { "degree": "5[-1]", "lyrics": "look" },
         { "degree": "5[-1]", "lyrics": "at" },
         { "degree": "1", "lyrics": "them" },
-        { "degree": "3", "lyrics": "and" },
+        { "degree": "1", "lyrics": "and" },
         { "degree": "1", "duration": 4, "lyrics": "siii" },
         { "degree": "1", "duration": 2, "lyrics": "iii" },
         { "degree": "1", "duration": 2, "lyrics": "iigh" },
@@ -83,8 +83,8 @@ const teachYourChildrenBridge = {
         // "And know they love you" (2→4, 1→3, 2→4, 3→5, 1→3)
         { "degree": "7[-1]", "lyrics": "And", "start_of_line": true },
         { "degree": "7[-1]", "lyrics": "know" },
-        { "degree": "3", "lyrics": "they" },
-        { "degree": "3", "duration": 2, "lyrics": "love" },
+        { "degree": "2", "lyrics": "they" },
+        { "degree": "2", "duration": 2, "lyrics": "love" },
         { "degree": "5[-1]", "duration": 2, "lyrics": "you." },
       ]
     },
@@ -116,15 +116,15 @@ const teachYourChildrenBridge = {
         { "degree": "1", "lyrics": "look" },
         { "degree": "1", "lyrics": "at" },
         { "degree": "3", "lyrics": "them" },
-        { "degree": "1", "lyrics": "and" },
+        { "degree": "3", "lyrics": "and" },
         { "degree": "3", "duration": 4, "lyrics": "siii" },
         { "degree": "5", "duration": 2, "lyrics": "iii" },
         { "degree": "4", "duration": 2, "lyrics": "iigh" },
         {"pause": 2 },
 
         // "And know they love you" (2→7[-1], 1→6[-1], 2→7[-1], 3→1, 1→6[-1])
-        { "degree": "3", "lyrics": "And", "start_of_line": true },
-        { "degree": "3", "lyrics": "know" },
+        { "degree": "2", "lyrics": "And", "start_of_line": true },
+        { "degree": "2", "lyrics": "know" },
         { "degree": "5", "lyrics": "they" },
         { "degree": "5", "duration": 2, "lyrics": "love" },
         { "degree": "1", "duration": 2, "lyrics": "you." },
@@ -135,16 +135,16 @@ const teachYourChildrenBridge = {
       "default_octave": 3,
       "notes": [
         // "Don't you ever ask them why" — diatonic 3rd below track 1 (3→1, 1→6[-1], 3→1, 3→1, 3→1, 2→7[-1])
-        { "degree": "1", "lyrics": "Dont", "duration": 6, "start_of_line": true },
-        { "degree": "4", "lyrics": "Why", "duration": 2 },
-        { "degree": "4", "lyrics": "If", "duration": 6, "start_of_line": true },
-        { "degree": "1", "lyrics": "Cry", "duration": 1 },
-        { "degree": "1", "duration": 7, "lyrics": "So", "start_of_line": true },
-        { "degree": "6", "duration": 6, "lyrics": "siiiiii"},
-        { "degree": "4", "duration": 2, "lyrics": "iiigh" },
+        { "chord": "1", "lyrics": "Dont", "duration": 6, "start_of_line": true },
+        { "chord": "4", "lyrics": "Why", "duration": 2 },
+        { "chord": "4", "lyrics": "If", "duration": 6, "start_of_line": true },
+        { "chord": "1", "lyrics": "Cry", "duration": 1 },
+        { "chord": "1", "duration": 7, "lyrics": "So", "start_of_line": true },
+        { "chord": "6", "duration": 6, "lyrics": "siiiiii"},
+        { "chord": "4", "duration": 2, "lyrics": "iiigh" },
         { "pause": 2},
-        { "degree": "5", "duration": 5, "lyrics": "And", "start_of_line": true  },
-        { "degree": "1", "duration": 2, "lyrics": "Love" },
+        { "chord": "5", "duration": 5, "lyrics": "And", "start_of_line": true  },
+        { "chord": "1", "duration": 2, "lyrics": "Love" },
       ]
     }
   }
