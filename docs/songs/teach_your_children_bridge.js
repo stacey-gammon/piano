@@ -99,7 +99,7 @@ const teachYourChildrenBridge = {
         { "degree": "1", "lyrics": "ver" },
         { "degree": "3", "lyrics": "ask" },
         { "degree": "5", "lyrics": "them" },
-        { "degree": "3", "lyrics": "why", "duration": 2  },
+        { "degree": "4", "lyrics": "why", "duration": 2  },
 
         // "If they told you, you would cry" (4→2, 4→2, 5→3, 5→3, 4→2, 3→1, 2→7[-1])
         { "degree": "6", "lyrics": "If", "start_of_line": true },
