@@ -11,6 +11,7 @@ async function loadSongs() {
         
         // Load the song files via script tags
         const songFiles = [
+            'teach_your_children_verse.js',
             'teach_your_children_bridge.js',
             'cross_muddy_waters_chorus.js',
             'sweet_child.js',

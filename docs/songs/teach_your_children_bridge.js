@@ -9,13 +9,13 @@ const teachYourChildrenBridge = {
       "default_octave": 3,
       "notes": [
         // "Don't you ever ask them why" (D)
-        { "degree": "5", "lyrics": "Dont", "start_of_line": true },
-        { "degree": "5", "lyrics": "you" },
-        { "degree": "5", "lyrics": "ev"},
-        { "degree": "5", "lyrics": "ver" },
-        { "degree": "6", "lyrics": "ask" },
-        { "degree": "1[+1]", "lyrics": "them" },
-        { "degree": "2[+1]", "lyrics": "why", "duration": 2 },
+        { "degree": "3", "lyrics": "Dont", "start_of_line": true },
+        { "degree": "3", "lyrics": "you" },
+        { "degree": "3", "lyrics": "ev"},
+        { "degree": "3", "lyrics": "ver" },
+        { "degree": "5", "lyrics": "ask" },
+        { "degree": "1", "lyrics": "them" },
+        { "degree": "6", "lyrics": "why", "duration": 2 },
 
         // "If they told you, you would cry" (G -> D)
         { "degree": "2[+1]", "lyrics": "If", "start_of_line": true },
@@ -51,13 +51,13 @@ const teachYourChildrenBridge = {
       "default_octave": 4,
       "notes": [
         // "Don't you ever ask them why" — diatonic 3rd above track 1 (3→5, 1→3, 3→5, 3→5, 3→5, 2→4)
-        { "degree": "1", "lyrics": "Dont", "start_of_line": true },
-        { "degree": "1", "lyrics": "you" },
-        { "degree": "1", "lyrics": "ev" },
-        { "degree": "1", "lyrics": "ver" },
-        { "degree": "2", "lyrics": "ask" },
+        { "degree": "5[-1]", "lyrics": "Dont", "start_of_line": true },
+        { "degree": "5[-1]", "lyrics": "you" },
+        { "degree": "5[-1]", "lyrics": "ev" },
+        { "degree": "5[-1]", "lyrics": "ver" },
+        { "degree": "1", "lyrics": "ask" },
         { "degree": "3", "lyrics": "them" },
-        { "degree": "4", "lyrics": "why", "duration": 2  },
+        { "degree": "1", "lyrics": "why", "duration": 2  },
 
         // "If they told you, you would cry" (4→6, 4→6, 5→7, 5→7, 4→6, 3→5, 2→4)
         { "degree": "4", "lyrics": "If", "start_of_line": true },
@@ -93,13 +93,13 @@ const teachYourChildrenBridge = {
       "default_octave": 4,
       "notes": [
         // "Don't you ever ask them why" — diatonic 3rd below track 1 (3→1, 1→6[-1], 3→1, 3→1, 3→1, 2→7[-1])
-        { "degree": "3", "lyrics": "Dont", "start_of_line": true },
-        { "degree": "3", "lyrics": "you" },
-        { "degree": "3", "lyrics": "ev" },
-        { "degree": "3", "lyrics": "ver" },
-        { "degree": "4", "lyrics": "ask" },
+        { "degree": "1", "lyrics": "Dont", "start_of_line": true },
+        { "degree": "1", "lyrics": "you" },
+        { "degree": "1", "lyrics": "ev" },
+        { "degree": "1", "lyrics": "ver" },
+        { "degree": "3", "lyrics": "ask" },
         { "degree": "5", "lyrics": "them" },
-        { "degree": "6", "lyrics": "why", "duration": 2  },
+        { "degree": "3", "lyrics": "why", "duration": 2  },
 
         // "If they told you, you would cry" (4→2, 4→2, 5→3, 5→3, 4→2, 3→1, 2→7[-1])
         { "degree": "6", "lyrics": "If", "start_of_line": true },
@@ -135,7 +135,8 @@ const teachYourChildrenBridge = {
       "default_octave": 3,
       "notes": [
         // "Don't you ever ask them why" — diatonic 3rd below track 1 (3→1, 1→6[-1], 3→1, 3→1, 3→1, 2→7[-1])
-        { "degree": "1", "lyrics": "Dont", "duration": 8, "start_of_line": true },
+        { "degree": "1", "lyrics": "Dont", "duration": 6, "start_of_line": true },
+        { "degree": "4", "lyrics": "Why", "duration": 2 },
         { "degree": "4", "lyrics": "If", "duration": 6, "start_of_line": true },
         { "degree": "1", "lyrics": "Cry", "duration": 1 },
         { "degree": "1", "duration": 7, "lyrics": "So", "start_of_line": true },

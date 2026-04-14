@@ -715,12 +715,93 @@
             return select?.value || displayMode || 'degrees';
         }
 
-        function formatDisplayText(note, trackId) {
-            if (!note || (!note.degree && !note.chord && !note.note)) return null;
+        function isChordTrack(trackId) {
+            return String(trackId || '').toLowerCase() === 'chords';
+        }
+
+        function stripOctave(noteName) {
+            return noteName ? noteName.replace(/\d+$/, '') : noteName;
+        }
+
+        function escapeHtmlAttribute(text) {
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\n/g, '&#10;');
+        }
+
+        function getScaleDegreeForNote(noteName, key) {
+            if (!noteName || !key || key === 'Unknown') return null;
+            const normalizedNote = stripOctave(noteName);
+            const isMinorKey = key.toLowerCase().includes('m');
+            const scale = isMinorKey ? getMinorScale(key) : getMajorScale(key);
+            const degreeIndex = scale.indexOf(normalizedNote);
+            return degreeIndex >= 0 ? String(degreeIndex + 1) : null;
+        }
+
+        function getChordHoverDetails(note, trackId) {
+            const chordValue = note?.chord || (isChordTrack(trackId) ? note?.degree : null);
+            if (!chordValue) return null;
+
+            let chordNotes = [];
+            const normalizedChordValue = chordValue.toString().replace(/\[.*?\]/g, '');
+            if (/^\d+$/.test(normalizedChordValue)) {
+                chordNotes = getChordNotes(songKey, parseInt(normalizedChordValue, 10)) || [];
+            } else {
+                chordNotes = (chordDefinitions[normalizedChordValue] || []).map(stripOctave);
+            }
+
+            const normalizedChordNotes = chordNotes.map(stripOctave).filter(Boolean);
+            if (!normalizedChordNotes.length) return null;
+
+            const chordDegrees = normalizedChordNotes
+                .map(chordNote => getScaleDegreeForNote(chordNote, songKey))
+                .filter(Boolean);
+
+            const lines = [`Notes: ${normalizedChordNotes.join(', ')}`];
+            if (chordDegrees.length) {
+                lines.push(`Degrees: ${chordDegrees.join(', ')}`);
+            }
+            return lines.join('\n');
+        }
+
+        function getHoverText(note, trackId) {
+            if (!note || (!note.degree && !note.chord && !note.note)) return '';
+
+            if (note.chord || isChordTrack(trackId)) {
+                return getChordHoverDetails(note, trackId) || '';
+            }
 
             const currentDisplayMode = getSelectedDisplayMode();
 
             if (note.degree) {
+                if (currentDisplayMode === 'notes') {
+                    return note.degree.toString().replace(/\[.*?\]/g, '');
+                }
+
+                const actualNote = mapUnparsedDegreeToNote(note.degree, songKey, trackId);
+                return actualNote ? stripOctave(actualNote) : '';
+            }
+
+            if (note.note) {
+                if (currentDisplayMode === 'notes') {
+                    return getScaleDegreeForNote(note.note, songKey) || '';
+                }
+                return stripOctave(note.note);
+            }
+
+            return '';
+        }
+
+        function formatDisplayText(note, trackId) {
+            if (!note || (!note.degree && !note.chord && !note.note)) return null;
+
+            const currentDisplayMode = getSelectedDisplayMode();
+            const isChordEntry = note.chord || isChordTrack(trackId);
+
+            if (note.degree && !isChordEntry) {
                 if (currentDisplayMode === 'notes') {
                     const actualNote = mapUnparsedDegreeToNote(note.degree, songKey, trackId);
                     if (actualNote) {
@@ -730,10 +811,15 @@
                 return note.degree.toString().replace(/\[.*?\]/g, '');
             }
 
-            if (note.chord) {
-                return /^\d+$/.test(note.chord)
-                    ? (convertChordDegreeToName ? convertChordDegreeToName(note.chord, songKey) : note.chord)
-                    : note.chord;
+            if (isChordEntry) {
+                const chordValue = (note.chord || note.degree).toString().replace(/\[.*?\]/g, '');
+                if (/^\d+$/.test(chordValue)) {
+                    if (currentDisplayMode === 'notes') {
+                        return convertChordDegreeToName ? convertChordDegreeToName(chordValue, songKey) : chordValue;
+                    }
+                    return chordValue;
+                }
+                return chordValue;
             }
 
             if (note.note) {
@@ -925,7 +1011,9 @@
                         const minW = Math.max(64, duration * 44);
                         const soloOutline = isSolo ? 'outline: 2px solid #ffd700;' : '';
                         const lyric = (note.lyrics || '').trim() || '&nbsp;';
-                        return `<button class="track-cell ${cls}" onclick="playTrackNoteToggle('${trackId}', ${note.step})" title="Play/stop this note" style="min-width:${minW}px; ${soloOutline}">
+                        const hoverText = getHoverText(note, trackId);
+                        const titleAttr = hoverText ? ` title="${escapeHtmlAttribute(hoverText)}"` : '';
+                        return `<button class="track-cell ${cls}" onclick="playTrackNoteToggle('${trackId}', ${note.step})"${titleAttr} style="min-width:${minW}px; ${soloOutline}">
                             <span class="track-cell-note">${text}</span>
                             <span class="track-cell-lyric">${lyric}</span>
                         </button>`;
