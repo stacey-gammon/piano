@@ -19,6 +19,12 @@ const teachYourChildrenVerse = {
         { "degree": "4", "lyrics": "have"},
         { "degree": "6", "lyrics": "a"},
         { "degree": "5", "duration": 2, "lyrics": "code"},
+        { "degree": "3", "lyrics": "that",  "start_of_line": true},
+        { "degree": "3", "lyrics": "you"},
+        { "degree": "3", "lyrics": "can"},
+        { "degree": "6", "lyrics": "live"},
+        { "degree": "5", "duration": 2, "lyrics": "by"},
+
       ]
     },
     "Kellie": {
@@ -36,6 +42,11 @@ const teachYourChildrenVerse = {
         { "degree": "6[-1]", "lyrics": "have"},
         { "degree": "1", "lyrics": "a"},
         { "degree": "1", "duration": 2, "lyrics": "code"},
+        { "degree": "5[-1]", "lyrics": "that",  "start_of_line": true},
+        { "degree": "5[-1]", "lyrics": "you"},
+        { "degree": "5[-1]", "lyrics": "can"},
+        { "degree": "1", "lyrics": "live"},
+        { "degree": "7[-1]", "duration": 2, "lyrics": "by"},
       ]
     },
     "Stacey": {
@@ -50,9 +61,14 @@ const teachYourChildrenVerse = {
         { "degree": "1", "lyrics": "road"},
 
         { "degree": "1", "lyrics": "Must", "start_of_line": true },
-        { "degree": "4", "lyrics": "have"},
+        { "degree": "1", "lyrics": "have"},
         { "degree": "4", "lyrics": "a"},
         { "degree": "3", "duration": 2, "lyrics": "code"},
+        { "degree": "1", "lyrics": "that",  "start_of_line": true},
+        { "degree": "1", "lyrics": "you"},
+        { "degree": "1", "lyrics": "can"},
+        { "degree": "3", "lyrics": "live"},
+        { "degree": "2", "duration": 2, "lyrics": "by"},
       ]
     },
     "Chords": {
@@ -62,7 +78,9 @@ const teachYourChildrenVerse = {
         { "chord": "1", "lyrics": "You", "duration": 7, "start_of_line": true },
         { "chord": "4", "lyrics": "Road", "duration": 1 },
         { "chord": "4", "lyrics": "Must", "duration": 3, "start_of_line": true },
-        { "chord": "1", "lyrics": "Code", "duration": 4 },
+        { "chord": "1", "lyrics": "Code", "duration": 2 },
+        { "chord": "1", "lyrics": "That", "duration": 4, "start_of_line": true },
+        { "chord": "5", "lyrics": "By", "duration": 2 },
       ]
     }
   }
